@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #e2b0a2;
+  --color-primary-light: #f4dcd6;
+  --color-navy: #0a0e17;
+  --color-navy-light: #131a26;
+  --color-navy-dark: #05070a;
+
+  --font-sans: 'Outfit', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+}
+
+body {
+  background-color: #0a0e17;
+  color: white;
+  @apply font-sans overflow-x-hidden;
+}
+
+.hero-gradient {
+  background: linear-gradient(180deg, rgba(10, 14, 23, 0.85) 0%, rgba(10, 14, 23, 1) 100%),
+    url('https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&q=80&w=1200');
+  background-size: cover;
+  background-position: center;
+}
+
+.city-card {
+  background-color: #131a26;
+  @apply transition-all duration-500 border border-white/5;
+  transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.city-card:hover {
+  border-color: #e2b0a2;
+  @apply -translate-y-2.5 shadow-2xl;
+  box-shadow: 0 20px 40px -15px rgba(226, 176, 162, 0.2);
+}
+
+.btn-primary {
+  background-color: #e2b0a2;
+  color: #0a0e17;
+  @apply transition-all duration-300 rounded-sm font-black uppercase tracking-widest text-[10px];
+}
+
+.btn-primary:hover {
+  background-color: #f4dcd6;
+  @apply tracking-[0.4em];
+}
