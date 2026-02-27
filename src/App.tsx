@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard';
 import { ClientDashboard } from './components/ClientDashboard';
 import { AdminPanel } from './components/AdminPanel';
 import { ProfileModal } from './components/ProfileModal';
+import { ModelLandingPage } from './components/ModelLandingPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [availableNeighborhoods, setAvailableNeighborhoods] = useState<string[]>([]);
   const [currentHash, setCurrentHash] = useState(window.location.hash);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [activeGender, setActiveGender] = useState('Mulheres');
   const [featuredProfiles, setFeaturedProfiles] = useState<any[]>([]);
@@ -155,9 +157,16 @@ export default function App() {
 
   // Hash change listener
   useEffect(() => {
-    const handleHashChange = () => setCurrentHash(window.location.hash);
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    const handleLocationChange = () => {
+      setCurrentHash(window.location.hash);
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('popstate', handleLocationChange);
+    return () => {
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('popstate', handleLocationChange);
+    };
   }, []);
 
   const fetchAvailableCities = useCallback(async () => {
@@ -286,6 +295,7 @@ export default function App() {
 
   const isDashboardView = currentHash === '#dashboard';
   const isAdminView = currentHash === '#admin';
+  const isModelLandingView = currentHash === '#sejaumamodelo' || currentPath === '/sejaumamodelo';
 
   const handleProfileUpdate = useCallback((profileId: string, updates: any) => {
     setProfiles(prev => prev.map(p =>
@@ -324,6 +334,8 @@ export default function App() {
       document.title = 'Dashboard | Clube Privado';
     } else if (currentHash === '#admin') {
       document.title = 'Admin Panel | Clube Privado';
+    } else if (isModelLandingView) {
+      document.title = 'Seja uma Modelo | Clube Privado';
     } else if (searchCity) {
       document.title = `Acompanhantes em ${searchCity} | Clube Privado`;
     } else {
@@ -335,7 +347,7 @@ export default function App() {
     fetchFeaturedProfiles();
     fetchAvailableCities();
 
-  }, [currentHash, searchCity, activeFilter, activeGender, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
+  }, [currentHash, currentPath, isModelLandingView, searchCity, activeFilter, activeGender, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
 
   // Guard: Global Loading (Wait for role to prevent UI flicker/stale redirects)
   if (!roleLoaded && (user || isDashboardView || isAdminView)) {
@@ -350,6 +362,10 @@ export default function App() {
   }
 
   // Final Routing Logic
+  if (isModelLandingView) {
+    return <ModelLandingPage />;
+  }
+
   if (isAdminView && isAdmin) {
     return <AdminPanel />;
   }
