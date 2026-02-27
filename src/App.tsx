@@ -476,7 +476,7 @@ export default function App() {
       </header>
 
       <main className="pt-[121px]">
-        <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[80vh] py-20 flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-b from-navy/90 via-navy/60 to-navy z-10" />
             <video
