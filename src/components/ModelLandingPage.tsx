@@ -11,6 +11,8 @@ import {
     Plus
 } from 'lucide-react';
 
+import { supabase } from '../lib/supabase';
+
 export const ModelLandingPage: React.FC = () => {
     const [formData, setFormData] = useState({
         nome: '',
@@ -22,12 +24,35 @@ export const ModelLandingPage: React.FC = () => {
     });
 
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Aqui seria a integração com sua API ou WhatsApp
-        console.log('Dados enviados:', formData);
-        setSubmitted(true);
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { error: insertError } = await supabase
+                .from('model_leads')
+                .insert([{
+                    name: formData.nome,
+                    age: parseInt(formData.idade),
+                    city: formData.cidade,
+                    instagram: formData.instagram,
+                    whatsapp: formData.whatsapp,
+                    message: formData.mensagem
+                }]);
+
+            if (insertError) throw insertError;
+
+            setSubmitted(true);
+        } catch (err: any) {
+            console.error('Error submitting lead:', err);
+            setError('Ocorreu um erro ao enviar sua candidatura. Por favor, tente novamente.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -155,6 +180,12 @@ export const ModelLandingPage: React.FC = () => {
                         <p className="text-gray-400 font-light">Preencha os campos abaixo. Entraremos em contato para agendar uma entrevista discreta.</p>
                     </div>
 
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm text-center animate-in fade-in slide-in-from-top-4">
+                            {error}
+                        </div>
+                    )}
+
                     {submitted ? (
                         <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
                             <div className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
@@ -252,9 +283,17 @@ export const ModelLandingPage: React.FC = () => {
                                 ></textarea>
                             </div>
 
-                            <button type="submit" className="w-full py-5 bg-primary text-navy font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-3 shadow-xl">
-                                <Send size={18} />
-                                Enviar Candidatura
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className={`w-full py-5 bg-primary text-navy font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-white hover:scale-[1.02] active:scale-[0.98]'}`}
+                            >
+                                {loading ? (
+                                    <div className="w-5 h-5 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <Send size={18} />
+                                )}
+                                {loading ? 'Enviando...' : 'Enviar Candidatura'}
                             </button>
 
                             <p className="text-center text-xs text-gray-500 flex items-center justify-center gap-2 mt-4">
