@@ -162,8 +162,15 @@ export const ModelLandingPage: React.FC = () => {
                             </div>
                             <h3 className="text-2xl font-bold mb-2 uppercase tracking-wider">Candidatura Recebida</h3>
                             <p className="text-gray-400">Verificamos seu perfil e retornaremos via WhatsApp em até 24h.</p>
-                            <button onClick={() => setSubmitted(false)} className="mt-8 text-primary underline underline-offset-4 decoration-1">
+                            <button onClick={() => setSubmitted(false)} className="mt-8 text-primary underline underline-offset-4 decoration-1 block mx-auto">
                                 Enviar outra candidatura
+                            </button>
+
+                            <button
+                                onClick={() => window.location.href = '/'}
+                                className="mt-8 w-full py-4 bg-primary text-navy font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-white transition-all shadow-xl max-w-xs mx-auto flex items-center justify-center gap-2"
+                            >
+                                Ir para a Página Principal
                             </button>
                         </div>
                     ) : (
