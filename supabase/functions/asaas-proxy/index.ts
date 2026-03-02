@@ -10,8 +10,8 @@ const corsHeaders = {
 console.log("LOG: Sistema Asaas Proxy carregado v12 (Secure Withdrawal + Webhooks)")
 
 serve(async (req) => {
-    // Configurações dinâmicas - Mudamos o padrão para Sandbox para facilitar seus testes
-    const DEFAULT_URL = 'https://sandbox.asaas.com/api/v3'
+    // Configurações de API do Asaas
+    const DEFAULT_URL = 'https://api.asaas.com/v3'
     const ASAAS_API_URL = Deno.env.get('ASAAS_API_URL') || DEFAULT_URL
     const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''

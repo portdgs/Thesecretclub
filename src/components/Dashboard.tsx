@@ -142,7 +142,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 setShowPaymentModal(false);
                 fetchProfile(); // Atualiza dados na tela
             } else {
-                alert('O pagamento ainda não foi detectado no Asaas. Simule a confirmação no painel Sandbox ou aguarde.');
+                alert('O pagamento ainda não foi detectado pelo Asaas. Verifique o status no seu aplicativo bancário ou aguarde a compensação.');
             }
         } catch (error: any) {
             console.error('Erro ao confirmar:', error);
