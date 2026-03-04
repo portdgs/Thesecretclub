@@ -34,9 +34,9 @@ serve(async (req) => {
 
         if (action === 'ping') return new Response(JSON.stringify({ message: 'pong' }), { headers: corsHeaders })
 
-        // 1. CRIAR COBRANÇA PIX
+        // 1. CRIAR COBRANÇA (PIX OU CARTÃO)
         if (action === 'createPayment') {
-            const { name, email, cpf, plan, userId } = payload
+            const { name, email, cpf, plan, userId, billingType = 'PIX' } = payload
             const cleanCpf = (cpf || '').replace(/\D/g, '')
 
             // Busca ou Cria Cliente no Asaas
@@ -63,7 +63,7 @@ serve(async (req) => {
                 headers,
                 body: JSON.stringify({
                     customer: customerId,
-                    billingType: 'PIX',
+                    billingType: billingType,
                     value: plan.price,
                     dueDate: dueDate.toISOString().split('T')[0],
                     description: `Assinatura Plano ${plan.name} - Clube Privado`,
@@ -71,17 +71,21 @@ serve(async (req) => {
                 })
             })
             const paymentResult = await payRes.json()
-            if (!payRes.ok) throw new Error(paymentResult.errors?.[0]?.description || 'Erro gerar cobrança')
+            if (!payRes.ok) throw new Error(paymentResult.errors?.[0]?.description || 'Erro ao gerar cobrança')
 
-            // Busca QR Code
-            const pixRes = await fetch(`${ASAAS_API_URL}/payments/${paymentResult.id}/pixQrCode`, { headers })
-            const pixData = await pixRes.json()
+            // Busca QR Code apenas se o método for PIX
+            let pixData = null;
+            if (billingType === 'PIX') {
+                const pixRes = await fetch(`${ASAAS_API_URL}/payments/${paymentResult.id}/pixQrCode`, { headers })
+                pixData = await pixRes.json()
+            }
 
             return new Response(JSON.stringify({
                 id: paymentResult.id,
                 status: paymentResult.status,
-                pixQrCodeBase64: pixData.encodedImage,
-                pixCopyPaste: pixData.payload,
+                invoiceUrl: paymentResult.invoiceUrl, // Link de pagamento para Cartão/Boleto
+                pixQrCodeBase64: pixData?.encodedImage,
+                pixCopyPaste: pixData?.payload,
                 value: paymentResult.value
             }), { headers: corsHeaders })
         }

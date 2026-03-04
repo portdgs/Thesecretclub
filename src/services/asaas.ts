@@ -19,9 +19,10 @@ export const createPayment = async (
     userEmail: string,
     userName: string,
     userCpf: string,
-    splitWalletId?: string
+    splitWalletId?: string,
+    billingType?: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
 ): Promise<PaymentResponse> => {
-    console.log(`[Asaas] Invocando Edge Function para criar cobrança: ${plan.name}`);
+    console.log(`[Asaas] Invocando Edge Function para criar cobrança: ${plan.name} via ${billingType || 'PIX'}`);
 
     if (!userCpf || userCpf.replace(/\D/g, '').length < 11) {
         throw new Error('CPF é obrigatório para gerar cobranças. Preencha seu CPF no perfil.');
@@ -36,7 +37,8 @@ export const createPayment = async (
                 email: userEmail,
                 name: userName,
                 cpf: userCpf,
-                splitWalletId: splitWalletId || null
+                splitWalletId: splitWalletId || null,
+                billingType
             }
         }
     });

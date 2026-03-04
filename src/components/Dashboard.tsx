@@ -42,6 +42,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [paymentData, setPaymentData] = useState<any>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD' | null>(null);
 
     // Crop State
     const [showCropModal, setShowCropModal] = useState(false);
@@ -59,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const handleSelectPlan = async (plan: any) => {
         setSelectedPlan(plan);
         setPaymentData(null);
-        setUploading(true);
+        setPaymentMethod(null);
 
         try {
             const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -68,35 +69,58 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             // Busca dados do perfil (nome, cpf, afiliado)
             const { data: userProfile, error: profileError } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('name, cpf, referred_by')
                 .eq('id', authUser.id)
                 .single();
 
-            console.log('[Asaas] Perfil encontrado:', userProfile?.name, 'CPF:', userProfile?.cpf, 'Erro:', profileError?.message);
-
             if (!userProfile?.cpf) {
                 alert('Preencha seu CPF na aba "Meu Perfil" antes de assinar um plano.');
-                setUploading(false);
                 return;
             }
 
-            // CPF ok — agora sim abre o modal
+            // CPF ok — abre o modal de seleção
             setShowPaymentModal(true);
+        } catch (error: any) {
+            console.error('Erro ao verificar CPF:', error);
+            alert('Erro ao verificar dados. Tente novamente.');
+        }
+    };
+
+    const handleGeneratePayment = async (method: 'PIX' | 'CREDIT_CARD') => {
+        setPaymentMethod(method);
+        setUploading(true);
+        try {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (!authUser) return;
+
+            const { data: userProfile } = await supabase
+                .from('profiles')
+                .select('name, cpf, referred_by')
+                .eq('id', authUser.id)
+                .single();
 
             const splitWalletId = userProfile?.referred_by;
 
             const { createPayment } = await import('../services/asaas');
+            const billingType = method === 'PIX' ? 'PIX' : 'UNDEFINED';
+
             const data = await createPayment(
                 authUser.id,
-                plan,
+                selectedPlan,
                 authUser.email || '',
                 userProfile?.name || 'Cliente',
-                userProfile.cpf,
-                splitWalletId
+                userProfile?.cpf,
+                splitWalletId,
+                billingType
             );
+
             setPaymentData(data);
+
+            if (method === 'CREDIT_CARD' && data.invoiceUrl) {
+                window.open(data.invoiceUrl, '_blank');
+            }
         } catch (error: any) {
-            console.error('Erro ao gerar PIX:', error);
+            console.error('Erro ao gerar pagamento:', error);
             alert(error.message || 'Erro ao gerar pagamento. Tente novamente.');
             setShowPaymentModal(false);
         } finally {
@@ -1169,37 +1193,74 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                             <LogOut size={20} />
                                         </button>
 
-                                        <h3 className="text-xl font-black italic uppercase mb-2">Pagamento via PIX</h3>
+                                        <h3 className="text-xl font-black italic uppercase mb-2">
+                                            {paymentMethod === 'PIX' ? 'Pagamento via PIX' : paymentMethod === 'CREDIT_CARD' ? 'Cobranda Aberta' : 'Forma de Pagamento'}
+                                        </h3>
                                         <p className="text-[11px] text-gray-400 mb-6">Plano {selectedPlan.name} - R$ {selectedPlan.price},00</p>
 
-                                        {paymentData ? (
+                                        {!paymentMethod ? (
+                                            <div className="space-y-4">
+                                                <button
+                                                    onClick={() => handleGeneratePayment('PIX')}
+                                                    disabled={uploading}
+                                                    className="w-full bg-green-500 hover:bg-green-600 text-white py-4 font-black uppercase tracking-widest text-[10px] transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    {uploading ? <Loader2 size={16} className="animate-spin" /> : 'Pagar com PIX (Ativação Imediata)'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleGeneratePayment('CREDIT_CARD')}
+                                                    disabled={uploading}
+                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 font-black uppercase tracking-widest text-[10px] transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    {uploading ? <Loader2 size={16} className="animate-spin" /> : 'Pagar com Cartão / Boleto'}
+                                                </button>
+                                            </div>
+                                        ) : paymentData ? (
                                             <div className="space-y-6 text-center">
-                                                <div className="bg-white p-4 inline-block rounded-sm">
-                                                    {paymentData.pixQrCodeBase64 ? (
-                                                        <img
-                                                            src={`data:image/png;base64,${paymentData.pixQrCodeBase64}`}
-                                                            alt="QR Code PIX"
-                                                            className="w-48 h-48"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-48 h-48 bg-gray-200 flex items-center justify-center text-navy font-bold text-xs uppercase tracking-widest">
-                                                            Carregando QR...
+                                                {paymentMethod === 'PIX' ? (
+                                                    <>
+                                                        <div className="bg-white p-4 inline-block rounded-sm">
+                                                            {paymentData.pixQrCodeBase64 ? (
+                                                                <img
+                                                                    src={`data:image/png;base64,${paymentData.pixQrCodeBase64}`}
+                                                                    alt="QR Code PIX"
+                                                                    className="w-48 h-48"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-48 h-48 bg-gray-200 flex items-center justify-center text-navy font-bold text-xs uppercase tracking-widest">
+                                                                    Carregando QR...
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
 
-                                                <div className="bg-navy border border-white/10 p-3 rounded-sm flex items-center justify-between gap-2">
-                                                    <span className="text-[9px] text-gray-500 truncate max-w-[200px] font-mono">{paymentData.pixCopyPaste}</span>
-                                                    <button
-                                                        onClick={() => navigator.clipboard.writeText(paymentData.pixCopyPaste!)}
-                                                        className="text-primary text-[9px] font-black uppercase hover:underline"
-                                                    >
-                                                        Copiar
-                                                    </button>
-                                                </div>
+                                                        <div className="bg-navy border border-white/10 p-3 rounded-sm flex items-center justify-between gap-2">
+                                                            <span className="text-[9px] text-gray-500 truncate max-w-[200px] font-mono">{paymentData.pixCopyPaste}</span>
+                                                            <button
+                                                                onClick={() => navigator.clipboard.writeText(paymentData.pixCopyPaste!)}
+                                                                className="text-primary text-[9px] font-black uppercase hover:underline"
+                                                            >
+                                                                Copiar
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="bg-navy border border-white/10 p-6 rounded-sm space-y-4">
+                                                        <p className="text-[11px] text-gray-400">
+                                                            Redirecionando para o ambiente seguro do Asaas...
+                                                        </p>
+                                                        <a
+                                                            href={paymentData.invoiceUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-block bg-primary text-navy px-6 py-3 font-black uppercase tracking-widest text-[10px] hover:bg-primary-light transition-colors"
+                                                        >
+                                                            Abrir Página de Pagamento
+                                                        </a>
+                                                    </div>
+                                                )}
 
                                                 <div className="text-[9px] text-gray-500 mt-2">
-                                                    ID para simular no Asaas: <span className="text-white font-mono select-all">{paymentData.id}</span>
+                                                    ID da Cobrança: <span className="text-white font-mono select-all">{paymentData.id}</span>
                                                 </div>
 
                                                 <button
