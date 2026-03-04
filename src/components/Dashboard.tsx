@@ -67,7 +67,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!authUser) return;
 
             // Busca dados do perfil (nome, cpf, afiliado)
-            const { data: userProfile, error: profileError } = await supabase
+            const { data: userProfile } = await supabase
                 .from('profiles')
                 .select('name, cpf, referred_by')
                 .eq('id', authUser.id)
@@ -842,9 +842,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">WhatsApp</label>
                                     <input
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        placeholder="Ex: 11999999999"
+                                        placeholder="Ex: (11) 99999-9999"
                                         value={profile.whatsapp || ''}
-                                        onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
+                                        onChange={(e) => {
+                                            let v = e.target.value.replace(/\D/g, '');
+                                            // Ignora o 55 inicial para aplicar a máscara local
+                                            if (v.startsWith('55') && v.length > 2) v = v.substring(2);
+                                            v = v.substring(0, 11); // limita a 11 digitos (DDD + 9 digitos)
+                                            if (v.length > 7) v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                                            else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,5}).*/, '($1) $2');
+                                            else if (v.length > 0) v = v.replace(/^(\d{1,2}).*/, '($1');
+                                            setProfile({ ...profile, whatsapp: v });
+                                        }}
                                     />
                                 </div>
                                 <div className="space-y-2">

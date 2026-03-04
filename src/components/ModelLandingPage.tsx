@@ -265,8 +265,16 @@ export const ModelLandingPage: React.FC = () => {
                                     type="tel"
                                     name="whatsapp"
                                     value={formData.whatsapp}
-                                    onChange={handleChange}
-                                    placeholder="(00) 00000-0000"
+                                    onChange={(e) => {
+                                        let v = e.target.value.replace(/\D/g, '');
+                                        if (v.startsWith('55') && v.length > 2) v = v.substring(2);
+                                        v = v.substring(0, 11);
+                                        if (v.length > 7) v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                                        else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,5}).*/, '($1) $2');
+                                        else if (v.length > 0) v = v.replace(/^(\d{1,2}).*/, '($1');
+                                        setFormData({ ...formData, whatsapp: v });
+                                    }}
+                                    placeholder="Ex: (11) 99999-9999"
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:border-primary/50 focus:outline-none transition-all font-mono placeholder:text-gray-600"
                                 />
                             </div>

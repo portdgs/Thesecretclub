@@ -222,8 +222,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     <button
                         onClick={() => {
                             if (onWhatsAppClick) onWhatsAppClick(profile.id);
+
+                            // Sanitize phone number (remove everything except digits)
+                            let cleanNumber = profile.whatsapp.replace(/\D/g, '');
+
+                            // Try to fix country code if missing
+                            if (cleanNumber && !cleanNumber.startsWith('55') && cleanNumber.length <= 11) {
+                                cleanNumber = '55' + cleanNumber;
+                            }
+
                             const text = `Olá ${profile.name}, vi seu perfil no Clube Privado e gostaria de saber mais.`;
-                            window.open(`https://wa.me/${profile.whatsapp}?text=${encodeURIComponent(text)}`, '_blank');
+                            window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`, '_blank');
                         }}
                         className="absolute bottom-6 right-6 z-[9999] bg-green-600 hover:bg-green-700 text-white px-6 py-4 font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-2xl shadow-green-600/40 hover:scale-105 transition-transform rounded-full"
                     >
@@ -470,44 +479,55 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                         </div>
 
                                         {/* Endorsement Section - TOP */}
-                                        <div className="mb-8 text-center">
-                                            <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                                                <h4 className="font-bold text-navy-dark mb-2">Confirmação de Realidade</h4>
-                                                <p className="text-sm text-gray-500 mb-4">
-                                                    Para ganhar o <span className="font-bold text-green-600">Selo de Verificada</span>, o perfil precisa de:
+                                        {profile.verified ? (
+                                            <div className="mb-8 text-center bg-green-50/50 rounded-xl p-8 border border-green-100/50 shadow-sm relative overflow-hidden">
+                                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-400/10 rounded-full blur-2xl"></div>
+                                                <ShieldCheck size={48} className="text-green-500 mx-auto mb-4 drop-shadow-sm" />
+                                                <h4 className="font-black text-lg text-green-800 tracking-tight mb-2">Selo Oficial Concedido</h4>
+                                                <p className="text-sm text-green-700/80 max-w-sm mx-auto">
+                                                    Este perfil possui autenticidade garantida pelo Clube Privado.
                                                 </p>
-                                                <ul className="text-xs text-left inline-block mb-6 space-y-2 text-gray-600 bg-white p-4 rounded-lg border border-gray-100">
-                                                    <li className="flex items-center gap-2">
-                                                        {profile.validation_video_url ? <ShieldCheck size={16} className="text-green-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-300" />}
-                                                        <span>1 Vídeo de Verificação (Comparação)</span>
-                                                    </li>
-                                                    <li className="flex items-center gap-2">
-                                                        {endorsementsCount >= 4 ? <ShieldCheck size={16} className="text-green-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-300" />}
-                                                        <span>4 Indicações de Clientes Reais ({endorsementsCount}/4)</span>
-                                                    </li>
-                                                </ul>
-
-                                                <div className="flex flex-col items-center gap-3">
-                                                    <button
-                                                        onClick={handleEndorse}
-                                                        disabled={loadingEndorsement || hasEndorsed || (user && user.id === profile.id)}
-                                                        className={`
-                                                            px-8 py-3 rounded-full font-bold text-sm uppercase tracking-wide transition-all
-                                                            ${hasEndorsed
-                                                                ? 'bg-green-100 text-green-700 cursor-default border border-green-200'
-                                                                : 'bg-navy-dark text-white hover:bg-primary hover:text-navy-dark shadow-lg hover:shadow-xl'
-                                                            }
-                                                            ${(loadingEndorsement || (user && user.id === profile.id)) ? 'opacity-50 cursor-not-allowed' : ''}
-                                                        `}
-                                                    >
-                                                        {loadingEndorsement ? 'Enviando...' : hasEndorsed ? 'Confirmado por você' : 'Confirmar que é Real'}
-                                                    </button>
-                                                    <p className="text-xs font-bold text-gray-400">
-                                                        {endorsementsCount} pessoas confirmaram este perfil
+                                            </div>
+                                        ) : (
+                                            <div className="mb-8 text-center">
+                                                <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                                                    <h4 className="font-bold text-navy-dark mb-2">Confirmação de Realidade</h4>
+                                                    <p className="text-sm text-gray-500 mb-4">
+                                                        Para ganhar o <span className="font-bold text-green-600">Selo de Verificada</span>, o perfil precisa de:
                                                     </p>
+                                                    <ul className="text-xs text-left inline-block mb-6 space-y-2 text-gray-600 bg-white p-4 rounded-lg border border-gray-100">
+                                                        <li className="flex items-center gap-2">
+                                                            {profile.validation_video_url ? <ShieldCheck size={16} className="text-green-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-300" />}
+                                                            <span>1 Vídeo de Verificação (Comparação)</span>
+                                                        </li>
+                                                        <li className="flex items-center gap-2">
+                                                            {endorsementsCount >= 4 ? <ShieldCheck size={16} className="text-green-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-300" />}
+                                                            <span>4 Indicações de Clientes Reais ({endorsementsCount}/4)</span>
+                                                        </li>
+                                                    </ul>
+
+                                                    <div className="flex flex-col items-center gap-3">
+                                                        <button
+                                                            onClick={handleEndorse}
+                                                            disabled={loadingEndorsement || hasEndorsed || (user && user.id === profile.id)}
+                                                            className={`
+                                                                px-8 py-3 rounded-full font-bold text-sm uppercase tracking-wide transition-all
+                                                                ${hasEndorsed
+                                                                    ? 'bg-green-100 text-green-700 cursor-default border border-green-200'
+                                                                    : 'bg-navy-dark text-white hover:bg-primary hover:text-navy-dark shadow-lg hover:shadow-xl'
+                                                                }
+                                                                ${(loadingEndorsement || (user && user.id === profile.id)) ? 'opacity-50 cursor-not-allowed' : ''}
+                                                            `}
+                                                        >
+                                                            {loadingEndorsement ? 'Enviando...' : hasEndorsed ? 'Confirmado por você' : 'Confirmar que é Real'}
+                                                        </button>
+                                                        <p className="text-xs font-bold text-gray-400">
+                                                            {endorsementsCount} pessoas confirmaram este perfil
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
 
                                         <div className="aspect-[9/16] max-w-sm mx-auto bg-gray-100 rounded-2xl overflow-hidden shadow-2xl border-4 border-white relative group">
                                             {profile.validation_video_url ? (
@@ -518,9 +538,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-gray-400 bg-gray-50">
-                                                    <ShieldCheck size={48} className="mb-4 opacity-50" />
-                                                    <p className="text-sm font-bold uppercase tracking-widest">Nenhum vídeo de validação disponível</p>
-                                                    <p className="text-xs mt-2">Este perfil ainda não enviou um vídeo para comparação.</p>
+                                                    {profile.verified ? (
+                                                        <>
+                                                            <ShieldCheck size={48} className="mb-4 text-green-500/50" />
+                                                            <p className="text-xs px-4">A certificação deste perfil foi concedida pelo Clube Privado de forma acelerada no plano Elite.</p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <ShieldCheck size={48} className="mb-4 opacity-50" />
+                                                            <p className="text-sm font-bold uppercase tracking-widest">Nenhum vídeo de validação disponível</p>
+                                                            <p className="text-xs mt-2">Este perfil ainda não enviou um vídeo para comparação.</p>
+                                                        </>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
