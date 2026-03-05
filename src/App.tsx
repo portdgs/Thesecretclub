@@ -214,8 +214,10 @@ export default function App() {
 
       if (filter === 'Verificados') {
         query = query.eq('verified', true);
-      } else if (filter === 'Elite') {
+      } else if (filter === 'Luxo+') {
         query = query.not('active_plan_id', 'is', null);
+      } else if (filter === 'Disponíveis Agora') {
+        query = query.eq('is_online', true);
       }
 
       // Removed order by plans temporarily to debug visibility
@@ -242,7 +244,12 @@ export default function App() {
         };
       }));
 
-      setProfiles(profilesWithMedia);
+      // Client-side filter for 'Com Vídeo' — only keep profiles that actually have a video
+      if (filter === 'Com Vídeo') {
+        setProfiles(profilesWithMedia.filter(p => p.videoUrl));
+      } else {
+        setProfiles(profilesWithMedia);
+      }
     } catch (error) {
       console.error('Error in fetchProfiles:', error);
     } finally {
@@ -698,7 +705,7 @@ export default function App() {
           <div className="container mx-auto px-6">
             <div className="text-center mb-24">
               <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-4">Escolha seu <span className="text-primary not-italic underline underline-offset-8">Plano</span></h2>
-              <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em]">Aumente sua visibilidade e receba mais contatos</p>
+              <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em]">Anuncie seus serviços e receba mais contatos</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
