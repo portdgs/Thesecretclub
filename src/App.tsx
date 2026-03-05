@@ -201,7 +201,12 @@ export default function App() {
       }
 
       // Filter by profile_type (category)
-      query = query.eq('profile_type', activeCategory);
+      // Robust filter: treat NULL as 'acompanhante'
+      if (activeCategory === 'acompanhante') {
+        query = query.or('profile_type.eq.acompanhante,profile_type.is.null');
+      } else {
+        query = query.eq('profile_type', activeCategory);
+      }
 
       // Filter by gender within the category
       if (activeGender === 'Mulheres') {
@@ -217,6 +222,7 @@ export default function App() {
       } else if (filter === 'Luxo+') {
         query = query.not('active_plan_id', 'is', null);
       } else if (filter === 'Disponíveis Agora') {
+        // Robust filter: treat NULL as online (true)
         query = query.or('is_online.eq.true,is_online.is.null');
       }
 
@@ -262,8 +268,15 @@ export default function App() {
       let query = supabase
         .from('profiles')
         .select('*, plans(tier_weight)')
-        .neq('role', 'cliente')
-        .eq('profile_type', activeCategory);
+        .neq('role', 'cliente');
+
+      // Filter by profile_type (category)
+      // Robust filter: treat NULL as 'acompanhante'
+      if (activeCategory === 'acompanhante') {
+        query = query.or('profile_type.eq.acompanhante,profile_type.is.null');
+      } else {
+        query = query.eq('profile_type', activeCategory);
+      }
 
       if (activeGender === 'Mulheres') {
         query = query.ilike('gender', '%Mulher%');
