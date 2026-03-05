@@ -772,6 +772,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     />
                                 </div>
                                 <div className="space-y-2">
+                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Tipo de Perfil</label>
+                                    <select
+                                        className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
+                                        value={profile.profile_type || 'acompanhante'}
+                                        onChange={(e) => setProfile({ ...profile, profile_type: e.target.value })}
+                                    >
+                                        <option value="acompanhante">Acompanhante</option>
+                                        <option value="massagista">Massagista</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
                                     <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Sexo</label>
                                     <select
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
@@ -782,7 +793,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         <option value="Mulher cis">Mulher cis</option>
                                         <option value="Mulher trans">Mulher trans</option>
                                         <option value="Homem cis">Homem cis</option>
-                                        <option value="Massagista">Massagista</option>
                                         <option value="Outro">Outro</option>
                                     </select>
                                 </div>

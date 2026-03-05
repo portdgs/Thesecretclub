@@ -22,6 +22,7 @@ export default function App() {
   const [currentHash, setCurrentHash] = useState(window.location.hash);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [activeFilter, setActiveFilter] = useState('Todos');
+  const [activeCategory, setActiveCategory] = useState<'acompanhante' | 'massagista'>('acompanhante');
   const [activeGender, setActiveGender] = useState('Mulheres');
   const [featuredProfiles, setFeaturedProfiles] = useState<any[]>([]);
 
@@ -199,14 +200,16 @@ export default function App() {
         query = query.or(`city.ilike.${searchTerm},neighborhood.ilike.${searchTerm}`);
       }
 
+      // Filter by profile_type (category)
+      query = query.eq('profile_type', activeCategory);
+
+      // Filter by gender within the category
       if (activeGender === 'Mulheres') {
         query = query.ilike('gender', '%Mulher%');
       } else if (activeGender === 'Homens') {
         query = query.ilike('gender', '%Homem%');
       } else if (activeGender === 'Trans') {
         query = query.ilike('gender', '%Trans%');
-      } else if (activeGender === 'Massagistas') {
-        query = query.or('gender.ilike.%Massagista%,specialty.ilike.%Massagista%');
       }
 
       if (filter === 'Verificados') {
@@ -245,7 +248,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [activeGender]);
+  }, [activeGender, activeCategory]);
 
   const fetchFeaturedProfiles = useCallback(async () => {
     try {
@@ -466,31 +469,61 @@ export default function App() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
-          <div className="container mx-auto px-4 flex items-center justify-center gap-1 sm:gap-4 h-12">
-            {['MULHERES', 'HOMENS', 'TRANS', 'MASSAGISTAS'].map((gender) => (
+          <div className="container mx-auto px-4 flex items-center justify-center gap-0 h-12">
+            {/* Level 1: Category tabs */}
+            {(['acompanhante', 'massagista'] as const).map((cat) => (
               <button
-                key={gender}
-                onClick={() => setActiveGender(gender === 'TRANS' ? 'Trans' : gender === 'HOMENS' ? 'Homens' : gender === 'MASSAGISTAS' ? 'Massagistas' : 'Mulheres')}
-                className={`relative px-4 sm:px-12 h-full flex flex-col items-center justify-center text-[13px] sm:text-sm font-bold transition-all duration-300 hover:text-white group ${(activeGender === 'Mulheres' && gender === 'MULHERES') ||
-                  (activeGender === 'Homens' && gender === 'HOMENS') ||
-                  (activeGender === 'Trans' && gender === 'TRANS') ||
-                  (activeGender === 'Massagistas' && gender === 'MASSAGISTAS')
-                  ? 'text-white'
-                  : 'text-gray-500 hover:bg-white/5'
+                key={cat}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  setActiveGender('Mulheres');
+                }}
+                className={`relative px-6 sm:px-10 h-full flex items-center justify-center text-[13px] sm:text-sm font-bold transition-all duration-300 hover:text-white group ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
                   }`}
               >
-                {gender}
-                {((activeGender === 'Mulheres' && gender === 'MULHERES') ||
-                  (activeGender === 'Homens' && gender === 'HOMENS') ||
-                  (activeGender === 'Trans' && gender === 'TRANS') ||
-                  (activeGender === 'Massagistas' && gender === 'MASSAGISTAS')) && (
-                    <motion.div
-                      layoutId="genderTab"
-                      className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-t-full shadow-[0_0_10px_rgba(226,176,162,0.8)]"
-                    />
-                  )}
+                {cat === 'acompanhante' ? 'ACOMPANHANTES' : 'MASSAGISTAS'}
+                {activeCategory === cat && (
+                  <motion.div
+                    layoutId="categoryTab"
+                    className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-t-full shadow-[0_0_10px_rgba(226,176,162,0.8)]"
+                  />
+                )}
               </button>
             ))}
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-white/10 mx-2" />
+
+            {/* Level 2: Gender sub-tabs */}
+            {(activeCategory === 'acompanhante'
+              ? ['MULHERES', 'HOMENS', 'TRANS']
+              : ['MULHERES', 'HOMENS']
+            ).map((gender) => {
+              const genderMap: Record<string, string> = {
+                'MULHERES': 'Mulheres',
+                'HOMENS': 'Homens',
+                'TRANS': 'Trans',
+              };
+              const genderValue = genderMap[gender];
+              const isActive = activeGender === genderValue;
+
+              return (
+                <button
+                  key={gender}
+                  onClick={() => setActiveGender(genderValue)}
+                  className={`relative px-4 sm:px-8 h-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all duration-300 hover:text-white ${isActive ? 'text-primary' : 'text-gray-500 hover:bg-white/5'
+                    }`}
+                >
+                  {gender}
+                  {isActive && (
+                    <motion.div
+                      layoutId="genderTab"
+                      className="absolute bottom-0 left-0 w-full h-0.5 bg-primary/60 rounded-t-full"
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </header>
