@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../utils/cropImage';
+import imageCompression from 'browser-image-compression';
 import {
     LayoutDashboard, User, CreditCard, TrendingUp, LogOut, CheckCircle2,
     Clock, Plus, MessageCircle, Share2, Star, Loader2, Trash2,
@@ -387,13 +388,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 return;
             }
 
-            const fileExt = file.name.split('.').pop();
+            console.log(`[Upload] Tamanho original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+            const options = {
+                maxSizeMB: 0.6,
+                maxWidthOrHeight: 1600,
+                useWebWorker: true
+            };
+            const compressedFile = await imageCompression(file, options);
+            console.log(`[Upload] Tamanho comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+
+            const fileExt = compressedFile.name.split('.').pop() || 'jpg';
             const fileName = `${Math.random()}.${fileExt}`;
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('public-photos')
-                .upload(filePath, file, {
+                .upload(filePath, compressedFile, {
                     cacheControl: '3600',
                     upsert: true
                 });
@@ -452,13 +462,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const fileExt = file.name.split('.').pop();
+            console.log(`[Avatar] Tamanho original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+            const options = {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 1000,
+                useWebWorker: true
+            };
+            const compressedFile = await imageCompression(file, options);
+            console.log(`[Avatar] Tamanho comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+
+            const fileExt = compressedFile.name.split('.').pop() || 'jpg';
             const fileName = `avatar_${Date.now()}.${fileExt}`;
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('public-photos')
-                .upload(filePath, file, {
+                .upload(filePath, compressedFile, {
                     cacheControl: '3600',
                     upsert: true
                 });
@@ -484,16 +503,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const file = event.target.files?.[0];
             if (!file) return;
 
-            // Invés de fazer upload direto, abre o modal de corte
-            const imageUrl = URL.createObjectURL(file);
+            setUploading(true);
+            console.log(`[Cover] Tamanho original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+            const options = {
+                maxSizeMB: 0.8,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true
+            };
+            const compressedFile = await imageCompression(file, options);
+            console.log(`[Cover] Tamanho comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+
+            // Invés de fazer upload direto, abre o modal de corte usando a imagem comprimida
+            const imageUrl = URL.createObjectURL(compressedFile);
             setImageToCrop(imageUrl);
             setShowCropModal(true);
             setZoom(1);
             setCrop({ x: 0, y: 0 });
 
+            setUploading(false);
+
             // Reseta o input file para permitir selecionar o mesmo logo depois
             if (coverInputRef.current) coverInputRef.current.value = '';
         } catch (error: any) {
+            setUploading(false);
             alert('Erro ao carregar a imagem: ' + error.message);
         }
     };
