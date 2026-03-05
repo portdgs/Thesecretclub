@@ -496,7 +496,7 @@ export default function App() {
       </header>
 
       <main className="pt-[121px]">
-        <section className="relative min-h-[80vh] py-20 flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[55vh] md:min-h-[45vh] py-12 md:py-16 flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-b from-navy/90 via-navy/60 to-navy z-10" />
             <video
@@ -512,7 +512,7 @@ export default function App() {
           </div>
 
           <div className="relative z-20 container mx-auto px-4 text-center">
-            <div className="flex justify-center gap-8 mb-8 text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400">
+            <div className="flex justify-center gap-4 md:gap-8 mb-6 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400">
               <span>Privacidade</span>
               <span className="text-primary">•</span>
               <span>Luxo</span>
@@ -520,12 +520,12 @@ export default function App() {
               <span>Exclusividade</span>
             </div>
 
-            <h1 className="text-5xl md:text-8xl font-serif font-light mb-6 tracking-tight">
+            <h1 className="text-4xl md:text-7xl font-serif font-light mb-4 tracking-tight">
               A arte do <span className="font-serif font-normal text-primary italic">encontro</span><br />
               em sua <span className="font-serif font-normal text-primary italic">melhor</span> forma
             </h1>
 
-            <div className="max-w-3xl mx-auto mt-12 relative z-20">
+            <div className="max-w-3xl mx-auto mt-8 relative z-20">
               <div className="bg-navy/80 backdrop-blur-xl p-2 rounded-2xl border border-white/10 flex flex-col md:flex-row gap-2 shadow-2xl">
                 <div className="flex-1 relative flex items-center bg-white/5 rounded-xl px-4 py-1 border border-white/5 group hover:border-white/20 transition-all">
                   <MapPin className="text-gray-400 group-hover:text-primary transition-colors" size={20} />
