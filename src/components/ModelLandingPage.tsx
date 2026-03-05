@@ -29,6 +29,13 @@ export const ModelLandingPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Manual Validation (Safari-friendly)
+        if (!formData.nome.trim()) return setError('Por favor, informe seu Nome Artístico.');
+        if (!formData.idade || isNaN(parseInt(formData.idade))) return setError('Por favor, informe uma idade válida.');
+        if (!formData.cidade.trim()) return setError('Por favor, informe sua Cidade.');
+        if (!formData.whatsapp.trim() || formData.whatsapp.length < 14) return setError('Por favor, informe um WhatsApp válido com DDD.');
+
         setLoading(true);
         setError(null);
 
@@ -49,7 +56,7 @@ export const ModelLandingPage: React.FC = () => {
             setSubmitted(true);
         } catch (err: any) {
             console.error('Error submitting lead:', err);
-            setError('Ocorreu um erro ao enviar sua candidatura. Por favor, tente novamente.');
+            setError(`Ocorreu um erro: ${err.message || 'Verifique sua conexão e tente novamente.'}`);
         } finally {
             setLoading(false);
         }
@@ -57,6 +64,7 @@ export const ModelLandingPage: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (error) setError(null); // Limpa o erro ao digitar
     };
 
     return (
@@ -210,7 +218,6 @@ export const ModelLandingPage: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-gray-500 ml-1">Nome Artístico</label>
                                     <input
-                                        required
                                         type="text"
                                         name="nome"
                                         value={formData.nome}
@@ -222,7 +229,6 @@ export const ModelLandingPage: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-gray-500 ml-1">Idade</label>
                                     <input
-                                        required
                                         type="number"
                                         name="idade"
                                         value={formData.idade}
@@ -236,7 +242,6 @@ export const ModelLandingPage: React.FC = () => {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-500 ml-1">Cidade Principal</label>
                                 <input
-                                    required
                                     type="text"
                                     name="cidade"
                                     value={formData.cidade}
@@ -261,7 +266,6 @@ export const ModelLandingPage: React.FC = () => {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-500 ml-1">WhatsApp de Contato</label>
                                 <input
-                                    required
                                     type="tel"
                                     name="whatsapp"
                                     value={formData.whatsapp}
