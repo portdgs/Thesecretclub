@@ -206,7 +206,7 @@ export default function App() {
       } else if (activeGender === 'Trans') {
         query = query.ilike('gender', '%Trans%');
       } else if (activeGender === 'Massagistas') {
-        query = query.ilike('gender', '%Massagista%');
+        query = query.or('gender.ilike.%Massagista%,specialty.ilike.%Massagista%');
       }
 
       if (filter === 'Verificados') {
