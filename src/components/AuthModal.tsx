@@ -52,6 +52,15 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Manual Validation (Safari-friendly)
+        if (!email.trim() || !email.includes('@')) {
+            return setError('Por favor, informe um e-mail válido.');
+        }
+        if (!password || password.length < 6) {
+            return setError('A senha deve ter pelo menos 6 caracteres.');
+        }
+
         setLoading(true);
         setError(null);
 
@@ -280,7 +289,6 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="E-mail"
                                             className="w-full bg-white/5 border border-white/10 rounded-sm py-3 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
-                                            required
                                         />
                                     </div>
 
@@ -292,8 +300,6 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Senha"
                                             className="w-full bg-white/5 border border-white/10 rounded-sm py-3 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
-                                            required
-                                            minLength={6}
                                         />
                                     </div>
 
