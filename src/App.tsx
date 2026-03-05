@@ -467,13 +467,14 @@ export default function App() {
 
         <div className="bg-white/5 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
           <div className="container mx-auto px-4 flex items-center justify-center gap-1 sm:gap-4 h-12">
-            {['MULHERES', 'HOMENS', 'TRANS'].map((gender) => (
+            {['MULHERES', 'HOMENS', 'TRANS', 'MASSAGISTAS'].map((gender) => (
               <button
                 key={gender}
-                onClick={() => setActiveGender(gender === 'TRANS' ? 'Trans' : gender === 'HOMENS' ? 'Homens' : 'Mulheres')}
+                onClick={() => setActiveGender(gender === 'TRANS' ? 'Trans' : gender === 'HOMENS' ? 'Homens' : gender === 'MASSAGISTAS' ? 'Massagistas' : 'Mulheres')}
                 className={`relative px-4 sm:px-12 h-full flex flex-col items-center justify-center text-[13px] sm:text-sm font-bold transition-all duration-300 hover:text-white group ${(activeGender === 'Mulheres' && gender === 'MULHERES') ||
                   (activeGender === 'Homens' && gender === 'HOMENS') ||
-                  (activeGender === 'Trans' && gender === 'TRANS')
+                  (activeGender === 'Trans' && gender === 'TRANS') ||
+                  (activeGender === 'Massagistas' && gender === 'MASSAGISTAS')
                   ? 'text-white'
                   : 'text-gray-500 hover:bg-white/5'
                   }`}
@@ -481,7 +482,8 @@ export default function App() {
                 {gender}
                 {((activeGender === 'Mulheres' && gender === 'MULHERES') ||
                   (activeGender === 'Homens' && gender === 'HOMENS') ||
-                  (activeGender === 'Trans' && gender === 'TRANS')) && (
+                  (activeGender === 'Trans' && gender === 'TRANS') ||
+                  (activeGender === 'Massagistas' && gender === 'MASSAGISTAS')) && (
                     <motion.div
                       layoutId="genderTab"
                       className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-t-full shadow-[0_0_10px_rgba(226,176,162,0.8)]"
