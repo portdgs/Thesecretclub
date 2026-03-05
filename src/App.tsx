@@ -255,7 +255,8 @@ export default function App() {
       let query = supabase
         .from('profiles')
         .select('*, plans(tier_weight)')
-        .neq('role', 'cliente');
+        .neq('role', 'cliente')
+        .eq('profile_type', activeCategory);
 
       if (activeGender === 'Mulheres') {
         query = query.ilike('gender', '%Mulher%');
@@ -288,7 +289,7 @@ export default function App() {
     } catch (error) {
       console.error('Erro ao buscar perfis em destaque:', error);
     }
-  }, [activeGender]);
+  }, [activeGender, activeCategory]);
 
   const handleWhatsAppClick = async (profileId: string) => {
     try {

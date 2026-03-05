@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Loader2, AlertCircle, User, Heart, ChevronRight, ChevronLeft } from 'lucide-react';
 
-type UserRole = 'cliente' | 'acompanhante' | null;
+type UserRole = 'cliente' | 'acompanhante' | 'massagista' | null;
 type AuthStep = 'role' | 'form';
 
 export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
@@ -77,7 +77,7 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                     if (profile?.role && selectedRole && profile.role !== selectedRole) {
                         // Role diferente — bloqueia login
                         await supabase.auth.signOut({ scope: 'local' });
-                        const roleLabel = profile.role === 'cliente' ? 'Cliente' : 'Acompanhante';
+                        const roleLabel = profile.role === 'cliente' ? 'Cliente' : profile.role === 'massagista' ? 'Massagista' : 'Acompanhante';
                         throw new Error(`Esta conta já está cadastrada como "${roleLabel}". Por favor, volte e selecione o perfil correto.`);
                     }
 
@@ -103,10 +103,11 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
 
                     await supabase.from('profiles').upsert({
                         id: data.user.id,
-                        role: selectedRole || 'acompanhante',
+                        role: selectedRole === 'massagista' ? 'acompanhante' : (selectedRole || 'acompanhante'),
+                        profile_type: selectedRole === 'massagista' ? 'massagista' : 'acompanhante',
                         name: email.split('@')[0],
                         city: 'São Paulo', // Cidade padrão
-                        gender: 'Mulher',  // Gênero padrão
+                        gender: 'Mulher cis',  // Gênero padrão
                         verified: false,
                         referred_by: referredBy || null, // Salva quem indicou
                         balance: 0.0 // Inicializa saldo zerado
@@ -226,6 +227,22 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                             <ChevronRight size={16} className="text-gray-600 group-hover:text-primary transition-colors" />
                                         </div>
                                     </button>
+
+                                    <button
+                                        onClick={() => selectRole('massagista')}
+                                        className="w-full group bg-navy border border-white/10 hover:border-green-500/50 rounded-sm p-6 text-left transition-all hover:bg-green-500/5"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                                                <span className="text-xl">💆</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-black text-sm uppercase tracking-wide">Massagista</h3>
+                                                <p className="text-[10px] text-gray-500 mt-1">Divulgue seus serviços de massagem</p>
+                                            </div>
+                                            <ChevronRight size={16} className="text-gray-600 group-hover:text-green-400 transition-colors" />
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -243,9 +260,11 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                         <div className="flex items-center gap-2 mt-2">
                                             <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm ${selectedRole === 'cliente'
                                                 ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                                : 'bg-primary/10 text-primary border border-primary/20'
+                                                : selectedRole === 'massagista'
+                                                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                    : 'bg-primary/10 text-primary border border-primary/20'
                                                 }`}>
-                                                {selectedRole === 'cliente' ? '👤 Perfil Cliente' : '💗 Perfil Acompanhante'}
+                                                {selectedRole === 'cliente' ? '👤 Perfil Cliente' : selectedRole === 'massagista' ? '💆 Perfil Massagista' : '💗 Perfil Acompanhante'}
                                             </span>
                                             <button
                                                 onClick={() => setStep('role')}
