@@ -715,7 +715,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <div className="bg-navy-light border border-white/5 rounded-sm overflow-hidden">
                             <div className="p-6 border-b border-white/5 flex justify-between items-center">
                                 <h3 className="text-xs font-black uppercase tracking-widest">Status do Perfil</h3>
-                                <span className="bg-green-500/20 text-green-500 text-[8px] font-black px-2 py-1 rounded-sm uppercase">Público</span>
+                                <span className={`text-[8px] font-black px-2 py-1 rounded-sm uppercase ${profile.is_online !== false ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                                    {profile.is_online !== false ? '● Online' : '● Offline'}
+                                </span>
                             </div>
                             <div className="p-8">
                                 <div className="flex items-center gap-12">
@@ -730,7 +732,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="flex gap-4">
+                                        <div className="flex gap-4 flex-wrap">
                                             <div className="bg-white/5 p-4 rounded-sm border border-white/5 flex items-center gap-3">
                                                 <Clock size={16} className="text-primary opacity-50" />
                                                 <div>
@@ -740,8 +742,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button className="btn-primary px-8 flex items-center justify-center font-black tracking-widest text-[10px]">Renovar Plano</button>
+                                            <button
+                                                onClick={async () => {
+                                                    const newStatus = !(profile.is_online !== false);
+                                                    setProfile({ ...profile, is_online: newStatus });
+                                                    await supabase.from('profiles').update({ is_online: newStatus }).eq('id', user.id);
+                                                }}
+                                                className={`px-6 py-3 rounded-sm border text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${profile.is_online !== false
+                                                        ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'
+                                                        : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-green-500/10 hover:border-green-500/30 hover:text-green-400'
+                                                    }`}
+                                            >
+                                                <div className={`w-2 h-2 rounded-full ${profile.is_online !== false ? 'bg-green-500' : 'bg-red-500'}`} />
+                                                {profile.is_online !== false ? 'Ficar Offline' : 'Ficar Online'}
+                                            </button>
                                         </div>
+                                        <button className="btn-primary px-8 flex items-center justify-center font-black tracking-widest text-[10px]">Renovar Plano</button>
                                     </div>
                                 </div>
                             </div>
