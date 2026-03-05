@@ -750,6 +750,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         <option value="Mulher cis">Mulher cis</option>
                                         <option value="Mulher trans">Mulher trans</option>
                                         <option value="Homem cis">Homem cis</option>
+                                        <option value="Massagista">Massagista</option>
                                         <option value="Outro">Outro</option>
                                     </select>
                                 </div>

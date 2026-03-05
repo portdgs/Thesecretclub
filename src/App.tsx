@@ -205,6 +205,8 @@ export default function App() {
         query = query.ilike('gender', '%Homem%');
       } else if (activeGender === 'Trans') {
         query = query.ilike('gender', '%Trans%');
+      } else if (activeGender === 'Massagistas') {
+        query = query.ilike('gender', '%Massagista%');
       }
 
       if (filter === 'Verificados') {
