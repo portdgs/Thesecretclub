@@ -217,7 +217,7 @@ export default function App() {
       } else if (filter === 'Luxo+') {
         query = query.not('active_plan_id', 'is', null);
       } else if (filter === 'Disponíveis Agora') {
-        query = query.eq('is_online', true);
+        query = query.or('is_online.eq.true,is_online.is.null');
       }
 
       // Removed order by plans temporarily to debug visibility
