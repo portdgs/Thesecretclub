@@ -479,7 +479,7 @@ export default function App() {
                   setActiveCategory(cat);
                   setActiveGender('Mulheres');
                 }}
-                className={`relative px-6 sm:px-10 h-full flex items-center justify-center text-[13px] sm:text-sm font-bold transition-all duration-300 hover:text-white group ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
+                className={`relative px-3 sm:px-10 h-full flex items-center justify-center text-[11px] sm:text-sm font-bold transition-all duration-300 hover:text-white group ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
                   }`}
               >
                 {cat === 'acompanhante' ? 'ACOMPANHANTES' : 'MASSAGISTAS'}
@@ -554,7 +554,7 @@ export default function App() {
               <span>Exclusividade</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-serif font-light mb-4 tracking-tight whitespace-nowrap">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-serif font-light mb-4 tracking-tight sm:whitespace-nowrap">
               A arte do <span className="font-serif font-normal text-primary italic">encontro</span> em sua <span className="font-serif font-normal text-primary italic">melhor</span> forma
             </h1>
 
