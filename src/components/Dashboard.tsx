@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import {
     LayoutDashboard, User, CreditCard, TrendingUp, LogOut, CheckCircle2,
     Clock, Plus, MessageCircle, Share2, Star, Loader2, Trash2,
-    ShieldCheck, Image as ImageIcon, Camera, X
+    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -1678,10 +1678,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         <p className="text-[8px] text-gray-600 mt-2 uppercase font-bold tracking-widest">Cliques/Views</p>
                                     </div>
 
-                                    <div className="bg-navy p-6 rounded-sm border border-white/5">
+                                    <div className="bg-navy p-6 rounded-sm border border-white/5 relative group/rank">
                                         <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Destaque na Cidade</div>
-                                        <div className="text-3xl font-black">{activePlan?.tier_weight === 4 ? 'TOP #1' : activePlan?.tier_weight >= 2 ? 'ALTO' : 'ORGÂNICO'}</div>
-                                        <p className="text-[8px] text-gray-600 mt-2 uppercase font-bold tracking-widest">Ranking Estimado</p>
+                                        <div className="text-3xl font-black">
+                                            {activePlan?.tier_weight === 4 ? 'TOP #1' : activePlan?.tier_weight === 3 ? 'TOP #3' : activePlan?.tier_weight === 2 ? 'TOP #10' : 'ORGÂNICO'}
+                                        </div>
+                                        <p className="text-[8px] text-gray-600 mt-2 uppercase font-bold tracking-widest flex items-center gap-1">
+                                            Ranking Estimado <HelpCircle size={10} className="cursor-help" />
+                                        </p>
+                                        <div className="absolute left-1/2 -top-12 -translate-x-1/2 bg-gray-800 text-white text-[9px] py-1 px-2 rounded opacity-0 invisible group-hover/rank:opacity-100 group-hover/rank:visible transition-all whitespace-nowrap z-50 pointer-events-none border border-white/10 shadow-xl max-w-[150px] text-center">
+                                            Posição baseada no peso do seu plano {activePlan?.name || 'FREE'} em {profile.city || 'sua cidade'}.
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1698,28 +1705,66 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 )}
 
                                 {activePlan?.tier_weight >= 3 && (
-                                    <div className="mt-8 space-y-4">
-                                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Mapa de Calor Real (Últimos 7 dias)</h3>
+                                    <div className="mt-8 space-y-6">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Mapa de Calor Real (Últimos 7 dias)</h3>
+                                            <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
+                                                <TrendingUp size={12} className="text-primary" />
+                                                <span className="text-[10px] font-black uppercase text-primary tracking-widest">Insights Ativos</span>
+                                            </div>
+                                        </div>
+
                                         <div className="bg-navy border border-white/5 h-48 rounded-sm flex items-end justify-between p-4 gap-1">
                                             {heatmapData.map((v, i) => {
                                                 const maxVal = Math.max(...heatmapData, 1);
                                                 const heightPerc = (v / maxVal) * 100;
+                                                const isPeak = v === Math.max(...heatmapData) && v > 0;
                                                 return (
                                                     <div
                                                         key={i}
-                                                        className="flex-1 bg-primary/20 hover:bg-primary transition-colors cursor-help min-h-[2px]"
+                                                        className={`flex-1 transition-all duration-500 cursor-help min-h-[2px] ${isPeak ? 'bg-primary shadow-[0_0_15px_rgba(226,176,162,0.4)]' : 'bg-primary/20 hover:bg-primary/40'}`}
                                                         style={{ height: `${Math.max(heightPerc, 2)}%` }}
                                                         title={`${i}h - ${v} visitas registradas`}
                                                     />
                                                 );
                                             })}
                                         </div>
-                                        <p className="text-[8px] text-gray-600 uppercase font-black text-center tracking-widest">
-                                            Horário de Pico Identificado: {
-                                                heatmapData.indexOf(Math.max(...heatmapData))
-                                            }:00 - {
-                                                heatmapData.indexOf(Math.max(...heatmapData)) + 1
-                                            }:00
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-primary/5 border border-primary/20 p-4 rounded-sm">
+                                                <div className="flex gap-3 items-start">
+                                                    <div className="p-2 bg-primary/10 rounded-full">
+                                                        <Clock size={16} className="text-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Horário de Pico</p>
+                                                        <p className="text-xs font-bold text-white">
+                                                            {heatmapData.indexOf(Math.max(...heatmapData, 0))}:00 - {heatmapData.indexOf(Math.max(...heatmapData, 0)) + 1}:00
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-white/5 border border-white/10 p-4 rounded-sm">
+                                                <div className="flex gap-3 items-start">
+                                                    <div className="p-2 bg-white/10 rounded-full">
+                                                        <Plus size={16} className="text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Dica de Conversão</p>
+                                                        <p className="text-[11px] font-medium text-gray-300">
+                                                            {Math.max(...heatmapData) > 0
+                                                                ? `Nos horários de pico sugeridos ao lado, certifique-se de estar ONLINE e considere atualizar suas fotos para ganhar mais destaque!`
+                                                                : `Aumente sua visibilidade interagindo mais ou subindo novos vídeos para começar a gerar tráfego.`
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-[8px] text-gray-600 uppercase font-black text-center tracking-widest pt-4">
+                                            Os dados são atualizados em tempo real com base nos acessos ao seu perfil.
                                         </p>
                                     </div>
                                 )}

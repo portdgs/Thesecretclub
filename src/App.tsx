@@ -230,8 +230,10 @@ export default function App() {
         query = query.not('active_plan_id', 'is', null);
       }
 
-      // Removed order by plans temporarily to debug visibility
-      query = query.order('created_at', { ascending: false });
+      // Order by plans(tier_weight) and then by created_at
+      query = query
+        .order('tier_weight', { foreignTable: 'plans', ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false });
 
       const { data: profilesData, error: profilesError } = await query;
 
@@ -290,8 +292,9 @@ export default function App() {
         query = query.ilike('gender', '%Trans%');
       }
 
-      // Removed order by plans temporarily to guarantee visibility
+      // Order by plans(tier_weight) and then by created_at
       const { data, error } = await query
+        .order('tier_weight', { foreignTable: 'plans', ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(15);
 
@@ -449,7 +452,7 @@ export default function App() {
 
             <div className="flex-1 flex justify-center hidden lg:flex overflow-hidden">
               <h1 className="text-lg sm:text-xl font-serif font-light tracking-tight text-white/95 whitespace-nowrap">
-                A arte do <span className="text-primary italic">encontro</span> em sua <span className="text-primary italic">melhor</span> forma
+                A arte do <span className="text-primary italic">encontro</span> em sua <span className="text-primary italic"> melhor</span> forma
               </h1>
             </div>
 
@@ -500,7 +503,7 @@ export default function App() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
-          <div className="container mx-auto px-4 flex items-center justify-center gap-0 h-12">
+          <div className="container mx-auto flex items-center justify-start lg:justify-center gap-0 h-12">
             {/* Level 1: Category tabs */}
             {(['acompanhante', 'massagista'] as const).map((cat) => (
               <button
@@ -509,7 +512,7 @@ export default function App() {
                   setActiveCategory(cat);
                   setActiveGender('Mulheres');
                 }}
-                className={`relative px-3 sm:px-10 h-full flex items-center justify-center text-[11px] sm:text-sm font-bold transition-all duration-300 hover:text-white group ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
+                className={`relative px-4 sm:px-10 h-full flex items-center justify-center text-[11px] sm:text-sm font-bold transition-all duration-300 hover:text-white group shrink-0 ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
                   }`}
               >
                 {cat === 'acompanhante' ? 'ACOMPANHANTES' : 'MASSAGISTAS'}
@@ -542,7 +545,7 @@ export default function App() {
                 <button
                   key={gender}
                   onClick={() => setActiveGender(genderValue)}
-                  className={`relative px-4 sm:px-8 h-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all duration-300 hover:text-white ${isActive ? 'text-primary' : 'text-gray-500 hover:bg-white/5'
+                  className={`relative px-4 sm:px-8 h-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all duration-300 hover:text-white shrink-0 ${isActive ? 'text-primary' : 'text-gray-500 hover:bg-white/5'
                     }`}
                 >
                   {gender}
@@ -560,7 +563,7 @@ export default function App() {
       </header>
 
       <main className="pt-[121px]">
-        <section className="relative min-h-[45vh] md:min-h-[35vh] py-8 md:py-12 flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[400px] md:min-h-[35vh] flex flex-col items-center justify-start md:justify-center pt-12 md:pt-12 pb-32 md:pb-12 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-b from-navy/90 via-navy/60 to-navy z-10" />
             <video
@@ -585,7 +588,7 @@ export default function App() {
             </div>
 
             {/* Hidden headline on desktop as it's now in the header, visible on mobile */}
-            <h1 className="lg:hidden text-2xl sm:text-3xl font-serif font-light mb-6 tracking-tight">
+            <h1 className="lg:hidden text-xl sm:text-3xl font-serif font-light mb-6 tracking-tight">
               A arte do <span className="font-serif font-normal text-primary italic">encontro</span> em sua <span className="font-serif font-normal text-primary italic">melhor</span> forma
             </h1>
 
@@ -619,7 +622,7 @@ export default function App() {
                 </button>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-3 mt-8">
+              <div className="flex flex-wrap justify-center gap-3 mt-8 mb-6 md:mb-0">
                 {availableNeighborhoods.slice(0, 3).map(hood => (
                   <button key={hood} onClick={() => { setSearchCity(hood); document.getElementById('showcase')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-[10px] uppercase font-bold tracking-widest text-gray-400 hover:text-white border border-white/10 rounded-full px-4 py-1.5 bg-white/5 hover:bg-white/10 outline-none transition-all">{hood}</button>
                 ))}
@@ -631,7 +634,7 @@ export default function App() {
         </section>
 
         {featuredProfiles.length > 0 && (
-          <section className="relative z-30 -mt-12 pb-8 scrollbar-hide overflow-x-auto">
+          <section className="relative z-30 mt-20 lg:-mt-12 pb-8 scrollbar-hide overflow-x-auto">
             <div className="container mx-auto px-4 flex gap-4 min-w-max">
               {featuredProfiles.map((p) => (
                 <div
