@@ -447,6 +447,12 @@ export default function App() {
               </div>
             </div>
 
+            <div className="flex-1 flex justify-center hidden lg:flex">
+              <h1 className="text-lg font-serif font-light tracking-tight text-white/90">
+                A arte do <span className="text-primary italic">encontro</span> em sua <span className="text-primary italic">melhor</span> forma
+              </h1>
+            </div>
+
             <div className="flex-1" />
 
             <div className="flex items-center gap-2 sm:gap-6">
@@ -570,15 +576,8 @@ export default function App() {
           </div>
 
           <div className="relative z-20 container mx-auto px-4 text-center">
-            <div className="flex justify-center gap-4 md:gap-8 mb-4 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400">
-              <span>Privacidade</span>
-              <span className="text-primary">•</span>
-              <span>Luxo</span>
-              <span className="text-primary">•</span>
-              <span>Exclusividade</span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-serif font-light mb-4 tracking-tight sm:whitespace-nowrap">
+            {/* Hidden headline on desktop as it's now in the header, visible on mobile */}
+            <h1 className="lg:hidden text-2xl sm:text-3xl font-serif font-light mb-6 tracking-tight">
               A arte do <span className="font-serif font-normal text-primary italic">encontro</span> em sua <span className="font-serif font-normal text-primary italic">melhor</span> forma
             </h1>
 
@@ -624,7 +623,7 @@ export default function App() {
         </section>
 
         {featuredProfiles.length > 0 && (
-          <section className="bg-navy/50 backdrop-blur-sm border-b border-white/5 py-5 scrollbar-hide overflow-x-auto">
+          <section className="relative z-30 -mt-20 pb-8 scrollbar-hide overflow-x-auto">
             <div className="container mx-auto px-4 flex gap-4 min-w-max">
               {featuredProfiles.map((p) => (
                 <div
