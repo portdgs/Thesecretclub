@@ -1293,7 +1293,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         </button>
 
                                         <h3 className="text-xl font-black italic uppercase mb-2">
-                                            {paymentMethod === 'PIX' ? 'Pagamento via PIX' : paymentMethod === 'CREDIT_CARD' ? 'Cobranda Aberta' : 'Forma de Pagamento'}
+                                            {paymentMethod === 'PIX' ? 'PAGAMENTO VIA PIX' : paymentMethod === 'CREDIT_CARD' ? 'COBRANÇA ABERTA' : 'FORMA DE PAGAMENTO'}
                                         </h3>
                                         <p className="text-[11px] text-gray-400 mb-6">Plano {selectedPlan.name} - R$ {selectedPlan.price},00</p>
 
