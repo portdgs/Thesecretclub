@@ -1468,12 +1468,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                     if (confirm(`Deseja solicitar o saque do seu saldo disponível?`)) {
                                                         setUploading(true);
                                                         // Invocaremos a Edge Function para processar o saque automático (Backend calcula valor)
-                                                        const { data, error } = await supabase.functions.invoke('asaas-proxy', {
+                                                        const { data, error: invokeError } = await supabase.functions.invoke('asaas-proxy', {
                                                             body: { action: 'withdraw', payload: { userId: user.id } }
                                                         });
                                                         setUploading(false);
-                                                        if (error || data?.error) alert('Erro no saque: ' + (error?.message || data?.error));
-                                                        else {
+
+                                                        const serverError = data?.error;
+                                                        if (invokeError || serverError) {
+                                                            alert('Erro no saque: ' + (serverError || invokeError?.message || 'Erro desconhecido'));
+                                                        } else {
                                                             alert('Saque solicitado com sucesso! O PIX cairá em breve.');
                                                             fetchProfile();
                                                         }

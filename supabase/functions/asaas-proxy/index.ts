@@ -8,40 +8,38 @@ const corsHeaders = {
     'Content-Type': 'application/json',
 }
 
-console.log("LOG: Sistema Asaas Proxy v14 (Bootstrap)")
+console.log("LOG: Sistema Asaas Proxy v15 (Hyper-Logging)")
 
 serve(async (req) => {
     // --- LOG DE ENTRADA ABSOLUTA ---
     console.log(`LOG_ENTRY: [${req.method}] ${req.url}`)
-
-    // Configurações de API do Asaas
-    const DEFAULT_URL = 'https://api.asaas.com/v3'
-    const ASAAS_API_URL = Deno.env.get('ASAAS_API_URL') || DEFAULT_URL
-    const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    console.log(`LOG: [${req.method}] ${req.url} - Iniciado.`)
 
     if (req.method === 'OPTIONS') {
         console.log("LOG: [OPTIONS] Respondendo Preflight CORS.")
         return new Response('ok', { status: 200, headers: corsHeaders })
     }
 
-    // Validação de variáveis de ambiente no boot da requisição real
-    if (!ASAAS_API_KEY) {
-        console.error("ERRO: ASAAS_API_KEY não configurada nos Secrets do Supabase!")
-        return new Response(JSON.stringify({ error: 'Configuração do servidor incompleta (API_KEY)' }), { status: 500, headers: corsHeaders })
-    }
-
     try {
+        console.log(`LOG: [${req.method}] Processando requisição...`)
+
+        // Configurações de API do Asaas
+        const DEFAULT_URL = 'https://api.asaas.com/v3'
+        const ASAAS_API_URL = Deno.env.get('ASAAS_API_URL') || DEFAULT_URL
+        const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')
+        const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+        if (!ASAAS_API_KEY) throw new Error("ASAAS_API_KEY não configurada nos Secrets")
+        if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase internal keys (URL/SERVICE_ROLE) missing")
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
         const bodyText = await req.text()
         console.log(`LOG: Body recebido (${bodyText.length} bytes)`)
 
         const parsedBody = bodyText ? JSON.parse(bodyText) : {}
         const action = parsedBody.action
-        const payload = parsedBody.payload
+        const payload = parsedBody.payload || {}
         const headers = {
             'Content-Type': 'application/json',
             'access_token': (ASAAS_API_KEY || '').trim()
@@ -50,71 +48,73 @@ serve(async (req) => {
         console.log(`LOG: Ação identificada: ${action || 'Evento Webhook'}`)
 
         // --- SEGURANÇA WEBHOOK ---
-        // Se for um evento enviado pelo Asaas (sem a ação manual 'checkStatus'), validamos o token
-        if (parsedBody.event && action !== 'checkStatus') {
+        if (parsedBody.event && action !== 'checkStatus' && action !== 'withdraw') {
             console.log(`LOG: Validando Token do Webhook...`)
             const webhookToken = Deno.env.get('ASAAS_WEBHOOK_TOKEN')
             const requestToken = req.headers.get('asaas-access-token')
 
             if (webhookToken && requestToken !== webhookToken) {
                 console.error("ERRO: Token de Webhook inválido!")
-                return new Response(JSON.stringify({ error: 'Unauthorized Webhook' }), { status: 401, headers: corsHeaders })
+                return new Response(JSON.stringify({ error: 'Token inválido' }), { status: 401, headers: corsHeaders })
             }
         }
 
-        if (action === 'ping') return new Response(JSON.stringify({ message: 'pong' }), { status: 200, headers: corsHeaders })
-
-        // 1. CRIAR COBRANÇA (PIX OU CARTÃO)
+        // 1. CRIAR PAGAMENTO (PIX OU CHECKOUT)
         if (action === 'createPayment') {
-            const { name, email, cpf, plan, userId, billingType = 'PIX' } = payload
-            console.log(`LOG: Criando pagamento para User ${userId}, Plano ${plan?.name}, Tipo ${billingType}`)
-
-            const cleanCpf = (cpf || '').replace(/\D/g, '')
+            const { userId, planId, email, name, cpf, splitWalletId, billingType } = payload
+            console.log(`LOG: Criando pagamento para User ${userId}, Plano ${planId}, Tipo ${billingType}`)
 
             // Busca ou Cria Cliente no Asaas
-            console.log(`LOG: Buscando/Criando cliente no Asaas (CPF: ${cleanCpf.substring(0, 3)}...)...`)
-            const searchRes = await fetch(`${ASAAS_API_URL}/customers?cpfCnpj=${cleanCpf}`, { headers })
+            console.log(`LOG: Buscando/Criando cliente no Asaas (CPF: ${cpf?.substring(0, 3)}...)...`)
+            const searchRes = await fetch(`${ASAAS_API_URL}/customers?cpfCnpj=${cpf}`, { headers })
             const searchData = await searchRes.json()
-
-            if (!searchRes.ok) {
-                console.error("ERRO Asaas Customers:", searchData)
-                throw new Error(searchData.errors?.[0]?.description || 'Erro ao buscar cliente no Asaas')
-            }
-
-            let customerId = (searchData.data?.[0]?.id)
+            let customerId = searchData.data?.[0]?.id
 
             if (!customerId) {
                 console.log(`LOG: Cliente não encontrado. Criando novo...`)
-                const createRes = await fetch(`${ASAAS_API_URL}/customers`, {
+                const createCustRes = await fetch(`${ASAAS_API_URL}/customers`, {
                     method: 'POST',
                     headers,
-                    body: JSON.stringify({ name, email, cpfCnpj: cleanCpf })
+                    body: JSON.stringify({ name, email, cpfCnpj: cpf })
                 })
-                const customerData = await createRes.json()
-                if (!createRes.ok) throw new Error(customerData.errors?.[0]?.description || 'Erro criar cliente')
-                customerId = customerData.id
+                const newCust = await createCustRes.json()
+                customerId = newCust.id
             }
 
+            // Mapeamento de preços por Plano
+            const plans: any = { 'Bronze': 37.90, 'Prata': 87.00, 'Ouro': 174.00, 'Platina': 397.00 }
+            const amount = plans[planId] || 37.90
+
+            // Cria Cobrança
             console.log(`LOG: Gerando cobrança para Customer ${customerId}...`)
-            const dueDate = new Date()
-            dueDate.setDate(dueDate.getDate() + 1)
-            const payRes = await fetch(`${ASAAS_API_URL}/payments`, {
+            const paymentBody: any = {
+                customer: customerId,
+                billingType: billingType || 'PIX',
+                value: amount,
+                dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+                description: `Assinatura Clube Privado - Plano ${planId}`,
+                externalReference: `${userId}_${Date.now()}`
+            }
+
+            // Se for indicado por alguém, configura o split (Comissão de 15%)
+            if (splitWalletId) {
+                paymentBody.split = [{
+                    walletId: splitWalletId,
+                    fixedValue: amount * 0.15, // Mandato: 15% fixo
+                }]
+            }
+
+            const paymentRes = await fetch(`${ASAAS_API_URL}/payments`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({
-                    customer: customerId,
-                    billingType: billingType,
-                    value: plan.price,
-                    dueDate: dueDate.toISOString().split('T')[0],
-                    description: `Assinatura Plano ${plan.name} - Clube Privado`,
-                    externalReference: `${userId}_${plan.id}`
-                })
+                body: JSON.stringify(paymentBody)
             })
-            const paymentResult = await payRes.json()
-            if (!payRes.ok) throw new Error(paymentResult.errors?.[0]?.description || 'Erro ao gerar cobrança')
+            const paymentResult = await paymentRes.json()
 
-            // Busca QR Code apenas se o método for PIX
-            let pixData = null;
+            if (!paymentRes.ok) throw new Error(paymentResult.errors?.[0]?.description || 'Erro ao criar cobrança no Asaas');
+
+            // Se for PIX, busca o QR Code
+            let pixData = null
             if (billingType === 'PIX') {
                 console.log(`LOG: Gerando QR Code PIX...`)
                 const pixRes = await fetch(`${ASAAS_API_URL}/payments/${paymentResult.id}/pixQrCode`, { headers })
@@ -125,7 +125,7 @@ serve(async (req) => {
             return new Response(JSON.stringify({
                 id: paymentResult.id,
                 status: paymentResult.status,
-                invoiceUrl: paymentResult.invoiceUrl, // Link de pagamento para Cartão/Boleto
+                invoiceUrl: paymentResult.invoiceUrl,
                 pixQrCodeBase64: pixData?.encodedImage,
                 pixCopyPaste: pixData?.payload,
                 value: paymentResult.value
@@ -137,7 +137,6 @@ serve(async (req) => {
             const { userId } = payload
             console.log(`LOG: Processando saque para User ${userId}`)
 
-            // BUSCA COMISSÕES PENDENTES NO BACKEND (Mandato de Segurança)
             const { data: pendingComms, error: commsErr } = await supabase
                 .from('affiliate_commissions')
                 .select('id, amount')
@@ -170,16 +169,9 @@ serve(async (req) => {
             if (!transRes.ok) throw new Error(transData.errors?.[0]?.description || 'Erro na transferência PIX');
 
             // Sucesso: Zera saldo no perfil e marca comissões como pagas
-            const { error: profileUpdErr } = await supabase.from('profiles').update({ balance: 0 }).eq('id', userId);
-            if (profileUpdErr) console.error("ERRO: Falha ao zerar saldo do perfil:", profileUpdErr);
-
+            await supabase.from('profiles').update({ balance: 0 }).eq('id', userId);
             const commIds = pendingComms.map((c: any) => c.id);
-            const { error: commsUpdErr } = await supabase
-                .from('affiliate_commissions')
-                .update({ status: 'paid', asaas_transfer_id: transData.id })
-                .in('id', commIds);
-
-            if (commsUpdErr) console.error("ERRO: Falha ao atualizar status das comissões:", commsUpdErr);
+            await supabase.from('affiliate_commissions').update({ status: 'paid', asaas_transfer_id: transData.id }).in('id', commIds);
 
             console.log(`LOG: Saque concluído: ${transData.id}`)
             return new Response(JSON.stringify({ success: true, transferId: transData.id, amount: totalToWithdraw }), { status: 200, headers: corsHeaders })
@@ -204,7 +196,7 @@ serve(async (req) => {
 
                     if (userProfile?.referred_by) {
                         const amount = data.value * 0.15 // Mandato: 15%
-                        const { error: insErr } = await supabase.from('affiliate_commissions').insert({
+                        await supabase.from('affiliate_commissions').insert({
                             referrer_id: userProfile.referred_by,
                             referred_user_id: userProfile.id,
                             amount: amount,
@@ -212,9 +204,6 @@ serve(async (req) => {
                             asaas_transfer_id: paymentId
                         })
 
-                        if (insErr) console.error('ERRO: Falha ao inserir comissão:', insErr)
-
-                        // Atualiza saldo redundante no perfil (facilitador)
                         const { data: referrer } = await supabase.from('profiles').select('balance').eq('id', userProfile.referred_by).single()
                         await supabase.from('profiles').update({ balance: (parseFloat(referrer?.balance || 0) + amount) }).eq('id', userProfile.referred_by)
                         console.log(`LOG: Comissão gerada para ${userProfile.referred_by}`);
