@@ -3,13 +3,17 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Content-Type': 'application/json',
 }
 
-console.log("LOG: Sistema Asaas Proxy carregado v12 (Secure Withdrawal + Webhooks)")
+console.log("LOG: Sistema Asaas Proxy v14 (Bootstrap)")
 
 serve(async (req) => {
+    // --- LOG DE ENTRADA ABSOLUTA ---
+    console.log(`LOG_ENTRY: [${req.method}] ${req.url}`)
+
     // Configurações de API do Asaas
     const DEFAULT_URL = 'https://api.asaas.com/v3'
     const ASAAS_API_URL = Deno.env.get('ASAAS_API_URL') || DEFAULT_URL
@@ -18,23 +22,37 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    console.log(`LOG: [${req.method}] Usando URL: ${ASAAS_API_URL}`)
+    console.log(`LOG: [${req.method}] ${req.url} - Iniciado.`)
 
-    if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+    if (req.method === 'OPTIONS') {
+        console.log("LOG: [OPTIONS] Respondendo Preflight CORS.")
+        return new Response('ok', { status: 200, headers: corsHeaders })
+    }
+
+    // Validação de variáveis de ambiente no boot da requisição real
+    if (!ASAAS_API_KEY) {
+        console.error("ERRO: ASAAS_API_KEY não configurada nos Secrets do Supabase!")
+        return new Response(JSON.stringify({ error: 'Configuração do servidor incompleta (API_KEY)' }), { status: 500, headers: corsHeaders })
+    }
 
     try {
         const bodyText = await req.text()
+        console.log(`LOG: Body recebido (${bodyText.length} bytes)`)
+
         const parsedBody = bodyText ? JSON.parse(bodyText) : {}
         const action = parsedBody.action
         const payload = parsedBody.payload
         const headers = {
             'Content-Type': 'application/json',
-            'access_token': ASAAS_API_KEY || ''
+            'access_token': (ASAAS_API_KEY || '').trim()
         }
+
+        console.log(`LOG: Ação identificada: ${action || 'Evento Webhook'}`)
 
         // --- SEGURANÇA WEBHOOK ---
         // Se for um evento enviado pelo Asaas (sem a ação manual 'checkStatus'), validamos o token
         if (parsedBody.event && action !== 'checkStatus') {
+            console.log(`LOG: Validando Token do Webhook...`)
             const webhookToken = Deno.env.get('ASAAS_WEBHOOK_TOKEN')
             const requestToken = req.headers.get('asaas-access-token')
 
@@ -44,19 +62,29 @@ serve(async (req) => {
             }
         }
 
-        if (action === 'ping') return new Response(JSON.stringify({ message: 'pong' }), { headers: corsHeaders })
+        if (action === 'ping') return new Response(JSON.stringify({ message: 'pong' }), { status: 200, headers: corsHeaders })
 
         // 1. CRIAR COBRANÇA (PIX OU CARTÃO)
         if (action === 'createPayment') {
             const { name, email, cpf, plan, userId, billingType = 'PIX' } = payload
+            console.log(`LOG: Criando pagamento para User ${userId}, Plano ${plan?.name}, Tipo ${billingType}`)
+
             const cleanCpf = (cpf || '').replace(/\D/g, '')
 
             // Busca ou Cria Cliente no Asaas
+            console.log(`LOG: Buscando/Criando cliente no Asaas (CPF: ${cleanCpf.substring(0, 3)}...)...`)
             const searchRes = await fetch(`${ASAAS_API_URL}/customers?cpfCnpj=${cleanCpf}`, { headers })
             const searchData = await searchRes.json()
+
+            if (!searchRes.ok) {
+                console.error("ERRO Asaas Customers:", searchData)
+                throw new Error(searchData.errors?.[0]?.description || 'Erro ao buscar cliente no Asaas')
+            }
+
             let customerId = (searchData.data?.[0]?.id)
 
             if (!customerId) {
+                console.log(`LOG: Cliente não encontrado. Criando novo...`)
                 const createRes = await fetch(`${ASAAS_API_URL}/customers`, {
                     method: 'POST',
                     headers,
@@ -67,7 +95,7 @@ serve(async (req) => {
                 customerId = customerData.id
             }
 
-            // Cria Cobrança
+            console.log(`LOG: Gerando cobrança para Customer ${customerId}...`)
             const dueDate = new Date()
             dueDate.setDate(dueDate.getDate() + 1)
             const payRes = await fetch(`${ASAAS_API_URL}/payments`, {
@@ -88,10 +116,12 @@ serve(async (req) => {
             // Busca QR Code apenas se o método for PIX
             let pixData = null;
             if (billingType === 'PIX') {
+                console.log(`LOG: Gerando QR Code PIX...`)
                 const pixRes = await fetch(`${ASAAS_API_URL}/payments/${paymentResult.id}/pixQrCode`, { headers })
                 pixData = await pixRes.json()
             }
 
+            console.log(`LOG: Pagamento criado com sucesso: ${paymentResult.id}`)
             return new Response(JSON.stringify({
                 id: paymentResult.id,
                 status: paymentResult.status,
@@ -99,12 +129,13 @@ serve(async (req) => {
                 pixQrCodeBase64: pixData?.encodedImage,
                 pixCopyPaste: pixData?.payload,
                 value: paymentResult.value
-            }), { headers: corsHeaders })
+            }), { status: 200, headers: corsHeaders })
         }
 
         // 2. SOLICITAR SAQUE (AUTOMÁTICO E SEGURO)
         if (action === 'withdraw') {
             const { userId } = payload
+            console.log(`LOG: Processando saque para User ${userId}`)
 
             // BUSCA COMISSÕES PENDENTES NO BACKEND (Mandato de Segurança)
             const { data: pendingComms, error: commsErr } = await supabase
@@ -150,7 +181,8 @@ serve(async (req) => {
 
             if (commsUpdErr) console.error("ERRO: Falha ao atualizar status das comissões:", commsUpdErr);
 
-            return new Response(JSON.stringify({ success: true, transferId: transData.id, amount: totalToWithdraw }), { headers: corsHeaders })
+            console.log(`LOG: Saque concluído: ${transData.id}`)
+            return new Response(JSON.stringify({ success: true, transferId: transData.id, amount: totalToWithdraw }), { status: 200, headers: corsHeaders })
         }
 
         // 3. WEBHOOK / CHECK STATUS (GERAR COMISSÃO)
@@ -159,10 +191,10 @@ serve(async (req) => {
                 ? await (await fetch(`${ASAAS_API_URL}/payments/${payload.paymentId}`, { headers })).json()
                 : (parsedBody.event === 'PAYMENT_RECEIVED' || parsedBody.event === 'PAYMENT_CONFIRMED') ? parsedBody.payment : null;
 
-            if (!data) return new Response('Ignored', { headers: corsHeaders });
+            if (!data) return new Response('Ignored', { status: 200, headers: corsHeaders });
 
             const paymentId = data.id;
-            console.log(`LOG: Processando pagamento ${paymentId}. Status: ${data.status}`);
+            console.log(`LOG: Processando Status do Pagamento ${paymentId}. Status: ${data.status}`);
 
             if (data.status === 'RECEIVED' || data.status === 'CONFIRMED') {
                 const { data: existing } = await supabase.from('affiliate_commissions').select('id').eq('asaas_transfer_id', paymentId).single()
@@ -185,17 +217,17 @@ serve(async (req) => {
                         // Atualiza saldo redundante no perfil (facilitador)
                         const { data: referrer } = await supabase.from('profiles').select('balance').eq('id', userProfile.referred_by).single()
                         await supabase.from('profiles').update({ balance: (parseFloat(referrer?.balance || 0) + amount) }).eq('id', userProfile.referred_by)
-                        console.log(`LOG: Comissão gerada: R$ ${amount} para Referrer ${userProfile.referred_by}`);
+                        console.log(`LOG: Comissão gerada para ${userProfile.referred_by}`);
                     }
                 }
             }
-            return new Response(JSON.stringify({ status: data.status }), { headers: corsHeaders })
+            return new Response(JSON.stringify({ status: data.status }), { status: 200, headers: corsHeaders })
         }
 
-        return new Response(JSON.stringify({ error: 'Ação inválida' }), { headers: corsHeaders })
+        return new Response(JSON.stringify({ error: 'Ação inválida' }), { status: 400, headers: corsHeaders })
 
     } catch (e: any) {
-        console.error(`LOG ERRO: ${e.message}`)
-        return new Response(JSON.stringify({ error: e.message }), { headers: corsHeaders })
+        console.error(`LOG ERRO FATAL: ${e.message}`)
+        return new Response(JSON.stringify({ error: e.message }), { status: 400, headers: corsHeaders })
     }
 })
