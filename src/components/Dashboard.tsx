@@ -52,6 +52,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [isCropping, setIsCropping] = useState(false);
+    const [heatmapData, setHeatmapData] = useState<number[]>(new Array(24).fill(0));
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const videoInputRef = useRef<HTMLInputElement>(null);
@@ -206,6 +207,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         if (activeTab === 'Afiliados') {
             fetchAffiliateData();
         }
+        if (activeTab === 'Estatísticas') {
+            fetchHeatmapData();
+        }
 
         return () => { document.title = originalTitle; };
     }, [activeTab]);
@@ -236,6 +240,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             setCommissions(commData || []);
         } catch (error) {
             console.error('Erro em fetchAffiliateData:', error);
+        }
+    };
+
+    const fetchHeatmapData = async () => {
+        try {
+            if (!user) return;
+            // Busca dados dos últimos 7 dias para uma média melhor
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+            const { data, error } = await supabase
+                .from('profile_analytics')
+                .select('created_at')
+                .eq('profile_id', user.id)
+                .gte('created_at', sevenDaysAgo.toISOString());
+
+            if (error) throw error;
+
+            const hourlyCounts = new Array(24).fill(0);
+            data.forEach((entry: any) => {
+                const hour = new Date(entry.created_at).getHours();
+                hourlyCounts[hour]++;
+            });
+
+            setHeatmapData(hourlyCounts);
+        } catch (error) {
+            console.error('Erro ao buscar dados do mapa de calor:', error);
         }
     };
 
@@ -749,8 +780,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                     await supabase.from('profiles').update({ is_online: newStatus }).eq('id', user.id);
                                                 }}
                                                 className={`px-6 py-3 rounded-sm border text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${profile.is_online !== false
-                                                        ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'
-                                                        : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-green-500/10 hover:border-green-500/30 hover:text-green-400'
+                                                    ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'
+                                                    : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-green-500/10 hover:border-green-500/30 hover:text-green-400'
                                                     }`}
                                             >
                                                 <div className={`w-2 h-2 rounded-full ${profile.is_online !== false ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -1665,13 +1696,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
                                 {activePlan?.tier_weight >= 3 && (
                                     <div className="mt-8 space-y-4">
-                                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Mapa de Calor (Simulação)</h3>
+                                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Mapa de Calor Real (Últimos 7 dias)</h3>
                                         <div className="bg-navy border border-white/5 h-48 rounded-sm flex items-end justify-between p-4 gap-1">
-                                            {[30, 45, 20, 60, 80, 100, 90, 70, 50, 40, 20, 10, 5, 10, 30, 50, 70, 95, 120, 110, 90, 80, 60, 40].map((v, i) => (
-                                                <div key={i} className="flex-1 bg-primary/20 hover:bg-primary transition-colors cursor-help" style={{ height: `${v}%` }} title={`${i}h - ${v} visitas estimadas`} />
-                                            ))}
+                                            {heatmapData.map((v, i) => {
+                                                const maxVal = Math.max(...heatmapData, 1);
+                                                const heightPerc = (v / maxVal) * 100;
+                                                return (
+                                                    <div
+                                                        key={i}
+                                                        className="flex-1 bg-primary/20 hover:bg-primary transition-colors cursor-help min-h-[2px]"
+                                                        style={{ height: `${Math.max(heightPerc, 2)}%` }}
+                                                        title={`${i}h - ${v} visitas registradas`}
+                                                    />
+                                                );
+                                            })}
                                         </div>
-                                        <p className="text-[8px] text-gray-600 uppercase font-black text-center tracking-widest">Horário de Pico: 18:00 - 22:00</p>
+                                        <p className="text-[8px] text-gray-600 uppercase font-black text-center tracking-widest">
+                                            Horário de Pico Identificado: {
+                                                heatmapData.indexOf(Math.max(...heatmapData))
+                                            }:00 - {
+                                                heatmapData.indexOf(Math.max(...heatmapData)) + 1
+                                            }:00
+                                        </p>
                                     </div>
                                 )}
                             </div>
