@@ -32,6 +32,18 @@ serve(async (req) => {
             'access_token': ASAAS_API_KEY || ''
         }
 
+        // --- SEGURANÇA WEBHOOK ---
+        // Se for um evento enviado pelo Asaas (sem a ação manual 'checkStatus'), validamos o token
+        if (parsedBody.event && action !== 'checkStatus') {
+            const webhookToken = Deno.env.get('ASAAS_WEBHOOK_TOKEN')
+            const requestToken = req.headers.get('asaas-access-token')
+
+            if (webhookToken && requestToken !== webhookToken) {
+                console.error("ERRO: Token de Webhook inválido!")
+                return new Response(JSON.stringify({ error: 'Unauthorized Webhook' }), { status: 401, headers: corsHeaders })
+            }
+        }
+
         if (action === 'ping') return new Response(JSON.stringify({ message: 'pong' }), { headers: corsHeaders })
 
         // 1. CRIAR COBRANÇA (PIX OU CARTÃO)
