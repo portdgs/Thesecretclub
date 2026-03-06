@@ -447,8 +447,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex-1 flex justify-center hidden lg:flex">
-              <h1 className="text-xl sm:text-2xl font-serif font-light tracking-tight text-white/95">
+            <div className="flex-1 flex justify-center hidden lg:flex overflow-hidden">
+              <h1 className="text-xl sm:text-2xl font-serif font-light tracking-tight text-white/95 whitespace-nowrap">
                 A arte do <span className="text-primary italic">encontro</span> em sua <span className="text-primary italic">melhor</span> forma
               </h1>
             </div>
@@ -576,6 +576,14 @@ export default function App() {
           </div>
 
           <div className="relative z-20 container mx-auto px-4 text-center">
+            <div className="flex justify-center gap-4 md:gap-8 mb-4 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400">
+              <span>Privacidade</span>
+              <span className="text-primary">•</span>
+              <span>Luxo</span>
+              <span className="text-primary">•</span>
+              <span>Exclusividade</span>
+            </div>
+
             {/* Hidden headline on desktop as it's now in the header, visible on mobile */}
             <h1 className="lg:hidden text-2xl sm:text-3xl font-serif font-light mb-6 tracking-tight">
               A arte do <span className="font-serif font-normal text-primary italic">encontro</span> em sua <span className="font-serif font-normal text-primary italic">melhor</span> forma
@@ -623,7 +631,7 @@ export default function App() {
         </section>
 
         {featuredProfiles.length > 0 && (
-          <section className="relative z-30 -mt-20 pb-8 scrollbar-hide overflow-x-auto">
+          <section className="relative z-30 -mt-12 pb-8 scrollbar-hide overflow-x-auto">
             <div className="container mx-auto px-4 flex gap-4 min-w-max">
               {featuredProfiles.map((p) => (
                 <div
