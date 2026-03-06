@@ -448,7 +448,7 @@ export default function App() {
             </div>
 
             <div className="flex-1 flex justify-center hidden lg:flex">
-              <h1 className="text-lg font-serif font-light tracking-tight text-white/90">
+              <h1 className="text-xl sm:text-2xl font-serif font-light tracking-tight text-white/95">
                 A arte do <span className="text-primary italic">encontro</span> em sua <span className="text-primary italic">melhor</span> forma
               </h1>
             </div>
