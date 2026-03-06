@@ -9,6 +9,7 @@ import { ClientDashboard } from './components/ClientDashboard';
 import { AdminPanel } from './components/AdminPanel';
 import { ProfileModal } from './components/ProfileModal';
 import { ModelLandingPage } from './components/ModelLandingPage';
+import { LegalModal } from './components/LegalModal';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
@@ -34,6 +35,12 @@ export default function App() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [roleLoaded, setRoleLoaded] = useState(false);
+
+  // Legal Modals State
+  const [isAgeVerified, setIsAgeVerified] = useState(() => {
+    return localStorage.getItem('age-verified') === 'true';
+  });
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
 
   // Capture referral from URL
   useEffect(() => {
@@ -853,9 +860,14 @@ export default function App() {
             &copy; 2024 Clube Privado. Todos os direitos reservados.
           </p>
           <div className="flex justify-center gap-8 text-[9px] uppercase tracking-widest text-gray-600">
-            <a href="#" className="hover:text-primary transition-colors">Termos de Uso</a>
-            <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
-            <a href="#" className="hover:text-primary transition-colors">Contato</a>
+            <button
+              onClick={() => setIsTermsOpen(true)}
+              className="hover:text-primary transition-colors uppercase tracking-widest"
+            >
+              Termos de Uso
+            </button>
+            <a href="#" className="hover:text-primary transition-colors uppercase tracking-widest">Privacidade</a>
+            <a href="#" className="hover:text-primary transition-colors uppercase tracking-widest">Contato</a>
           </div>
         </div>
       </footer>
@@ -865,6 +877,22 @@ export default function App() {
           <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
         )}
       </AnimatePresence>
+
+      <LegalModal
+        isOpen={!isAgeVerified}
+        type="age_verification"
+        onAccept={() => {
+          localStorage.setItem('age-verified', 'true');
+          setIsAgeVerified(true);
+        }}
+        onClose={() => { }}
+      />
+
+      <LegalModal
+        isOpen={isTermsOpen}
+        type="terms_of_use"
+        onClose={() => setIsTermsOpen(false)}
+      />
     </div>
   );
 }
