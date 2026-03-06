@@ -1458,7 +1458,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     <div className="bg-navy p-6 rounded-sm border border-white/5 relative overflow-hidden">
                                         <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Saldo Disponível</div>
                                         <div className="text-3xl font-black text-green-500">R$ {parseFloat(profile.balance || 0).toFixed(2)}</div>
-                                        {parseFloat(profile.balance || 0) >= 50 ? (
+                                        {parseFloat(profile.balance || 0) >= 5 ? (
                                             <button
                                                 onClick={async () => {
                                                     if (!profile.pix_key) {
@@ -1484,7 +1484,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                 {uploading ? 'Processando...' : 'Solicitar Saque (PIX)'}
                                             </button>
                                         ) : (
-                                            <p className="text-[8px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Mínimo para saque: R$ 50,00</p>
+                                            <p className="text-[8px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Mínimo para saque: R$ 5,00</p>
                                         )}
                                     </div>
                                     <div className="bg-navy p-6 rounded-sm border border-white/5">

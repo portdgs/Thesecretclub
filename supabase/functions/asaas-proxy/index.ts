@@ -149,7 +149,7 @@ serve(async (req) => {
             const totalToWithdraw = (pendingComms || []).reduce((acc: number, comm: any) => acc + parseFloat(comm.amount), 0);
 
             if (totalToWithdraw <= 0) throw new Error('Não há comissões pendentes para saque');
-            if (totalToWithdraw < 50) throw new Error('Saldo insuficiente (mínimo R$ 50)');
+            if (totalToWithdraw < 5) throw new Error('Saldo insuficiente (mínimo R$ 5)');
 
             const { data: profile } = await supabase.from('profiles').select('pix_key, pix_key_type').eq('id', userId).single();
             if (!profile?.pix_key) throw new Error('Chave PIX não cadastrada no perfil');
