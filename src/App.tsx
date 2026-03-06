@@ -230,9 +230,9 @@ export default function App() {
         query = query.not('active_plan_id', 'is', null);
       }
 
-      // Order by plans(tier_weight) and then by created_at
+      // Order by plan_tier_weight and then by created_at
       query = query
-        .order('tier_weight', { foreignTable: 'plans', ascending: false, nullsFirst: false })
+        .order('plan_tier_weight', { ascending: false })
         .order('created_at', { ascending: false });
 
       const { data: profilesData, error: profilesError } = await query;
@@ -292,9 +292,9 @@ export default function App() {
         query = query.ilike('gender', '%Trans%');
       }
 
-      // Order by plans(tier_weight) and then by created_at
+      // Order by plan_tier_weight and then by created_at
       const { data, error } = await query
-        .order('tier_weight', { foreignTable: 'plans', ascending: false, nullsFirst: false })
+        .order('plan_tier_weight', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(15);
 
