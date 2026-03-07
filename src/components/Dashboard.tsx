@@ -1466,51 +1466,64 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
                                 <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6">Seu Saldo e Ganhos</h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                    <div className="bg-navy p-6 rounded-sm border border-white/5 relative overflow-hidden">
-                                        <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Saldo Disponível</div>
-                                        <div className="text-3xl font-black text-green-500">R$ {parseFloat(profile.balance || 0).toFixed(2)}</div>
-                                        {parseFloat(profile.balance || 0) >= 50 ? (
-                                            <button
-                                                onClick={async () => {
-                                                    if (!profile.pix_key) {
-                                                        alert('Cadastre sua chave PIX primeiro.');
-                                                        return;
-                                                    }
-                                                    if (confirm(`Deseja solicitar o saque do seu saldo disponível?`)) {
-                                                        setUploading(true);
-                                                        // Invocaremos a Edge Function para processar o saque automático (Backend calcula valor)
-                                                        const { data, error: invokeError } = await supabase.functions.invoke('asaas-proxy', {
-                                                            body: { action: 'withdraw', payload: { userId: user.id } }
-                                                        });
-                                                        setUploading(false);
+                                {(() => {
+                                    const pendingComms = commissions.filter(c => c.status === 'pending' || c.status === 'processing');
+                                    const availableBal = pendingComms.filter(c => c.status === 'pending' && (!c.available_at || new Date(c.available_at) <= new Date())).reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
+                                    const lockedBal = pendingComms.filter(c => c.status === 'pending' && c.available_at && new Date(c.available_at) > new Date()).reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
 
-                                                        const serverError = data?.error;
-                                                        if (invokeError || serverError) {
-                                                            alert('Erro no saque: ' + (serverError || invokeError?.message || 'Erro desconhecido'));
-                                                        } else {
-                                                            alert('Saque solicitado com sucesso! O PIX cairá em breve.');
-                                                            fetchProfile();
-                                                        }
-                                                    }
-                                                }}
-                                                className="mt-4 w-full btn-primary py-2 text-[10px] font-black uppercase tracking-widest"
-                                            >
-                                                {uploading ? 'Processando...' : 'Solicitar Saque (PIX)'}
-                                            </button>
-                                        ) : (
-                                            <p className="text-[8px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Mínimo para saque: R$ 50,00</p>
-                                        )}
-                                    </div>
-                                    <div className="bg-navy p-6 rounded-sm border border-white/5">
-                                        <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Indicações Totais</div>
-                                        <div className="text-3xl font-black">{affiliateStats.indications}</div>
-                                    </div>
-                                    <div className="bg-navy p-6 rounded-sm border border-white/5">
-                                        <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Conversões</div>
-                                        <div className="text-3xl font-black">{affiliateStats.conversions}</div>
-                                    </div>
-                                </div>
+                                    return (
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                            <div className="bg-navy p-6 rounded-sm border border-white/5 relative overflow-hidden">
+                                                <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Saldo Disponível</div>
+                                                <div className="text-3xl font-black text-green-500">R$ {availableBal.toFixed(2)}</div>
+                                                {lockedBal > 0 && (
+                                                    <div className="text-[9px] text-yellow-500 mt-1 uppercase font-bold tracking-widest">
+                                                        + R$ {lockedBal.toFixed(2)} em carência (7 dias)
+                                                    </div>
+                                                )}
+                                                {availableBal >= 100 ? (
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!profile.pix_key) {
+                                                                alert('Cadastre sua chave PIX primeiro.');
+                                                                return;
+                                                            }
+                                                            if (confirm(`Deseja solicitar o saque do seu saldo disponível de R$ ${availableBal.toFixed(2)}?`)) {
+                                                                setUploading(true);
+                                                                const { data, error: invokeError } = await supabase.functions.invoke('asaas-proxy', {
+                                                                    body: { action: 'withdraw', payload: { userId: user.id } }
+                                                                });
+                                                                setUploading(false);
+
+                                                                const serverError = data?.error;
+                                                                if (invokeError || serverError) {
+                                                                    alert('Erro no saque: ' + (serverError || invokeError?.message || 'Erro desconhecido'));
+                                                                } else {
+                                                                    alert('Saque solicitado com sucesso! O processo de transferência foi iniciado.');
+                                                                    fetchProfile();
+                                                                    fetchAffiliateData();
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="mt-4 w-full btn-primary py-2 text-[10px] font-black uppercase tracking-widest"
+                                                    >
+                                                        {uploading ? 'Processando...' : 'Solicitar Saque (PIX)'}
+                                                    </button>
+                                                ) : (
+                                                    <p className="text-[8px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Mínimo para saque: R$ 100,00</p>
+                                                )}
+                                            </div>
+                                            <div className="bg-navy p-6 rounded-sm border border-white/5">
+                                                <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Indicações Totais</div>
+                                                <div className="text-3xl font-black">{affiliateStats.indications}</div>
+                                            </div>
+                                            <div className="bg-navy p-6 rounded-sm border border-white/5">
+                                                <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Conversões</div>
+                                                <div className="text-3xl font-black">{affiliateStats.conversions}</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
                                 <div className="bg-navy rounded-sm border border-white/5 overflow-hidden">
                                     <table className="w-full text-left">
@@ -1530,10 +1543,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                         <td className="p-4">Comissão - Indicação Ativa</td>
                                                         <td className="p-4 text-green-500">R$ {parseFloat(comm.amount).toFixed(2)}</td>
                                                         <td className="p-4">
-                                                            <span className={`px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${comm.status === 'paid' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
-                                                                }`}>
-                                                                {comm.status === 'paid' ? 'Pago' : 'Pendente'}
-                                                            </span>
+                                                            <div className="flex flex-col gap-1 items-start">
+                                                                <span className={`px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${comm.status === 'paid' ? 'bg-green-500/10 text-green-500' :
+                                                                    comm.status === 'suspicious' ? 'bg-red-500/10 text-red-500' : 'bg-yellow-500/10 text-yellow-500'
+                                                                    }`}>
+                                                                    {comm.status === 'paid' ? 'Pago' : comm.status === 'suspicious' ? 'Suspeito' : 'Pendente'}
+                                                                </span>
+                                                                {comm.status === 'pending' && comm.available_at && new Date(comm.available_at) > new Date() && (
+                                                                    <span className="text-[8px] text-gray-500 flex items-center gap-1">
+                                                                        <Clock size={10} /> Libera em {new Date(comm.available_at).toLocaleDateString()}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))

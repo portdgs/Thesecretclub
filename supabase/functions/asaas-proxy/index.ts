@@ -141,14 +141,27 @@ serve(async (req) => {
                 .from('affiliate_commissions')
                 .select('id, amount')
                 .eq('referrer_id', userId)
-                .eq('status', 'pending');
+                .eq('status', 'pending')
+                .lte('available_at', new Date().toISOString());
 
             if (commsErr) throw new Error('Erro ao buscar comissões pendentes');
 
             const totalToWithdraw = (pendingComms || []).reduce((acc: number, comm: any) => acc + parseFloat(comm.amount), 0);
 
-            if (totalToWithdraw <= 0) throw new Error('Não há comissões pendentes para saque');
-            if (totalToWithdraw < 50) throw new Error('Saldo insuficiente (mínimo R$ 50)');
+            if (totalToWithdraw <= 0) throw new Error('Não há comissões pendentes e liberadas para saque (Carência de 7 dias).');
+            if (totalToWithdraw < 100) throw new Error(`Saldo disponível insuficiente (Min. R$ 100). Disponível: R$ ${totalToWithdraw.toFixed(2)}`);
+
+            // Anti-múltiplos cliques / Race Condition
+            const { data: processingCheck } = await supabase
+                .from('affiliate_commissions')
+                .select('id')
+                .eq('referrer_id', userId)
+                .eq('status', 'processing')
+                .limit(1);
+            if (processingCheck && processingCheck.length > 0) throw new Error('Já existe um saque em processamento.');
+
+            const commIds = pendingComms.map((c: any) => c.id);
+            await supabase.from('affiliate_commissions').update({ status: 'processing' }).in('id', commIds);
 
             const { data: profile } = await supabase.from('profiles').select('pix_key, pix_key_type').eq('id', userId).single();
             if (!profile?.pix_key) throw new Error('Chave PIX não cadastrada no perfil');
@@ -166,11 +179,14 @@ serve(async (req) => {
                 })
             })
             const transData = await transRes.json()
-            if (!transRes.ok) throw new Error(transData.errors?.[0]?.description || 'Erro na transferência PIX');
+            if (!transRes.ok) {
+                // Reverte status caso o Asaas negue
+                await supabase.from('affiliate_commissions').update({ status: 'pending' }).in('id', commIds);
+                throw new Error(transData.errors?.[0]?.description || 'Erro na transferência PIX');
+            }
 
-            // Sucesso: Zera saldo no perfil e marca comissões como pagas
+            // Sucesso: Zera saldo no perfil legado e marca comissões como pagas
             await supabase.from('profiles').update({ balance: 0 }).eq('id', userId);
-            const commIds = pendingComms.map((c: any) => c.id);
             await supabase.from('affiliate_commissions').update({ status: 'paid', asaas_transfer_id: transData.id }).in('id', commIds);
 
             console.log(`LOG: Saque concluído: ${transData.id}`)
@@ -189,24 +205,37 @@ serve(async (req) => {
             console.log(`LOG: Processando Status do Pagamento ${paymentId}. Status: ${data.status}`);
 
             if (data.status === 'RECEIVED' || data.status === 'CONFIRMED') {
-                const { data: existing } = await supabase.from('affiliate_commissions').select('id').eq('asaas_transfer_id', paymentId).single()
+                const { data: existing } = await supabase.from('affiliate_commissions').select('id').or(`asaas_payment_id.eq.${paymentId},asaas_transfer_id.eq.${paymentId}`).single()
                 if (!existing) {
                     const userId = data.externalReference?.split('_')[0]
-                    const { data: userProfile } = await supabase.from('profiles').select('id, referred_by').eq('id', userId || '').single()
+                    const { data: userProfile } = await supabase.from('profiles').select('id, referred_by, cpf').eq('id', userId || '').single()
 
                     if (userProfile?.referred_by) {
-                        const amount = data.value * 0.15 // Mandato: 15%
+                        const { data: referrerProfile } = await supabase.from('profiles').select('cpf').eq('id', userProfile.referred_by).single();
+
+                        // Prevenção de Autofiliação
+                        const isSuspicious = referrerProfile?.cpf && userProfile?.cpf && (referrerProfile.cpf === userProfile.cpf);
+                        const statusStr = isSuspicious ? 'suspicious' : 'pending';
+
+                        const amount = (data.netValue || data.value) * 0.15 // Mandato: 15% sobre o valor líquido
+                        const availableAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
                         await supabase.from('affiliate_commissions').insert({
                             referrer_id: userProfile.referred_by,
                             referred_user_id: userProfile.id,
                             amount: amount,
-                            status: 'pending',
-                            asaas_transfer_id: paymentId
+                            status: statusStr,
+                            asaas_payment_id: paymentId,
+                            available_at: availableAt
                         })
 
-                        const { data: referrer } = await supabase.from('profiles').select('balance').eq('id', userProfile.referred_by).single()
-                        await supabase.from('profiles').update({ balance: (parseFloat(referrer?.balance || 0) + amount) }).eq('id', userProfile.referred_by)
-                        console.log(`LOG: Comissão gerada para ${userProfile.referred_by}`);
+                        if (!isSuspicious) {
+                            const { data: referrer } = await supabase.from('profiles').select('balance').eq('id', userProfile.referred_by).single()
+                            await supabase.from('profiles').update({ balance: (parseFloat(referrer?.balance || 0) + amount) }).eq('id', userProfile.referred_by)
+                            console.log(`LOG: Comissão gerada para ${userProfile.referred_by} (Disponível em 7 dias)`);
+                        } else {
+                            console.log(`LOG: ALERTA FRAUDE. Autofiliação bloqueada para CPF ${userProfile.cpf}. Comissão como suspicious.`);
+                        }
                     }
                 }
             }
