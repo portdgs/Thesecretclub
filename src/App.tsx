@@ -201,7 +201,7 @@ export default function App() {
       console.log("[App] Buscando perfis (Home)... City:", city || "Todas");
       let query = supabase
         .from('profiles')
-        .select('*, plans(tier_weight)')
+        .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('role', 'cliente');
       if (city && city.trim()) {
         const searchTerm = `%${city.trim()}%`;
@@ -274,7 +274,7 @@ export default function App() {
     try {
       let query = supabase
         .from('profiles')
-        .select('*, plans(tier_weight)')
+        .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('role', 'cliente');
 
       // Filter by profile_type (category)
