@@ -1468,8 +1468,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
                                 {(() => {
                                     const pendingComms = commissions.filter(c => c.status === 'pending' || c.status === 'processing');
-                                    const availableBal = pendingComms.filter(c => c.status === 'pending' && (!c.available_at || new Date(c.available_at) <= new Date())).reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
-                                    const lockedBal = pendingComms.filter(c => c.status === 'pending' && c.available_at && new Date(c.available_at) > new Date()).reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
+                                    const availableBal = pendingComms.filter(c => c.status === 'pending' && (!c.available_at || new Date(c.available_at) <= new Date())).reduce((acc, c) => acc + parseFloat(c.amount_net_commission || c.amount || 0), 0);
+                                    const lockedBal = pendingComms.filter(c => c.status === 'pending' && c.available_at && new Date(c.available_at) > new Date()).reduce((acc, c) => acc + parseFloat(c.amount_net_commission || c.amount || 0), 0);
 
                                     return (
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -1541,13 +1541,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                     <tr key={comm.id} className="border-t border-white/5">
                                                         <td className="p-4">{new Date(comm.created_at).toLocaleDateString()}</td>
                                                         <td className="p-4">Comissão - Indicação Ativa</td>
-                                                        <td className="p-4 text-green-500">R$ {parseFloat(comm.amount).toFixed(2)}</td>
+                                                        <td className="p-4 text-green-500">R$ {parseFloat(comm.amount_net_commission || comm.amount || 0).toFixed(2)}</td>
                                                         <td className="p-4">
                                                             <div className="flex flex-col gap-1 items-start">
                                                                 <span className={`px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${comm.status === 'paid' ? 'bg-green-500/10 text-green-500' :
-                                                                    comm.status === 'suspicious' ? 'bg-red-500/10 text-red-500' : 'bg-yellow-500/10 text-yellow-500'
+                                                                    comm.status === 'suspicious' ? 'bg-red-500/10 text-red-500' :
+                                                                        comm.status === 'canceled' ? 'bg-gray-500/10 text-gray-500 line-through' : 'bg-yellow-500/10 text-yellow-500'
                                                                     }`}>
-                                                                    {comm.status === 'paid' ? 'Pago' : comm.status === 'suspicious' ? 'Suspeito' : 'Pendente'}
+                                                                    {comm.status === 'paid' ? 'Pago' : comm.status === 'suspicious' ? 'Suspeito' : comm.status === 'canceled' ? 'Cancelado' : 'Pendente'}
                                                                 </span>
                                                                 {comm.status === 'pending' && comm.available_at && new Date(comm.available_at) > new Date() && (
                                                                     <span className="text-[8px] text-gray-500 flex items-center gap-1">
