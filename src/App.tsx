@@ -403,7 +403,14 @@ export default function App() {
   // Final Routing Logic
   if (isAffiliateView) {
     return (
-      <AffiliateProgram onLoginClick={() => setIsAuthOpen(true)} />
+      <>
+        <AffiliateProgram onLoginClick={() => setIsAuthOpen(true)} />
+        <AnimatePresence>
+          {isAuthOpen && (
+            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+          )}
+        </AnimatePresence>
+      </>
     );
   }
 
