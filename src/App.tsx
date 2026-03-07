@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MapPin, ChevronRight, Check, Search, User, Plus, Menu, ShieldCheck, HelpCircle } from 'lucide-react';
+import { MapPin, ChevronRight, Check, Search, User, Plus, Menu, ShieldCheck, HelpCircle, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProfileCard } from './components/ProfileCard';
 import { FilterBar } from './components/FilterBar';
