@@ -343,6 +343,9 @@ export default function App() {
       setSelectedProfile(profile);
       setIsProfileModalOpen(true);
 
+      const photosLimit = profile.plans?.photos_limit ?? 3;
+      const videosLimit = profile.plans?.videos_limit ?? 0;
+
       const { data: photoFiles } = await supabase.storage.from('public-photos').list(profile.id);
       const photoUrls = (photoFiles || []).map((file: any) =>
         supabase.storage.from('public-photos').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
@@ -353,12 +356,13 @@ export default function App() {
         supabase.storage.from('public-videos').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
       );
 
-      setSelectedPhotos(photoUrls);
-      setSelectedVideos(videoUrls);
+      setSelectedPhotos(photoUrls.slice(0, photosLimit));
+      setSelectedVideos(videoUrls.slice(0, videosLimit));
     } catch (error) {
       console.error('Error fetching full profile media:', error);
     }
   };
+
 
   // SEO & Data fetch Effect
   useEffect(() => {

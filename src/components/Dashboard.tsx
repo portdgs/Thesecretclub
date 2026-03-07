@@ -412,6 +412,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const file = event.target.files?.[0];
             if (!file) return;
 
+            const limit = activePlan?.photos_limit ?? 3;
+            if (photos.length >= limit) {
+                alert(`Você atingiu o limite de ${limit} fotos do seu plano atual. Renove para enviar mais.`);
+                return;
+            }
+
             setUploading(true);
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
@@ -454,6 +460,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         try {
             const file = event.target.files?.[0];
             if (!file) return;
+
+            const limit = activePlan?.videos_limit ?? 0;
+            if (videos.length >= limit) {
+                alert(`Você atingiu o limite de ${limit} vídeos do seu plano atual. Renove para enviar mais.`);
+                return;
+            }
 
             setUploading(true);
             const { data: { user } } = await supabase.auth.getUser();
@@ -1093,7 +1105,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <div>
                             <div className="flex justify-between items-end mb-6">
                                 <h2 className="text-xl font-black uppercase tracking-tight">Fotos</h2>
-                                <span className="text-[9px] text-gray-500 uppercase tracking-widest">{photos.length} de 15 fotos</span>
+                                <span className="text-[9px] text-gray-500 uppercase tracking-widest">{photos.length} de {activePlan?.photos_limit ?? 3} fotos</span>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
                                 <button
@@ -1136,7 +1148,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <div>
                             <div className="flex justify-between items-end mb-6">
                                 <h2 className="text-xl font-black uppercase tracking-tight">Vídeos</h2>
-                                <span className="text-[9px] text-gray-500 uppercase tracking-widest">{videos.length} de 5 vídeos</span>
+                                <span className="text-[9px] text-gray-500 uppercase tracking-widest">{videos.length} de {activePlan?.videos_limit ?? 0} vídeos</span>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                                 <button
