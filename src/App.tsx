@@ -10,6 +10,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { ProfileModal } from './components/ProfileModal';
 import { ModelLandingPage } from './components/ModelLandingPage';
 import { LegalModal } from './components/LegalModal';
+import { AffiliateProgram } from './components/AffiliateProgram';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
@@ -329,6 +330,7 @@ export default function App() {
   const isDashboardView = currentHash === '#dashboard';
   const isAdminView = currentHash === '#admin';
   const isModelLandingView = currentHash === '#sejaumamodelo' || currentPath === '/sejaumamodelo';
+  const isAffiliateView = currentPath.toLowerCase() === '/programadeafiliadosadulto';
 
   const handleProfileUpdate = useCallback((profileId: string, updates: any) => {
     setProfiles(prev => prev.map(p =>
@@ -380,7 +382,7 @@ export default function App() {
     fetchFeaturedProfiles();
     fetchAvailableCities();
 
-  }, [currentHash, currentPath, isModelLandingView, searchCity, activeFilter, activeGender, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
+  }, [currentHash, currentPath, isModelLandingView, isAffiliateView, searchCity, activeFilter, activeGender, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
 
   // Guard: Global Loading (Wait for role to prevent UI flicker/stale redirects)
   if (!roleLoaded && (user || isDashboardView || isAdminView)) {
@@ -395,6 +397,12 @@ export default function App() {
   }
 
   // Final Routing Logic
+  if (isAffiliateView) {
+    return (
+      <AffiliateProgram onLoginClick={() => setIsAuthOpen(true)} />
+    );
+  }
+
   if (isModelLandingView) {
     return <ModelLandingPage />;
   }
