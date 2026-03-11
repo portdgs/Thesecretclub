@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import { Feed } from './Feed';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -336,7 +337,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
                             <div className="container mx-auto px-4 md:px-0 max-w-4xl">
                                 <div className="flex items-center justify-start gap-8 md:gap-12 w-full overflow-x-auto no-scrollbar">
-                                    {['Galeria', 'Sobre', 'Validação do Selo Verificada', 'Avaliações'].map((tab) => (
+                                    {['Linha do Tempo', 'Galeria', 'Sobre', 'Validação do Selo Verificada', 'Avaliações'].map((tab) => (
                                         <button
                                             key={tab}
                                             onClick={() => setActiveTab(tab)}
@@ -359,8 +360,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         </div>
 
                         {/* 3. Content Sections */}
-                        <div className="bg-transparent min-h-screen">
+                        <div className="bg-transparent min-h-screen pb-32">
                             <div className="container mx-auto px-0 md:px-0 max-w-4xl pt-1">
+
+                                {/* LINHA DO TEMPO TAB */}
+                                {activeTab === 'Linha do Tempo' && (
+                                    <div className="p-4 md:p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
+                                        <Feed
+                                            currentUserId={user?.id || profile.id}
+                                            profileType={user?.id === profile.id ? user.user_metadata?.profile_type : profile.profile_type}
+                                        />
+                                    </div>
+                                )}
 
                                 {/* GALERIA TAB */}
                                 {activeTab === 'Galeria' && (

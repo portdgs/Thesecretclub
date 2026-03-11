@@ -11,8 +11,11 @@ import {
     MapPin,
     Search,
     Star,
-    ChevronRight
+    ChevronRight,
+    Mail
 } from 'lucide-react';
+
+import { InviteManager } from './InviteManager';
 
 export const ClientDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState('Início');
@@ -25,6 +28,7 @@ export const ClientDashboard: React.FC = () => {
         { icon: LayoutDashboard, label: 'Início' },
         { icon: Heart, label: 'Favoritas' },
         { icon: Eye, label: 'Visualizadas' },
+        { icon: Mail, label: 'Convites' },
         { icon: Settings, label: 'Minha Conta' },
     ];
 
@@ -261,6 +265,13 @@ export const ClientDashboard: React.FC = () => {
                                 ))}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Tab: Convites */}
+                {activeTab === 'Convites' && (
+                    <div className="animate-fade-in pb-20 mt-8">
+                        <InviteManager userId={profile?.id} />
                     </div>
                 )}
 

@@ -6,12 +6,14 @@ import imageCompression from 'browser-image-compression';
 import {
     LayoutDashboard, User, CreditCard, TrendingUp, LogOut, CheckCircle2,
     Clock, Plus, MessageCircle, Share2, Star, Loader2, Trash2,
-    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle
+    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Mail
 } from 'lucide-react';
 
 interface DashboardProps {
     user: any;
 }
+
+import { InviteManager } from './InviteManager';
 
 export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const [activeTab, setActiveTab] = useState('Resumo');
@@ -103,10 +105,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
             const splitWalletId = userProfile?.referred_by;
 
-            const { createPayment } = await import('../services/asaas');
+            const { createSuitPayment } = await import('../services/suitpay');
             const billingType = method === 'PIX' ? 'PIX' : 'UNDEFINED';
 
-            const data = await createPayment(
+            const data = await createSuitPayment(
                 authUser.id,
                 selectedPlan,
                 authUser.email || '',
@@ -139,8 +141,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user) return;
 
             // Simula verificação
-            const { checkPaymentStatus } = await import('../services/asaas');
-            const status = await checkPaymentStatus(paymentData.id);
+            const { checkSuitPaymentStatus } = await import('../services/suitpay');
+            const status = await checkSuitPaymentStatus(paymentData.id);
 
             if (status === 'CONFIRMED') {
                 // Busca o ID do plano de forma insensível a maiúsculas/minúsculas
@@ -185,7 +187,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         { icon: ImageIcon, label: 'Aparência' },
         { icon: CreditCard, label: 'Assinatura' },
         { icon: Share2, label: 'Afiliados' },
-
+        { icon: Mail, label: 'Convites' },
         { icon: ShieldCheck, label: 'Verificação' },
         { icon: TrendingUp, label: 'Estatísticas' },
     ];
@@ -1806,6 +1808,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         </div>
                     )
                 }
+
+                {activeTab === 'Convites' && (
+                    <div className="animate-fade-in pb-20">
+                        <InviteManager userId={user.id} />
+                    </div>
+                )}
+
                 {/* Hidden Inputs */}
                 <input
                     type="file"

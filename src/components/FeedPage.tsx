@@ -5,6 +5,7 @@ import { ProfileCard } from './ProfileCard';
 import { ProfileModal } from './ProfileModal';
 import { AuthModal } from './AuthModal';
 import { LegalModal } from './LegalModal';
+import { Feed } from './Feed';
 
 interface FeedPageProps {
     user: any;
@@ -70,10 +71,11 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     isAuthOpen,
     setIsAuthOpen,
     isTermsOpen,
-    setIsTermsOpen,
     isAgeVerified,
     setIsAgeVerified,
 }) => {
+    const [viewMode, setViewMode] = React.useState<'grid' | 'feed'>('grid');
+
     return (
         <div className="min-h-screen bg-navy text-white font-sans selection:bg-primary selection:text-navy">
             <ProfileModal
@@ -373,50 +375,83 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                             ))}
                         </div>
 
-                        <div className="mt-8">
-                            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-                                {loading ? (
-                                    [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                                        <div key={i} className="bg-navy border border-white/5 rounded-md overflow-hidden animate-pulse flex flex-col h-[350px]">
-                                            <div className="w-full h-3/4 bg-white/5" />
-                                            <div className="p-4 flex flex-col gap-3 flex-1">
-                                                <div className="h-4 bg-white/10 w-2/3 rounded" />
-                                                <div className="h-3 bg-white/5 w-1/2 rounded" />
-                                                <div className="h-2 bg-white/5 w-1/3 rounded mt-auto" />
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : profiles.length > 0 ? (
-                                    profiles.map((p: any) => (
-                                        <ProfileCard
-                                            key={p.id}
-                                            name={p.name || 'Membro'}
-                                            age={p.age || 18}
-                                            city={p.city || 'São Paulo'}
-                                            neighborhood={p.neighborhood || 'Centro'}
-                                            price={p.price_min || 0}
-                                            rating={p.rating || 5.0}
-                                            isVerified={p.verified}
-                                            imageUrl={p.imageUrl}
-                                            hasVideo={!!p.videoUrl}
-                                            planTier={
-                                                p.plans?.tier_weight === 4 ? 'platinum' :
-                                                    p.plans?.tier_weight === 3 ? 'gold' :
-                                                        p.plans?.tier_weight === 2 ? 'silver' :
-                                                            p.plans?.tier_weight === 1 ? 'bronze' : 'free'
-                                            }
-                                            whatsapp={p.whatsapp}
-                                            onWhatsAppClick={() => handleWhatsAppClick(p.id)}
-                                            onClick={() => openProfile(p)}
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="col-span-full py-20 text-center border border-dashed border-white/10">
-                                        <p className="text-gray-500 uppercase tracking-widest text-xs font-black">Nenhum membro encontrado nesta categoria</p>
-                                    </div>
-                                )}
+                        {/* View Mode Toggle */}
+                        <div className="flex justify-center mb-8 border-b border-white/5 pb-4">
+                            <div className="bg-white/5 p-1 rounded-full flex gap-1">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${viewMode === 'grid'
+                                        ? 'bg-primary text-navy shadow-[0_0_15px_rgba(226,176,162,0.4)]'
+                                        : 'text-gray-400 hover:text-white'
+                                        }`}
+                                >
+                                    Vitrine
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('feed')}
+                                    className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${viewMode === 'feed'
+                                        ? 'bg-primary text-navy shadow-[0_0_15px_rgba(226,176,162,0.4)]'
+                                        : 'text-gray-400 hover:text-white'
+                                        }`}
+                                >
+                                    Feed Social
+                                </button>
                             </div>
                         </div>
+
+                        {viewMode === 'feed' ? (
+                            <div className="py-8 animate-fade-in">
+                                <Feed
+                                    currentUserId={user?.id}
+                                    profileType={user?.user_metadata?.profile_type}
+                                />
+                            </div>
+                        ) : (
+                            <div className="mt-8 animate-fade-in">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+                                    {loading ? (
+                                        [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                            <div key={i} className="bg-navy border border-white/5 rounded-md overflow-hidden animate-pulse flex flex-col h-[350px]">
+                                                <div className="w-full h-3/4 bg-white/5" />
+                                                <div className="p-4 flex flex-col gap-3 flex-1">
+                                                    <div className="h-4 bg-white/10 w-2/3 rounded" />
+                                                    <div className="h-3 bg-white/5 w-1/2 rounded" />
+                                                    <div className="h-2 bg-white/5 w-1/3 rounded mt-auto" />
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : profiles.length > 0 ? (
+                                        profiles.map((p: any) => (
+                                            <ProfileCard
+                                                key={p.id}
+                                                name={p.name || 'Membro'}
+                                                age={p.age || 18}
+                                                city={p.city || 'São Paulo'}
+                                                neighborhood={p.neighborhood || 'Centro'}
+                                                price={p.price_min || 0}
+                                                rating={p.rating || 5.0}
+                                                isVerified={p.verified}
+                                                imageUrl={p.imageUrl}
+                                                hasVideo={!!p.videoUrl}
+                                                planTier={
+                                                    p.plans?.tier_weight === 4 ? 'platinum' :
+                                                        p.plans?.tier_weight === 3 ? 'gold' :
+                                                            p.plans?.tier_weight === 2 ? 'silver' :
+                                                                p.plans?.tier_weight === 1 ? 'bronze' : 'free'
+                                                }
+                                                whatsapp={p.whatsapp}
+                                                onWhatsAppClick={() => handleWhatsAppClick(p.id)}
+                                                onClick={() => openProfile(p)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-20 text-center border border-dashed border-white/10">
+                                            <p className="text-gray-500 uppercase tracking-widest text-xs font-black">Nenhum membro encontrado nesta categoria</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
 

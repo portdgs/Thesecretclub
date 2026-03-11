@@ -92,17 +92,21 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                 if (error) throw error;
 
                 if (data.user) {
-                    // Consume the invite code
-                    const codeToUse = inviteCode.trim().toUpperCase() || localStorage.getItem('pendingInviteCode') || '';
+                    // Consume the secure invite code
+                    const codeToUse = inviteCode.trim() || localStorage.getItem('pendingInviteCode') || '';
+                    let referredBy = localStorage.getItem('referralId');
+
                     if (codeToUse) {
-                        await supabase.rpc('validate_and_use_invite', {
-                            invite_code: codeToUse,
-                            user_uuid: data.user.id,
+                        const { data: inviterId } = await supabase.rpc('validate_and_use_secure_invite', {
+                            guest_email: email.trim().toLowerCase(),
+                            token: codeToUse,
+                            new_user_uuid: data.user.id
                         });
+                        if (inviterId) {
+                            referredBy = inviterId;
+                        }
                     }
                     localStorage.removeItem('pendingInviteCode');
-
-                    const referredBy = localStorage.getItem('referralId');
 
                     // Build profile name from gender + status
                     const genderLabel = memberGender === 'homem' ? 'Homem' : memberGender === 'mulher' ? 'Mulher' : '';
@@ -146,22 +150,26 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
     };
 
     const handleInviteSubmit = async () => {
+        if (!email.trim() || !email.includes('@')) {
+            setError('Por favor, informe um e-mail válido primeiro.');
+            return;
+        }
         if (!inviteCode.trim()) {
-            setError('Digite seu código de convite.');
+            setError('Digite seu token de convite.');
             return;
         }
         setLoading(true);
         setError(null);
         try {
             const { data, error } = await supabase
-                .from('invite_codes')
-                .select('id, used_by, expires_at')
-                .eq('code', inviteCode.trim().toUpperCase())
+                .from('generated_invites')
+                .select('id, is_used')
+                .eq('final_token', inviteCode.trim())
+                .eq('invited_email', email.trim().toLowerCase())
                 .single();
 
-            if (error || !data) { setError('Código de convite inválido.'); return; }
-            if (data.used_by) { setError('Este código já foi utilizado.'); return; }
-            if (data.expires_at && new Date(data.expires_at) < new Date()) { setError('Este código expirou.'); return; }
+            if (error || !data) { setError('Convite inválido ou e-mail não confere com o convite.'); return; }
+            if (data.is_used) { setError('Este convite já foi utilizado.'); return; }
 
             setInviteValidated(true);
             setStep('onboarding');
@@ -238,19 +246,29 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                     </h2>
                                 </div>
                                 <p className="text-gray-500 text-xs mb-8">
-                                    TheSecretclub é exclusivo por convite. Insira seu código para criar uma conta.
+                                    TheSecretclub é exclusivo por convite. Insira o e-mail autorizado e seu token de acesso.
                                 </p>
 
                                 <div className="space-y-4">
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                                            placeholder="Seu E-mail"
+                                            className="w-full bg-navy border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/50"
+                                        />
+                                    </div>
                                     <div className="relative">
                                         <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                                         <input
                                             type="text"
                                             value={inviteCode}
-                                            onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setError(null); }}
+                                            onChange={(e) => { setInviteCode(e.target.value); setError(null); }}
                                             onKeyDown={(e) => e.key === 'Enter' && handleInviteSubmit()}
-                                            placeholder="EX: SECRET-ALPHA-001"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 uppercase tracking-widest font-mono"
+                                            placeholder="Token de Acesso (Ex: a1b2c3d4...)"
+                                            className="w-full bg-navy border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 tracking-widest font-mono"
                                         />
                                     </div>
 
