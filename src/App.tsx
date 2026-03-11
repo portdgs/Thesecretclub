@@ -358,7 +358,11 @@ export default function App() {
 
   const handleWhatsAppClick = async (profileId: string) => {
     try {
-      await supabase.rpc('increment_clicks', { profile_id: profileId });
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      await supabase.rpc('increment_clicks', {
+        profile_id: profileId,
+        visitor_id: authUser?.id || null
+      });
     } catch (error) {
       console.error('Error incrementing clicks:', error);
     }

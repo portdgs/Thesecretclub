@@ -40,7 +40,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         cover_url: '',
         latitude: null,
         longitude: null,
-        is_location_public: false
+        is_location_public: false,
+        weight: '',
+        hair_color: '',
+        eye_color: '',
+        ethnicity: '',
+        pix_key: '',
+        pix_key_type: ''
     });
     const [activePlan, setActivePlan] = useState<any>(null);
     const [affiliateStats, setAffiliateStats] = useState({ indications: 0, conversions: 0 });
@@ -60,6 +66,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const [isCropping, setIsCropping] = useState(false);
     const [heatmapData, setHeatmapData] = useState<number[]>(new Array(24).fill(0));
     const [unreadMessages, setUnreadMessages] = useState(0);
+    const [recentVisitors, setRecentVisitors] = useState<any[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const videoInputRef = useRef<HTMLInputElement>(null);
@@ -292,6 +299,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
         if (activeTab === 'Estatísticas') {
             fetchHeatmapData();
+            fetchRecentVisitors();
         }
         if (activeTab === 'Mensagens' || true) {
             fetchUnreadCount();
@@ -370,6 +378,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             setHeatmapData(hourlyCounts);
         } catch (error) {
             console.error('Erro ao buscar dados do mapa de calor:', error);
+        }
+    };
+
+    const fetchRecentVisitors = async () => {
+        try {
+            if (!user) return;
+            const { data, error } = await supabase
+                .from('profile_analytics')
+                .select(`
+                    created_at,
+                    event_type,
+                    visitor:profiles!profile_analytics_visitor_id_fkey (
+                        id,
+                        name,
+                        avatar_url
+                    )
+                `)
+                .eq('profile_id', user.id)
+                .is('event_type', 'view')
+                .not('visitor_id', 'is', null)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (error) throw error;
+            setRecentVisitors(data || []);
+        } catch (error) {
+            console.error('Erro ao buscar visitantes recentes:', error);
         }
     };
 
@@ -2001,12 +2036,58 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <p className="text-[8px] text-gray-600 uppercase font-black text-center tracking-widest pt-4">
-                                            Os dados são atualizados em tempo real com base nos acessos ao seu perfil.
-                                        </p>
                                     </div>
                                 )}
+
+                                {/* Recent Visitors Section - Accessible to all members in Statistics tab */}
+                                <div className="mt-8 bg-navy-dark border border-white/5 rounded-sm p-8">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                                            <User size={16} className="text-primary" />
+                                            Visitantes Recentes
+                                        </h3>
+                                        <span className="text-[9px] text-gray-500 uppercase font-bold tracking-[0.2em]">Últimos 10 acessos</span>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {recentVisitors.length === 0 ? (
+                                            <div className="text-center py-12 border border-dashed border-white/10 rounded-sm">
+                                                <User size={32} className="mx-auto text-gray-700 mb-4 opacity-20" />
+                                                <p className="text-[10px] uppercase font-black tracking-widest text-gray-600">Nenhum visitante identificado ainda</p>
+                                                <p className="text-[8px] uppercase font-bold tracking-widest text-gray-700 mt-1">Apenas usuários logados aparecem aqui</p>
+                                            </div>
+                                        ) : (
+                                            recentVisitors.map((visit, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-sm hover:bg-white/10 transition-colors border border-transparent hover:border-white/10 group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-full border border-white/10 overflow-hidden shrink-0 group-hover:border-primary/50 transition-colors">
+                                                            <img
+                                                                src={visit.visitor?.avatar_url || `https://ui-avatars.com/api/?name=${visit.visitor?.name || 'User'}&background=random`}
+                                                                className="w-full h-full object-cover"
+                                                                alt={visit.visitor?.name}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{visit.visitor?.name || 'Membro do Clube'}</p>
+                                                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-500">Visualizou seu perfil</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] font-bold text-white">
+                                                            {new Date(visit.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                                        </p>
+                                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-500">
+                                                            às {new Date(visit.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    <p className="text-[8px] text-gray-600 uppercase font-black text-center tracking-widest pt-4">
+                                        Os dados são atualizados em tempo real com base nos acessos ao seu perfil.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )
@@ -2047,7 +2128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     className="hidden"
                     accept="image/*"
                 />
-            </main >
-        </div >
+            </main>
+        </div>
     );
 };

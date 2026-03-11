@@ -51,9 +51,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             fetchEndorsements();
             if (user) fetchReviews();
 
-            // Increment views via RPC (Background)
-            supabase.rpc('increment_views', { profile_id: profile.id }).then(({ error }: { error: any }) => {
-                if (error) console.error('Error incrementing views:', error);
+            // Log view event
+            supabase.auth.getUser().then(({ data: { user: authUser } }: { data: { user: any } }) => {
+                supabase.rpc('increment_views', {
+                    profile_id: profile.id,
+                    visitor_id: authUser?.id || null
+                }).then(({ error }: { error: any }) => {
+                    if (error) console.error('[ProfileModal] Error incrementing views:', error);
+                });
             });
 
             const previousTitle = document.title;
