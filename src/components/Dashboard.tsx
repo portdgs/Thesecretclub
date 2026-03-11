@@ -816,7 +816,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             <h3 className="text-xs font-black uppercase tracking-widest mb-8">Informações Básicas</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Nome Artístico</label>
+                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Nome de Exibição</label>
                                     <input
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
                                         value={profile.name || ''}
@@ -840,7 +840,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         onChange={(e) => setProfile({ ...profile, profile_type: e.target.value })}
                                     >
                                         <option value="acompanhante">Membro</option>
-                                        <option value="massagista">Massagista</option>
+                                        <option value="casal">Casal</option>
+                                        <option value="single_homem">Single Homem</option>
+                                        <option value="single_mulher">Single Mulher</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -858,10 +860,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Especialidade</label>
+                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Vibe / Interesses</label>
                                     <input
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        placeholder="Ex: Massagem, Jantar..."
+                                        placeholder="Ex: Festas, Amizade, Encontros..."
                                         value={profile.specialty || ''}
                                         onChange={(e) => setProfile({ ...profile, specialty: e.target.value })}
                                     />
@@ -876,16 +878,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Posição / Atuação</label>
+                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Papel no Clube</label>
                                     <select
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
                                         value={profile.sexual_role || ''}
                                         onChange={(e) => setProfile({ ...profile, sexual_role: e.target.value })}
                                     >
                                         <option value="">Selecione</option>
-                                        <option value="Ativa">Ativa</option>
-                                        <option value="Passiva">Passiva</option>
-                                        <option value="Versátil">Versátil</option>
+                                        <option value="Social">Social</option>
+                                        <option value="Explorador">Explorador</option>
+                                        <option value="VIP">VIP</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -976,45 +978,48 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         }}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor Mínimo (Referência)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        placeholder="Ex: 200"
-                                        value={profile.price_min || ''}
-                                        onChange={(e) => setProfile({ ...profile, price_min: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor 15 Minutos (R$)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        placeholder="Ex: 150"
-                                        value={profile.price_15min || ''}
-                                        onChange={(e) => setProfile({ ...profile, price_15min: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor 30 Minutos (R$)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        placeholder="Ex: 250"
-                                        value={profile.price_30min || ''}
-                                        onChange={(e) => setProfile({ ...profile, price_30min: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor 1 Hora (R$)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        placeholder="Ex: 400"
-                                        value={profile.price_1h || ''}
-                                        onChange={(e) => setProfile({ ...profile, price_1h: e.target.value })}
-                                    />
+                                {/* Price fields hidden for rebranding */}
+                                <div className="hidden">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor Mínimo (Referência)</label>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
+                                            placeholder="Ex: 200"
+                                            value={profile.price_min || ''}
+                                            onChange={(e) => setProfile({ ...profile, price_min: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor 15 Minutos (R$)</label>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
+                                            placeholder="Ex: 150"
+                                            value={profile.price_15min || ''}
+                                            onChange={(e) => setProfile({ ...profile, price_15min: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor 30 Minutos (R$)</label>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
+                                            placeholder="Ex: 250"
+                                            value={profile.price_30min || ''}
+                                            onChange={(e) => setProfile({ ...profile, price_30min: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Valor 1 Hora (R$)</label>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
+                                            placeholder="Ex: 400"
+                                            value={profile.price_1h || ''}
+                                            onChange={(e) => setProfile({ ...profile, price_1h: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
 
 
@@ -1022,7 +1027,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Descrição / Bio</label>
                                     <textarea
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm min-h-[150px] resize-none"
-                                        placeholder="Conte um pouco sobre você, seus serviços e diferenciais..."
+                                        placeholder="Conte um pouco sobre você, seu estilo de vida e o que busca no clube..."
                                         value={profile.bio || ''}
                                         onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                                     />

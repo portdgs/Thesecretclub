@@ -411,8 +411,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                     <div className="p-6 md:p-10 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                                             {[
-                                                { label: 'Especialidade', value: profile.specialty },
-                                                { label: 'Atuação', value: profile.sexual_role },
+                                                { label: 'Interesses', value: profile.specialty },
+                                                { label: 'Papel', value: profile.sexual_role },
                                                 { label: 'Altura', value: profile.height ? `${profile.height} cm` : null },
                                                 { label: 'Peso', value: profile.weight ? `${profile.weight} kg` : null },
                                                 { label: 'Cor do Cabelo', value: profile.hair_color },
@@ -428,37 +428,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                             ))}
                                         </div>
 
-                                        <div>
-                                            <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-6 flex items-center gap-3">
-                                                <span className="w-8 h-[2px] bg-primary"></span>
-                                                Investimento
-                                            </h3>
-                                            <div className="bg-white/60 backdrop-blur-sm p-2 rounded-xl border border-white/50 shadow-sm divide-y divide-gray-100">
-                                                {profile.price_15min && (
-                                                    <div className="flex justify-between items-center p-4">
-                                                        <span className="text-[11px] font-bold uppercase text-gray-500">15 Minutos</span>
-                                                        <span className="text-lg font-black text-navy-dark">R$ {profile.price_15min}</span>
-                                                    </div>
-                                                )}
-                                                {profile.price_30min && (
-                                                    <div className="flex justify-between items-center p-4">
-                                                        <span className="text-[11px] font-bold uppercase text-gray-500">30 Minutos</span>
-                                                        <span className="text-lg font-black text-navy-dark">R$ {profile.price_30min}</span>
-                                                    </div>
-                                                )}
-                                                {profile.price_1h && (
-                                                    <div className="flex justify-between items-center p-4 bg-gray-50/50">
-                                                        <span className="text-[11px] font-bold uppercase text-navy-dark">1 Hora</span>
-                                                        <span className="text-lg font-black text-primary">R$ {profile.price_1h}</span>
-                                                    </div>
-                                                )}
-                                                {!profile.price_15min && !profile.price_30min && !profile.price_1h && (
-                                                    <div className="text-center py-6 text-gray-400 text-sm italic">
-                                                        Consulte valores via WhatsApp
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
+                                        {/* Pricing section removed for rebranding */}
                                     </div>
                                 )}
 

@@ -31,7 +31,7 @@ export const ModelLandingPage: React.FC = () => {
         e.preventDefault();
 
         // Manual Validation (Safari-friendly)
-        if (!formData.nome.trim()) return setError('Por favor, informe seu Nome Artístico.');
+        if (!formData.nome.trim()) return setError('Por favor, informe seu Nome de Exibição.');
         if (!formData.idade || isNaN(parseInt(formData.idade))) return setError('Por favor, informe uma idade válida.');
         if (!formData.cidade.trim()) return setError('Por favor, informe sua Cidade.');
         if (!formData.whatsapp.trim() || formData.whatsapp.length < 14) return setError('Por favor, informe um WhatsApp válido com DDD.');
@@ -102,7 +102,7 @@ export const ModelLandingPage: React.FC = () => {
                         CONVITE EXCLUSIVO PARA MEMBROS DE ELITE
                     </div>
                     <h2 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight">
-                        Faça parte do <span className="italic text-primary">marketplace</span> mais exclusivo do Brasil
+                        Faça parte do <span className="italic text-primary">clube</span> mais exclusivo do Brasil
                     </h2>
                     <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
                         O TheSecretclub conecta os membros mais sofisticados do país a um público selecionado, garantindo privacidade absoluta e rentabilidade superior.
@@ -184,7 +184,7 @@ export const ModelLandingPage: React.FC = () => {
             <section id="form" className="py-24 px-6 mb-20">
                 <div className="max-w-2xl mx-auto bg-white/[0.03] border border-white/10 rounded-[40px] p-8 md:p-12 relative shadow-2xl">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-serif mb-4 italic text-primary">Inicie sua Carreira</h2>
+                        <h2 className="text-3xl font-serif mb-4 italic text-primary">Faça parte do clube</h2>
                         <p className="text-gray-400 font-light">Preencha os campos abaixo. Entraremos em contato para agendar uma entrevista discreta.</p>
                     </div>
 

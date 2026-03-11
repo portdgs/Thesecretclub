@@ -16,8 +16,8 @@ interface FeedPageProps {
     setSearchCity: (city: string) => void;
     activeFilter: string;
     setActiveFilter: (filter: string) => void;
-    activeCategory: 'acompanhante' | 'massagista';
-    setActiveCategory: (cat: 'acompanhante' | 'massagista') => void;
+    activeCategory: 'membro' | 'casal';
+    setActiveCategory: (cat: 'membro' | 'casal') => void;
     activeGender: string;
     setActiveGender: (gender: string) => void;
     availableCities: string[];
@@ -160,7 +160,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 {/* Category & Gender Tabs */}
                 <div className="bg-white/5 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
                     <div className="container mx-auto flex items-center justify-start lg:justify-center gap-0 h-12">
-                        {(['acompanhante', 'massagista'] as const).map((cat) => (
+                        {(['membro', 'casal'] as const).map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => {
@@ -170,7 +170,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                 className={`relative px-4 sm:px-10 h-full flex items-center justify-center text-[11px] sm:text-sm font-bold transition-all duration-300 hover:text-white group shrink-0 ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
                                     }`}
                             >
-                                {cat === 'acompanhante' ? 'ACOMPANHANTES' : 'MASSAGISTAS'}
+                                {cat === 'membro' ? 'MEMBROS' : 'CASAIS'}
                                 {activeCategory === cat && (
                                     <motion.div
                                         layoutId="categoryTab"
@@ -182,7 +182,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
 
                         <div className="h-6 w-px bg-white/10 mx-2" />
 
-                        {(activeCategory === 'acompanhante'
+                        {(activeCategory === 'membro'
                             ? ['MULHERES', 'HOMENS', 'TRANS']
                             : ['MULHERES', 'HOMENS']
                         ).map((gender) => {
@@ -461,7 +461,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                     <div className="container mx-auto px-6">
                         <div className="text-center mb-24">
                             <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-4">Escolha seu <span className="text-primary not-italic underline underline-offset-8">Plano</span></h2>
-                            <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em]">Anuncie seus serviços e receba mais contatos</p>
+                            <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em]">Anuncie seu perfil e tenha destaque exclusivo</p>
                         </div>
 
                         <div className="max-w-md mx-auto">
