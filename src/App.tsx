@@ -320,7 +320,7 @@ export default function App() {
 
   const isDashboardView = currentHash === '#dashboard';
   const isAdminView = currentHash === '#admin';
-  const isModelLandingView = currentHash === '#sejaumamodelo' || currentPath === '/sejaumamodelo';
+  const isModelLandingView = currentHash === '#sejaummembro' || currentPath === '/sejaummembro';
   const isAffiliateView = currentPath.toLowerCase() === '/programadeafiliadosadulto';
 
   const handleProfileUpdate = useCallback((profileId: string, updates: any) => {
@@ -363,7 +363,7 @@ export default function App() {
     } else if (currentHash === '#admin') {
       document.title = 'Admin Panel | TheSecretclub';
     } else if (isModelLandingView) {
-      document.title = 'Seja uma Modelo | TheSecretclub';
+      document.title = 'Seja um Membro | TheSecretclub';
     } else if (!user) {
       document.title = 'TheSecretclub | Acesso Exclusivo por Convite';
     } else if (searchCity) {

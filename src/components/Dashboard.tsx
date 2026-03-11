@@ -193,11 +193,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     useEffect(() => {
         // Dynamic SEO: Title based on tab
         const originalTitle = document.title;
-        if (activeTab === 'Meu Perfil') document.title = 'Configurações de Perfil | Clube Privado';
-        else if (activeTab === 'Mídia e Fotos') document.title = 'Meus Álbuns e Vídeos | Clube Privado';
-        else if (activeTab === 'Assinatura') document.title = 'Gerenciar Plano | Clube Privado';
-        else if (activeTab === 'Estatísticas') document.title = 'Minhas Estatísticas | Clube Privado';
-        else document.title = 'Dashboard | Clube Privado';
+        if (activeTab === 'Meu Perfil') document.title = 'Configurações de Perfil | TheSecretclub';
+        else if (activeTab === 'Mídia e Fotos') document.title = 'Meus Álbuns e Vídeos | TheSecretclub';
+        else if (activeTab === 'Assinatura') document.title = 'Gerenciar Plano | TheSecretclub';
+        else if (activeTab === 'Estatísticas') document.title = 'Minhas Estatísticas | TheSecretclub';
+        else document.title = 'Dashboard | TheSecretclub';
 
         fetchProfile();
         if (activeTab === 'Mídia e Fotos') {
@@ -688,7 +688,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             {/* Sidebar */}
             <aside className="w-64 bg-navy-dark border-r border-white/5 p-6 flex flex-col fixed h-full z-20">
                 <div className="text-xl font-light tracking-[0.4em] mb-12">
-                    CLUBE<span className="font-black text-primary">PRIVADO</span>
+                    THE<span className="font-black text-primary">SECRETCLUB</span>
                 </div>
 
                 <nav className="flex-1 space-y-2">
@@ -721,7 +721,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <h1 className="text-3xl font-black italic uppercase tracking-tighter">
                             {activeTab} <span className="text-primary not-italic">{activeTab === 'Resumo' ? 'Painel' : ''}</span>
                         </h1>
-                        <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em] mt-2">Sessão da Modelo</p>
+                        <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em] mt-2">Sessão do Membro</p>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -837,7 +837,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         value={profile.profile_type || 'acompanhante'}
                                         onChange={(e) => setProfile({ ...profile, profile_type: e.target.value })}
                                     >
-                                        <option value="acompanhante">Acompanhante</option>
+                                        <option value="acompanhante">Membro</option>
                                         <option value="massagista">Massagista</option>
                                     </select>
                                 </div>
@@ -1399,7 +1399,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             <div className="bg-navy-light border border-white/5 p-8 rounded-sm">
                                 <h2 className="text-xl font-black uppercase tracking-tight mb-4">Programa de Afiliados</h2>
                                 <p className="text-gray-400 text-sm mb-8">
-                                    Divulgue o Clube Privado e ganhe <span className="text-primary font-bold">15% de comissão</span> sobre cada indicação ativa.
+                                    Divulgue o TheSecretclub e ganhe <span className="text-primary font-bold">15% de comissão</span> sobre cada indicação ativa.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

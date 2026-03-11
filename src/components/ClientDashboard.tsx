@@ -30,7 +30,7 @@ export const ClientDashboard: React.FC = () => {
 
     useEffect(() => {
         const originalTitle = document.title;
-        document.title = `${activeTab} | Clube Privado`;
+        document.title = `${activeTab} | TheSecretclub`;
         fetchClientProfile();
         return () => { document.title = originalTitle; };
     }, [activeTab]);
@@ -59,7 +59,7 @@ export const ClientDashboard: React.FC = () => {
             {/* Sidebar */}
             <aside className="w-64 bg-navy-dark border-r border-white/5 p-6 flex flex-col fixed h-full z-20">
                 <div className="text-xl font-light tracking-[0.4em] mb-12">
-                    CLUBE<span className="font-black text-primary">PRIVADO</span>
+                    THE<span className="font-black text-primary">SECRETCLUB</span>
                 </div>
 
                 <nav className="flex-1 space-y-2">
@@ -114,7 +114,7 @@ export const ClientDashboard: React.FC = () => {
                                 Olá, <span className="text-primary">{profile.name || 'Cliente'}</span>
                             </h2>
                             <p className="text-gray-500 text-sm leading-relaxed">
-                                Bem-vindo ao seu painel exclusivo. Aqui você pode buscar acompanhantes, salvar favoritas e gerenciar sua conta.
+                                Bem-vindo ao seu painel exclusivo. Aqui você pode buscar membros, salvar favoritos e gerenciar sua conta.
                             </p>
                         </div>
 
@@ -129,7 +129,7 @@ export const ClientDashboard: React.FC = () => {
                                 </div>
                                 <h3 className="font-black text-sm uppercase tracking-wide mb-1">Explorar</h3>
                                 <p className="text-[10px] text-gray-500 leading-relaxed">
-                                    Busque acompanhantes por cidade, categoria ou filtro
+                                    Busque membros por cidade, categoria ou filtro
                                 </p>
                                 <ChevronRight size={14} className="text-gray-600 group-hover:text-primary transition-colors mt-3" />
                             </button>
@@ -143,7 +143,7 @@ export const ClientDashboard: React.FC = () => {
                                 </div>
                                 <h3 className="font-black text-sm uppercase tracking-wide mb-1">Favoritas</h3>
                                 <p className="text-[10px] text-gray-500 leading-relaxed">
-                                    Veja suas acompanhantes favoritas salvas
+                                    Veja seus membros favoritos salvos
                                 </p>
                                 <ChevronRight size={14} className="text-gray-600 group-hover:text-primary transition-colors mt-3" />
                             </button>
@@ -199,7 +199,7 @@ export const ClientDashboard: React.FC = () => {
                                     className="btn-primary px-8 py-3 inline-flex items-center gap-2"
                                 >
                                     <Search size={14} />
-                                    Explorar Modelos
+                                    Explorar Membros
                                 </button>
                             </div>
                         ) : (
@@ -241,7 +241,7 @@ export const ClientDashboard: React.FC = () => {
                                     className="btn-primary px-8 py-3 inline-flex items-center gap-2"
                                 >
                                     <Search size={14} />
-                                    Explorar Modelos
+                                    Explorar Membros
                                 </button>
                             </div>
                         ) : (

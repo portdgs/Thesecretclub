@@ -54,7 +54,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             });
 
             const previousTitle = document.title;
-            const newTitle = `${profile.name} - ${profile.city} | Clube Privado`;
+            const newTitle = `${profile.name} - ${profile.city} | TheSecretclub`;
             document.title = newTitle;
 
             return () => {
@@ -231,7 +231,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                 cleanNumber = '55' + cleanNumber;
                             }
 
-                            const text = `Olá ${profile.name}, vi seu perfil no Clube Privado e gostaria de saber mais.`;
+                            const text = `Olá ${profile.name}, vi seu perfil no TheSecretclub e gostaria de saber mais.`;
                             window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`, '_blank');
                         }}
                         className="absolute bottom-6 right-6 z-[9999] bg-green-600 hover:bg-green-700 text-white px-6 py-4 font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-2xl shadow-green-600/40 hover:scale-105 transition-transform rounded-full"
@@ -465,13 +465,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <Info size={24} className="text-gray-400 hover:text-primary cursor-help transition-colors" />
                                                 <div className="absolute right-0 top-full mt-2 w-72 bg-white p-4 rounded-xl shadow-xl border border-gray-100 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
                                                     <p className="text-xs font-bold text-navy-dark mb-2">
-                                                        Mídias de comparação é o sistema que a Clube Privado usa visando gerar mais credibilidade aos perfis.
+                                                        Mídias de comparação é o sistema que o TheSecretclub usa visando gerar mais credibilidade aos perfis.
                                                     </p>
                                                     <p className="text-xs text-gray-500 mb-2">
                                                         Todas as mídias de comparação são analisadas por nossa equipe.
                                                     </p>
                                                     <p className="text-xs text-gray-500 font-medium">
-                                                        <span className="font-bold text-primary">Lembre-se:</span> sempre que ficar com dúvida se as mídias de algum acompanhante são verdadeiras, venha aqui e de uma espiada para comparar.
+                                                        <span className="font-bold text-primary">Lembre-se:</span> sempre que ficar com dúvida se as mídias de algum perfil são verdadeiras, venha aqui e de uma espiada para comparar.
                                                     </p>
                                                     <div className="absolute -top-2 right-1 w-4 h-4 bg-white transform rotate-45 border-t border-l border-gray-100"></div>
                                                 </div>
@@ -485,7 +485,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <ShieldCheck size={48} className="text-green-500 mx-auto mb-4 drop-shadow-sm" />
                                                 <h4 className="font-black text-lg text-green-800 tracking-tight mb-2">Selo Oficial Concedido</h4>
                                                 <p className="text-sm text-green-700/80 max-w-sm mx-auto">
-                                                    Este perfil possui autenticidade garantida pelo Clube Privado.
+                                                    Este perfil possui autenticidade garantida pelo TheSecretclub.
                                                 </p>
                                             </div>
                                         ) : (
@@ -541,7 +541,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                                     {profile.verified ? (
                                                         <>
                                                             <ShieldCheck size={48} className="mb-4 text-green-500/50" />
-                                                            <p className="text-xs px-4">A certificação deste perfil foi concedida pelo Clube Privado de forma acelerada no plano Elite.</p>
+                                                            <p className="text-xs px-4">A certificação deste perfil foi concedida pelo TheSecretclub de forma acelerada no plano Elite.</p>
                                                         </>
                                                     ) : (
                                                         <>

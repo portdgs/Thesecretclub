@@ -345,7 +345,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                     <div className="container mx-auto px-4">
                         <div className="mb-8 border-l-4 border-primary pl-6">
                             <h2 className="text-xl sm:text-2xl font-black text-white uppercase leading-tight tracking-tighter">
-                                Encontre acompanhantes em <br className="sm:hidden" />
+                                Encontre membros em <br className="sm:hidden" />
                                 <span className="text-primary italic"> {searchCity || 'todo o Brasil'} </span>
                             </h2>
                             <div className="mt-1 flex items-center gap-2 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest">
@@ -390,7 +390,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                     profiles.map((p: any) => (
                                         <ProfileCard
                                             key={p.id}
-                                            name={p.name || 'Modelo'}
+                                            name={p.name || 'Membro'}
                                             age={p.age || 18}
                                             city={p.city || 'São Paulo'}
                                             neighborhood={p.neighborhood || 'Centro'}
@@ -412,7 +412,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                     ))
                                 ) : (
                                     <div className="col-span-full py-20 text-center border border-dashed border-white/10">
-                                        <p className="text-gray-500 uppercase tracking-widest text-xs font-black">Nenhuma modelo encontrada nesta categoria</p>
+                                        <p className="text-gray-500 uppercase tracking-widest text-xs font-black">Nenhum membro encontrado nesta categoria</p>
                                     </div>
                                 )}
                             </div>

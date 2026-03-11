@@ -40,7 +40,7 @@ export const AdminPanel: React.FC = () => {
     };
 
     const handleApprove = async (profileId: string) => {
-        if (!confirm('Deseja realmente aprovar esta modelo? O selo será concedido imediatamente.')) return;
+        if (!confirm('Deseja realmente aprovar este perfil? O selo será concedido imediatamente.')) return;
 
         try {
             setProcessingId(profileId);
@@ -59,7 +59,7 @@ export const AdminPanel: React.FC = () => {
             if (data && data.length > 0) {
                 // Logically remove from list
                 setPendingProfiles(prev => prev.filter(p => p.id !== profileId));
-                alert('Modelo aprovada com sucesso!');
+                alert('Perfil aprovado com sucesso!');
             } else {
                 console.warn('[Admin] Nenhuma linha foi afetada. Verifique as políticas de RLS.');
                 alert('Aviso: O comando foi enviado, mas nenhuma alteração foi detectada. Verifique se você tem permissões de administrador.');
@@ -73,7 +73,7 @@ export const AdminPanel: React.FC = () => {
     };
 
     const handleReject = async (profileId: string) => {
-        const reason = prompt('Motivo da rejeição (será exibido para a modelo):');
+        const reason = prompt('Motivo da rejeição (será exibido para o perfil):');
         if (reason === null) return;
 
         try {
@@ -92,7 +92,7 @@ export const AdminPanel: React.FC = () => {
 
             if (data && data.length > 0) {
                 setPendingProfiles(prev => prev.filter(p => p.id !== profileId));
-                alert('Vídeo rejeitado. A modelo precisará enviar um novo.');
+                alert('Vídeo rejeitado. O perfil precisará enviar um novo.');
             } else {
                 console.warn('[Admin] Nenhuma linha foi afetada na rejeição.');
                 alert('Aviso: O comando de rejeição foi enviado, mas nenhuma alteração foi detectada.');
@@ -131,7 +131,7 @@ export const AdminPanel: React.FC = () => {
                             Painel de <span className="text-primary not-italic">Verificação</span>
                         </h1>
                         <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em] mt-2">
-                            Analise os vídeos das modelos para conceder o selo real
+                            Analise os vídeos dos perfis para conceder o selo real
                         </p>
                     </div>
 

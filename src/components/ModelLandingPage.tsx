@@ -80,8 +80,8 @@ export const ModelLandingPage: React.FC = () => {
                             <Plus className="text-primary transform -rotate-3" size={24} />
                         </div>
                         <h1 className="text-xl font-bold tracking-widest uppercase flex flex-col leading-tight cursor-pointer" onClick={() => window.location.href = '/'}>
-                            <span>Clube</span>
-                            <span className="text-primary">Privado</span>
+                            <span>The</span>
+                            <span className="text-primary">Secretclub</span>
                         </h1>
                     </div>
                     <a href="#form" className="hidden md:block px-6 py-2 border border-white/20 rounded-full text-sm hover:bg-white hover:text-black transition-all">
@@ -99,17 +99,17 @@ export const ModelLandingPage: React.FC = () => {
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-primary text-xs font-semibold mb-8">
                         <Award size={14} />
-                        CONVITE EXCLUSIVO PARA MODELOS DE ELITE
+                        CONVITE EXCLUSIVO PARA MEMBROS DE ELITE
                     </div>
                     <h2 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight">
                         Faça parte do <span className="italic text-primary">marketplace</span> mais exclusivo do Brasil
                     </h2>
                     <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                        O Clube Privado conecta as modelos mais sofisticadas do país a um público selecionado, garantindo privacidade absoluta e rentabilidade superior.
+                        O TheSecretclub conecta os membros mais sofisticados do país a um público selecionado, garantindo privacidade absoluta e rentabilidade superior.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a href="#form" className="px-10 py-4 bg-primary text-navy font-bold rounded-full hover:scale-105 transition-transform shadow-[0_0_20px_rgba(226,176,162,0.3)]">
-                            Quero ser Modelo
+                            Quero ser Membro
                         </a>
                         <a href="#beneficios" className="px-10 py-4 bg-white/5 border border-white/10 font-bold rounded-full hover:bg-white/10 transition-colors">
                             Saiba Mais
@@ -157,7 +157,7 @@ export const ModelLandingPage: React.FC = () => {
             <section className="py-24 px-6">
                 <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-16 items-center">
                     <div className="flex-1">
-                        <h2 className="text-3xl font-serif font-medium mb-8">Padrão de Qualidade <span className="text-primary">Clube Privado</span></h2>
+                        <h2 className="text-3xl font-serif font-medium mb-8">Padrão de Qualidade <span className="text-primary">TheSecretclub</span></h2>
                         <div className="space-y-6">
                             {[
                                 "Ensaios fotográficos de alta qualidade",
@@ -175,7 +175,7 @@ export const ModelLandingPage: React.FC = () => {
                     <div className="flex-1 w-full bg-gradient-to-br from-primary/10 to-transparent p-12 rounded-[40px] border border-white/5 text-center">
                         <Camera className="mx-auto text-primary mb-6" size={48} />
                         <p className="text-xl font-medium mb-4 italic">Ainda não tem fotos profissionais?</p>
-                        <p className="text-gray-400 font-light">Nossa equipe de marketing auxilia as modelos selecionadas com estúdios parceiros de alto nível.</p>
+                        <p className="text-gray-400 font-light">Nossa equipe de marketing auxilia os membros selecionados com estúdios parceiros de alto nível.</p>
                     </div>
                 </div>
             </section>
@@ -324,10 +324,10 @@ export const ModelLandingPage: React.FC = () => {
                         <div className="w-8 h-8 bg-primary/20 backdrop-blur-sm rounded-lg flex items-center justify-center rotate-3 border border-primary/30">
                             <Plus className="text-primary transform -rotate-3" size={16} />
                         </div>
-                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-white">Clube <span className="text-primary">Privado</span></p>
+                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-white">The <span className="text-primary">Secretclub</span></p>
                     </div>
                     <p className="text-[10px] text-gray-600 max-w-sm uppercase tracking-widest leading-loose">
-                        © 2026 Clube Privado Marketplace de Luxo. <br /> Todos os direitos reservados.
+                        © 2026 TheSecretclub Marketplace de Luxo. <br /> Todos os direitos reservados.
                         Proibida a entrada para menores de 18 anos.
                     </p>
                 </div>

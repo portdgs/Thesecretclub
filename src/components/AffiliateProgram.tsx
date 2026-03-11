@@ -27,8 +27,8 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                             <Plus className="text-primary transform -rotate-3" size={24} />
                         </div>
                         <h1 className="text-xl font-bold tracking-widest uppercase flex flex-col leading-tight cursor-pointer" onClick={() => window.location.href = '/'}>
-                            <span>Clube</span>
-                            <span className="text-primary">Privado</span>
+                            <span>The</span>
+                            <span className="text-primary">Secretclub</span>
                         </h1>
                     </div>
                     <button onClick={onLoginClick} className="px-6 py-2 bg-primary text-navy font-bold rounded-full text-sm hover:scale-105 transition-all shadow-[0_0_15px_rgba(226,176,162,0.3)]">
@@ -52,7 +52,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                         Indique e Ganhe <span className="text-primary italic underline underline-offset-8">Renda Extra</span>
                     </h2>
                     <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                        Ganhe <strong className="text-white">15% de comissão VITÁLICIA</strong> sobre todos os planos e destaques comprados pelas modelos que você indicar para o Clube Privado.
+                        Ganhe <strong className="text-white">15% de comissão VITÁLICIA</strong> sobre todos os planos e destaques comprados pelos membros que você indicar para o TheSecretclub.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <button onClick={onLoginClick} className="px-10 py-5 bg-primary text-navy font-black text-sm uppercase tracking-widest rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(226,176,162,0.4)] hover:bg-white flex items-center justify-center gap-2">
@@ -81,7 +81,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                             </div>
                             <h4 className="text-xl font-bold mb-3 uppercase tracking-widest">Cadastre-se</h4>
                             <p className="text-gray-400 text-sm leading-relaxed">
-                                Crie sua conta gratuitamente no Clube Privado. No seu painel (Dashboard), acesse a aba "Afiliados" para pegar seu Link Exclusivo.
+                                Crie sua conta gratuitamente no TheSecretclub. No seu painel (Dashboard), acesse a aba "Afiliados" para pegar seu Link Exclusivo.
                             </p>
                         </div>
 
@@ -92,7 +92,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                             </div>
                             <h4 className="text-xl font-bold mb-3 uppercase tracking-widest">Compartilhe</h4>
                             <p className="text-gray-400 text-sm leading-relaxed">
-                                Envie seu link para amigas acompanhantes ou divulgue em suas redes sociais e grupos. Quanto mais divulgar, maior a chance de ganhar.
+                                Envie seu link para amigos e conhecidos ou divulgue em suas redes sociais e grupos. Quanto mais divulgar, maior a chance de ganhar.
                             </p>
                         </div>
 
@@ -144,7 +144,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                                 <div>
                                     <h4 className="text-lg font-bold text-white mb-1">Apenas Novos Cadastros</h4>
                                     <p className="text-gray-400 text-sm leading-relaxed font-light">
-                                        A comissão é válida apenas para acompanhantes que se cadastrarem pela primeira vez utilizando o seu link exclusivo.
+                                        A comissão é válida apenas para membros que se cadastrarem pela primeira vez utilizando o seu link exclusivo.
                                     </p>
                                 </div>
                             </div>
@@ -193,10 +193,10 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                         <div className="w-8 h-8 bg-primary/20 backdrop-blur-sm rounded-lg flex items-center justify-center rotate-3 border border-primary/30">
                             <Plus className="text-primary transform -rotate-3" size={16} />
                         </div>
-                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-white">Clube <span className="text-primary">Privado</span></p>
+                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-white">The <span className="text-primary">Secretclub</span></p>
                     </div>
                     <p className="text-[10px] text-gray-600 max-w-sm uppercase tracking-widest leading-loose">
-                        © 2026 Clube Privado.
+                        © 2026 TheSecretclub.
                         Termos aplicáveis ao programa de afiliados na plataforma.
                     </p>
                 </div>

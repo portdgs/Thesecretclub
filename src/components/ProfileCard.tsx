@@ -64,7 +64,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                 )}
             </div>
 
-            {/* Informações da Modelo (Bottom) */}
+            {/* Informações do Perfil (Bottom) */}
             <div className="absolute bottom-0 left-0 right-0 p-5 z-20 pointer-events-none flex flex-col justify-end">
                 <div className="flex justify-between items-end">
                     <div>

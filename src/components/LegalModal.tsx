@@ -61,7 +61,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type, o
 
                                 <div className="space-y-4 text-gray-400 text-sm leading-relaxed text-left bg-black/20 p-6 rounded-sm border border-white/5">
                                     <p>
-                                        <strong className="text-white">ESTE SITE É UM CLASSIFICADO DE SERVIÇOS ONLINE.</strong> O Clube Privado atua exclusivamente como plataforma de publicidade e divulgação para anunciantes independentes.
+                                        <strong className="text-white">ESTE SITE É UM CLASSIFICADO DE SERVIÇOS ONLINE.</strong> O TheSecretclub atua exclusivamente como plataforma de publicidade e divulgação para anunciantes independentes.
                                     </p>
                                     <p>
                                         <AlertTriangle className="inline-block text-yellow-500 mr-2" size={16} />
@@ -105,12 +105,12 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type, o
                                 <div className="prose prose-invert prose-sm max-w-none text-gray-400 space-y-6">
                                     <section>
                                         <h3 className="text-white uppercase font-black tracking-widest text-xs mb-2">1. Natureza do Serviço</h3>
-                                        <p>O CLUBE PRIVADO é uma plataforma digital de classificados destinada à divulgação de serviços artísticos, massagem e entretenimento prestados por anunciantes independentes. Atuamos como meros facilitadores de publicidade, não intervindo na negociação, agendamento ou prestação dos serviços.</p>
+                                        <p>O THESECRETCLUB é uma plataforma digital de classificados destinada à divulgação de serviços artísticos, massagem e entretenimento prestados por anunciantes independentes. Atuamos como meros facilitadores de publicidade, não intervindo na negociação, agendamento ou prestação dos serviços.</p>
                                     </section>
 
                                     <section>
                                         <h3 className="text-white uppercase font-black tracking-widest text-xs mb-2">2. Proibição de Exploração Sexual</h3>
-                                        <p>Em estrita conformidade com os Artigos 228, 229 e 230 do Código Penal Brasileiro, o CLUBE PRIVADO proíbe e combate qualquer forma de exploração sexual, rufianismo ou cafetinagem. Não recebemos comissões sobre serviços prestados e não exercemos controle hierárquico ou gerencial sobre os anunciantes.</p>
+                                        <p>Em estrita conformidade com os Artigos 228, 229 e 230 do Código Penal Brasileiro, o THESECRETCLUB proíbe e combate qualquer forma de exploração sexual, rufianismo ou cafetinagem. Não recebemos comissões sobre serviços prestados e não exercemos controle hierárquico ou gerencial sobre os anunciantes.</p>
                                     </section>
 
                                     <section>
@@ -125,7 +125,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type, o
 
                                     <section>
                                         <h3 className="text-white uppercase font-black tracking-widest text-xs mb-2">5. Privacidade e Dados</h3>
-                                        <p>O CLUBE PRIVADO preza pela LGPD (Lei Geral de Proteção de Dados). Seus dados de navegação são utilizados apenas para melhoria da experiência e nunca são vendidos a terceiros.</p>
+                                        <p>O THESECRETCLUB preza pela LGPD (Lei Geral de Proteção de Dados). Seus dados de navegação são utilizados apenas para melhoria da experiência e nunca são vendidos a terceiros.</p>
                                     </section>
                                 </div>
 
