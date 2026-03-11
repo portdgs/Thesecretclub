@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Search, Check, HelpCircle, TrendingUp, ShieldCheck, User, Plus, Menu } from 'lucide-react';
+import { MapPin, Search, Check, HelpCircle, ShieldCheck, User, Plus, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProfileCard } from './ProfileCard';
 import { ProfileModal } from './ProfileModal';
@@ -16,8 +16,8 @@ interface FeedPageProps {
     setSearchCity: (city: string) => void;
     activeFilter: string;
     setActiveFilter: (filter: string) => void;
-    activeCategory: 'membro' | 'casal';
-    setActiveCategory: (cat: 'membro' | 'casal') => void;
+    activeCategory: 'singles' | 'casal';
+    setActiveCategory: (cat: 'singles' | 'casal') => void;
     activeGender: string;
     setActiveGender: (gender: string) => void;
     availableCities: string[];
@@ -160,52 +160,31 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 {/* Category & Gender Tabs */}
                 <div className="bg-white/5 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
                     <div className="container mx-auto flex items-center justify-start lg:justify-center gap-0 h-12">
-                        {(['membro', 'casal'] as const).map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => {
-                                    setActiveCategory(cat);
-                                    setActiveGender('Mulheres');
-                                }}
-                                className={`relative px-4 sm:px-10 h-full flex items-center justify-center text-[11px] sm:text-sm font-bold transition-all duration-300 hover:text-white group shrink-0 ${activeCategory === cat ? 'text-white' : 'text-gray-500 hover:bg-white/5'
-                                    }`}
-                            >
-                                {cat === 'membro' ? 'MEMBROS' : 'CASAIS'}
-                                {activeCategory === cat && (
-                                    <motion.div
-                                        layoutId="categoryTab"
-                                        className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-t-full shadow-[0_0_10px_rgba(226,176,162,0.8)]"
-                                    />
-                                )}
-                            </button>
-                        ))}
-
-                        <div className="h-6 w-px bg-white/10 mx-2" />
-
-                        {(activeCategory === 'membro'
-                            ? ['MULHERES', 'HOMENS', 'TRANS']
-                            : ['MULHERES', 'HOMENS']
-                        ).map((gender) => {
-                            const genderMap: Record<string, string> = {
-                                'MULHERES': 'Mulheres',
-                                'HOMENS': 'Homens',
-                                'TRANS': 'Trans',
-                            };
-                            const genderValue = genderMap[gender];
-                            const isActive = activeGender === genderValue;
+                        {[
+                            { label: 'MULHERES', cat: 'singles', gender: 'Mulheres' },
+                            { label: 'HOMENS', cat: 'singles', gender: 'Homens' },
+                            { label: 'CASAIS', cat: 'casal', gender: 'Todos' },
+                            { label: 'TRANS', cat: 'singles', gender: 'Trans' }
+                        ].map((filter) => {
+                            const isActive = (filter.cat === 'casal')
+                                ? activeCategory === 'casal'
+                                : (activeCategory === 'singles' && activeGender === filter.gender);
 
                             return (
                                 <button
-                                    key={gender}
-                                    onClick={() => setActiveGender(genderValue)}
-                                    className={`relative px-4 sm:px-8 h-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all duration-300 hover:text-white shrink-0 ${isActive ? 'text-primary' : 'text-gray-500 hover:bg-white/5'
+                                    key={filter.label}
+                                    onClick={() => {
+                                        setActiveCategory(filter.cat as any);
+                                        setActiveGender(filter.gender);
+                                    }}
+                                    className={`relative px-6 sm:px-10 h-full flex items-center justify-center text-[10px] sm:text-xs font-black transition-all duration-300 hover:text-white group shrink-0 tracking-widest ${isActive ? 'text-white' : 'text-gray-500 hover:bg-white/5'
                                         }`}
                                 >
-                                    {gender}
+                                    {filter.label}
                                     {isActive && (
                                         <motion.div
-                                            layoutId="genderTab"
-                                            className="absolute bottom-0 left-0 w-full h-0.5 bg-primary/60 rounded-t-full"
+                                            layoutId="activeFilterTab"
+                                            className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary rounded-t-full shadow-[0_0_10px_rgba(226,176,162,0.8)]"
                                         />
                                     )}
                                 </button>
@@ -314,34 +293,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                     </section>
                 )}
 
-                {/* Affiliate Banner */}
-                <section className="bg-navy pt-8 pb-4">
-                    <div className="container mx-auto px-4">
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 via-primary/5 to-transparent border border-primary/20 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-primary/40 transition-all duration-500">
-                            <div className="relative z-10 text-center md:text-left">
-                                <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
-                                    <div className="bg-primary/20 p-1.5 rounded-lg">
-                                        <TrendingUp size={18} className="text-primary" />
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Oportunidade</span>
-                                </div>
-                                <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter mb-2 italic">
-                                    Quer ganhar <span className="text-primary not-italic underline underline-offset-4">Renda Extra?</span>
-                                </h2>
-                                <p className="text-gray-400 text-xs sm:text-sm font-medium max-w-xl">
-                                    Ganhe <span className="text-white font-bold">15% de comissão vitalícia</span> indicando o TheSecretclub para suas amigas. Comece hoje!
-                                </p>
-                            </div>
-                            <a
-                                href="/programadeafiliadosadulto"
-                                className="relative z-10 bg-primary text-navy px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[11px] hover:bg-white transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(226,176,162,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] whitespace-nowrap"
-                            >
-                                Quero Participar
-                            </a>
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-primary/20 transition-all duration-700" />
-                        </div>
-                    </div>
-                </section>
+
 
                 {/* Profile Grid */}
                 <section id="showcase" className="bg-navy py-8">

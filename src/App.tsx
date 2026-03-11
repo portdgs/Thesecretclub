@@ -21,7 +21,7 @@ export default function App() {
   const [currentHash, setCurrentHash] = useState(window.location.hash);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [activeFilter, setActiveFilter] = useState('Todos');
-  const [activeCategory, setActiveCategory] = useState<'membro' | 'casal'>('membro');
+  const [activeCategory, setActiveCategory] = useState<'singles' | 'casal'>('singles');
   const [activeGender, setActiveGender] = useState('Mulheres');
   const [featuredProfiles, setFeaturedProfiles] = useState<any[]>([]);
 
@@ -61,20 +61,20 @@ export default function App() {
 
       if (error) {
         console.error("[App] Erro ao buscar profile_type:", error);
-        setUserRole('membro');
+        setUserRole('singles');
         setIsAdmin(false);
       } else if (data && data.length > 0) {
         console.log("[App] Profile_type/Admin encontrada:", data[0]);
-        setUserRole(data[0].profile_type || 'membro');
+        setUserRole(data[0].profile_type || 'singles');
         setIsAdmin(!!data[0].is_admin);
       } else {
         console.warn("[App] Perfil não encontrado para o usuário logado.");
-        setUserRole('membro');
+        setUserRole('singles');
         setIsAdmin(false);
       }
     } catch (err) {
       console.error("[App] Exception ao buscar profile_type:", err);
-      setUserRole('membro');
+      setUserRole('singles');
       setIsAdmin(false);
     } finally {
       setRoleLoaded(true);
@@ -206,10 +206,10 @@ export default function App() {
       }
 
       // Filter by profile_type (category)
-      if (activeCategory === 'membro') {
-        query = query.or('profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
+      if (activeCategory === 'singles') {
+        query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
       } else {
-        query = query.eq('profile_type', activeCategory);
+        query = query.eq('profile_type', 'casal');
       }
 
       // Filter by gender within the category
@@ -271,10 +271,10 @@ export default function App() {
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('profile_type', 'cliente');
 
-      if (activeCategory === 'membro') {
-        query = query.or('profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
+      if (activeCategory === 'singles') {
+        query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
       } else {
-        query = query.eq('profile_type', activeCategory);
+        query = query.eq('profile_type', 'casal');
       }
 
       if (activeGender === 'Mulheres') {

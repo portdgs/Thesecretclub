@@ -52,7 +52,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                         Indique e Ganhe <span className="text-primary italic underline underline-offset-8">Renda Extra</span>
                     </h2>
                     <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                        Ganhe <strong className="text-white">15% de comissão VITÁLICIA</strong> sobre todos os planos e destaques comprados pelos membros que você indicar para o TheSecretclub.
+                        Ganhe <strong className="text-white">20% de comissão VITÁLICIA</strong> sobre todos os planos e destaques comprados pelos membros que você indicar para o TheSecretclub.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <button onClick={onLoginClick} className="px-10 py-5 bg-primary text-navy font-black text-sm uppercase tracking-widest rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(226,176,162,0.4)] hover:bg-white flex items-center justify-center gap-2">
@@ -72,7 +72,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                         {/* Connecting Line (Desktop) */}
-                        <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                        <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
 
                         {/* Step 1 */}
                         <div className="relative p-8 rounded-3xl bg-navy border border-white/5 text-center flex flex-col items-center hover:border-primary/30 transition-all z-10 group">
@@ -103,7 +103,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                             </div>
                             <h4 className="text-xl font-bold mb-3 uppercase tracking-widest">Receba PIX</h4>
                             <p className="text-gray-400 text-sm leading-relaxed">
-                                Ganhe 15% toda vez que uma indicada sua assinar ou renovar um plano premium. Saque suas comissões direto para o seu PIX.
+                                Ganhe 20% toda vez que uma indicada sua assinar ou renovar um plano premium. Saque suas comissões direto para o seu PIX.
                             </p>
                         </div>
                     </div>
@@ -117,7 +117,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                         <DollarSign className="absolute -right-10 -bottom-10 text-primary/10 w-64 h-64" />
                         <h2 className="text-4xl font-black mb-6 italic uppercase tracking-tighter text-white relative z-10">Lucro <span className="text-primary">Recorrente</span></h2>
                         <p className="text-lg text-gray-300 mb-6 relative z-10 leading-relaxed font-light">
-                            Nossa comissão não é paga apenas na primeira venda. Você ganha <strong className="text-white font-bold">15% todos os meses</strong> em que sua indicada mantiver uma assinatura ativa no site.
+                            Nossa comissão não é paga apenas na primeira venda. Você ganha <strong className="text-white font-bold">20% todos os meses</strong> em que sua indicada mantiver uma assinatura ativa no site.
                         </p>
                         <ul className="space-y-4 relative z-10">
                             {[

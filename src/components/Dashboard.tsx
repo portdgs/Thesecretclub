@@ -186,7 +186,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         { icon: Camera, label: 'Mídia e Fotos' },
         { icon: ImageIcon, label: 'Aparência' },
         { icon: CreditCard, label: 'Assinatura' },
-        { icon: Share2, label: 'Afiliados' },
+        ...(profile?.is_ambassador ? [{ icon: Share2, label: 'Embaixadores' }] : []),
         { icon: Mail, label: 'Convites' },
         { icon: ShieldCheck, label: 'Verificação' },
         { icon: TrendingUp, label: 'Estatísticas' },
@@ -839,10 +839,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                         value={profile.profile_type || 'acompanhante'}
                                         onChange={(e) => setProfile({ ...profile, profile_type: e.target.value })}
                                     >
-                                        <option value="acompanhante">Membro</option>
                                         <option value="casal">Casal</option>
-                                        <option value="single_homem">Single Homem</option>
-                                        <option value="single_mulher">Single Mulher</option>
+                                        <option value="homem_single">Homem Single</option>
+                                        <option value="mulher_single">Mulher Single</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -1401,12 +1400,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     )
                 }
                 {
-                    activeTab === 'Afiliados' && (
+                    activeTab === 'Embaixadores' && (
                         <div className="space-y-8">
                             <div className="bg-navy-light border border-white/5 p-8 rounded-sm">
-                                <h2 className="text-xl font-black uppercase tracking-tight mb-4">Programa de Afiliados</h2>
+                                <h2 className="text-xl font-black uppercase tracking-tight mb-4">Programa de Embaixadores</h2>
                                 <p className="text-gray-400 text-sm mb-8">
-                                    Divulgue o TheSecretclub e ganhe <span className="text-primary font-bold">15% de comissão</span> sobre cada indicação ativa.
+                                    Divulgue o TheSecretclub e ganhe <span className="text-primary font-bold">20% de comissão</span> sobre cada indicação ativa feita como embaixador.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -1424,6 +1423,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                 }}
                                                 className="btn-primary px-4 py-4 font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shrink-0"
                                             >
+                                                <span>Copiar Link de Embaixador</span>
                                                 <Share2 size={16} /> Copiar
                                             </button>
                                         </div>

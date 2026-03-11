@@ -61,11 +61,11 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type, o
 
                                 <div className="space-y-4 text-gray-400 text-sm leading-relaxed text-left bg-black/20 p-6 rounded-sm border border-white/5">
                                     <p>
-                                        <strong className="text-white">ESTE SITE É UM CLASSIFICADO DE SERVIÇOS ONLINE.</strong> O TheSecretclub atua exclusivamente como plataforma de publicidade e divulgação para anunciantes independentes.
+                                        <strong className="text-white">ESTE SITE É UMA REDE SOCIAL PRIVADA E EXCLUSIVA.</strong> O TheSecretclub atua exclusivamente como comunidade de networking e entretenimento para membros selecionados.
                                     </p>
                                     <p>
                                         <AlertTriangle className="inline-block text-yellow-500 mr-2" size={16} />
-                                        Declaramos expressamente que não temos qualquer relação com a exploração sexual de terceiros (cafetinagem) ou facilitação de prostituição. Cada anunciante é inteiramente responsável por sua própria agenda e conduta.
+                                        Declaramos expressamente que não temos qualquer relação com a exploração sexual de terceiros (cafetinagem) ou facilitação de prostituição. O clube promove apenas a interação social espontânea entre seus membros majoritários e independentes.
                                     </p>
                                     <p>
                                         Ao entrar, você confirma que:
@@ -105,12 +105,12 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type, o
                                 <div className="prose prose-invert prose-sm max-w-none text-gray-400 space-y-6">
                                     <section>
                                         <h3 className="text-white uppercase font-black tracking-widest text-xs mb-2">1. Natureza do Serviço</h3>
-                                        <p>O THESECRETCLUB é uma plataforma digital de classificados destinada à divulgação de serviços artísticos, massagem e entretenimento prestados por anunciantes independentes. Atuamos como meros facilitadores de publicidade, não intervindo na negociação, agendamento ou prestação dos serviços.</p>
+                                        <p>O THESECRETCLUB é uma plataforma social exclusiva e privada destinada à convivência, networking e entretenimento entre adultos. Atuamos como facilitadores de interação social espontânea em um ambiente seguro e selecionado.</p>
                                     </section>
 
                                     <section>
                                         <h3 className="text-white uppercase font-black tracking-widest text-xs mb-2">2. Proibição de Exploração Sexual</h3>
-                                        <p>Em estrita conformidade com os Artigos 228, 229 e 230 do Código Penal Brasileiro, o THESECRETCLUB proíbe e combate qualquer forma de exploração sexual, rufianismo ou cafetinagem. Não recebemos comissões sobre serviços prestados e não exercemos controle hierárquico ou gerencial sobre os anunciantes.</p>
+                                        <p>Em estrita conformidade com os Artigos 228, 229 e 230 do Código Penal Brasileiro, o THESECRETCLUB proíbe e combate qualquer forma de exploração sexual, rufianismo ou cafetinagem. Não recebemos comissões sobre atos privados e não exercemos controle ou gerência sobre as interações pessoais de nossos membros.</p>
                                     </section>
 
                                     <section>
@@ -120,7 +120,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type, o
 
                                     <section>
                                         <h3 className="text-white uppercase font-black tracking-widest text-xs mb-2">4. Responsabilidade do Conteúdo</h3>
-                                        <p>Os anunciantes são os únicos e exclusivos responsáveis pela veracidade das informações, fotos e vídeos publicados. O site reserva-se o direito de remover perfis que violem a dignidade humana ou utilizem materiais fraudulentos.</p>
+                                        <p>Os membros são os únicos e exclusivos responsáveis pela veracidade das informações, fotos e vídeos publicados em seus perfis. O clube reserva-se o direito de remover perfis que violem a dignidade humana ou utilizem materiais fraudulentos.</p>
                                     </section>
 
                                     <section>
