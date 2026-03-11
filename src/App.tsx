@@ -52,20 +52,20 @@ export default function App() {
 
   // Define fetchUserRole outside to be reused
   const fetchUserRole = useCallback(async (userId: string) => {
-    console.log("[App] Buscando role/admin para user:", userId);
+    console.log("[App] Buscando profile_type/admin para user:", userId);
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, is_admin')
+        .select('profile_type, is_admin')
         .eq('id', userId);
 
       if (error) {
-        console.error("[App] Erro ao buscar role:", error);
+        console.error("[App] Erro ao buscar profile_type:", error);
         setUserRole('acompanhante');
         setIsAdmin(false);
       } else if (data && data.length > 0) {
-        console.log("[App] Role/Admin encontrada:", data[0]);
-        setUserRole(data[0].role || 'acompanhante');
+        console.log("[App] Profile_type/Admin encontrada:", data[0]);
+        setUserRole(data[0].profile_type || 'acompanhante');
         setIsAdmin(!!data[0].is_admin);
       } else {
         console.warn("[App] Perfil não encontrado para o usuário logado.");
@@ -73,7 +73,7 @@ export default function App() {
         setIsAdmin(false);
       }
     } catch (err) {
-      console.error("[App] Exception ao buscar role:", err);
+      console.error("[App] Exception ao buscar profile_type:", err);
       setUserRole('acompanhante');
       setIsAdmin(false);
     } finally {
@@ -114,18 +114,18 @@ export default function App() {
       if (currentUser) {
         const pendingRole = localStorage.getItem('pendingRole');
         if (pendingRole) {
-          console.log("[App] Aplicando pendingRole:", pendingRole);
+          console.log("[App] Aplicando pendingRole (como profile_type):", pendingRole);
           localStorage.removeItem('pendingRole');
-          const { data: existingProfile } = await supabase.from('profiles').select('role').eq('id', currentUser.id);
+          const { data: existingProfile } = await supabase.from('profiles').select('profile_type').eq('id', currentUser.id);
 
-          if (existingProfile && existingProfile.length > 0 && existingProfile[0].role !== pendingRole) {
-            setUserRole(existingProfile[0].role);
+          if (existingProfile && existingProfile.length > 0 && existingProfile[0].profile_type !== pendingRole) {
+            setUserRole(existingProfile[0].profile_type);
             setRoleLoaded(true);
           } else {
             const referredBy = localStorage.getItem('referralId');
             await supabase.from('profiles').upsert({
               id: currentUser.id,
-              role: pendingRole,
+              profile_type: pendingRole,
               name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Usuário',
               referred_by: referredBy || null,
             }, { onConflict: 'id' });
@@ -180,7 +180,7 @@ export default function App() {
       const { data, error } = await supabase
         .from('profiles')
         .select('city, neighborhood')
-        .or('role.neq.cliente,role.is.null');
+        .or('profile_type.neq.cliente,profile_type.is.null');
 
       if (error) throw error;
       const cities = Array.from(new Set(data.map((p: any) => p.city).filter(Boolean)));
@@ -199,7 +199,7 @@ export default function App() {
       let query = supabase
         .from('profiles')
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
-        .neq('role', 'cliente');
+        .neq('profile_type', 'cliente');
       if (city && city.trim()) {
         const searchTerm = `%${city.trim()}%`;
         query = query.or(`city.ilike.${searchTerm},neighborhood.ilike.${searchTerm}`);
@@ -269,7 +269,7 @@ export default function App() {
       let query = supabase
         .from('profiles')
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
-        .neq('role', 'cliente');
+        .neq('profile_type', 'cliente');
 
       if (activeCategory === 'acompanhante') {
         query = query.or('profile_type.eq.acompanhante,profile_type.is.null');

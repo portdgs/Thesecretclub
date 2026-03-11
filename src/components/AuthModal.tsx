@@ -110,7 +110,7 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
 
                     await supabase.from('profiles').upsert({
                         id: data.user.id,
-                        role: 'cliente',
+                        profile_type: 'cliente',
                         name: email.split('@')[0],
                         gender: genderLabel || 'Não informado',
                         relationship_status: statusLabel || 'Não informado',
@@ -328,8 +328,8 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                                 <button
                                                     onClick={() => selectGender('homem')}
                                                     className={`group relative overflow-hidden rounded-2xl p-6 text-center transition-all duration-300 border ${memberGender === 'homem'
-                                                            ? 'border-blue-400/50 bg-blue-500/10 shadow-[0_0_20px_rgba(96,165,250,0.15)]'
-                                                            : 'border-white/10 bg-white/5 hover:border-blue-400/30 hover:bg-blue-500/5'
+                                                        ? 'border-blue-400/50 bg-blue-500/10 shadow-[0_0_20px_rgba(96,165,250,0.15)]'
+                                                        : 'border-white/10 bg-white/5 hover:border-blue-400/30 hover:bg-blue-500/5'
                                                         }`}
                                                 >
                                                     <div className="text-4xl mb-3">👨</div>
@@ -340,8 +340,8 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                                 <button
                                                     onClick={() => selectGender('mulher')}
                                                     className={`group relative overflow-hidden rounded-2xl p-6 text-center transition-all duration-300 border ${memberGender === 'mulher'
-                                                            ? 'border-pink-400/50 bg-pink-500/10 shadow-[0_0_20px_rgba(244,114,182,0.15)]'
-                                                            : 'border-white/10 bg-white/5 hover:border-pink-400/30 hover:bg-pink-500/5'
+                                                        ? 'border-pink-400/50 bg-pink-500/10 shadow-[0_0_20px_rgba(244,114,182,0.15)]'
+                                                        : 'border-white/10 bg-white/5 hover:border-pink-400/30 hover:bg-pink-500/5'
                                                         }`}
                                                 >
                                                     <div className="text-4xl mb-3">👩</div>
@@ -367,8 +367,8 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                                 <button
                                                     onClick={() => selectStatus('single')}
                                                     className={`group relative overflow-hidden rounded-2xl p-6 text-center transition-all duration-300 border ${memberStatus === 'single'
-                                                            ? 'border-primary/50 bg-primary/10 shadow-[0_0_20px_rgba(226,176,162,0.15)]'
-                                                            : 'border-white/10 bg-white/5 hover:border-primary/30 hover:bg-primary/5'
+                                                        ? 'border-primary/50 bg-primary/10 shadow-[0_0_20px_rgba(226,176,162,0.15)]'
+                                                        : 'border-white/10 bg-white/5 hover:border-primary/30 hover:bg-primary/5'
                                                         }`}
                                                 >
                                                     <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3">
@@ -382,8 +382,8 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                                                 <button
                                                     onClick={() => selectStatus('casal')}
                                                     className={`group relative overflow-hidden rounded-2xl p-6 text-center transition-all duration-300 border ${memberStatus === 'casal'
-                                                            ? 'border-purple-400/50 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.15)]'
-                                                            : 'border-white/10 bg-white/5 hover:border-purple-400/30 hover:bg-purple-500/5'
+                                                        ? 'border-purple-400/50 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.15)]'
+                                                        : 'border-white/10 bg-white/5 hover:border-purple-400/30 hover:bg-purple-500/5'
                                                         }`}
                                                 >
                                                     <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
