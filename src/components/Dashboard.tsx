@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import {
     LayoutDashboard, User, CreditCard, TrendingUp, LogOut, CheckCircle2,
     Clock, Plus, MessageCircle, Share2, Star, Loader2, Trash2,
-    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Mail, Navigation, MessageSquare
+    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Mail, Navigation, MessageSquare, UserPlus, Menu
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -67,6 +67,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const [heatmapData, setHeatmapData] = useState<number[]>(new Array(24).fill(0));
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [recentVisitors, setRecentVisitors] = useState<any[]>([]);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [friends, setFriends] = useState<any[]>([]);
+    const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const videoInputRef = useRef<HTMLInputElement>(null);
@@ -272,6 +275,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         { icon: User, label: 'Meu Perfil' },
         { icon: Camera, label: 'Mídia e Fotos' },
         { icon: ImageIcon, label: 'Aparência' },
+        { icon: UserPlus, label: 'Amigos', badge: pendingRequests.length > 0 ? pendingRequests.length : undefined },
         { icon: CreditCard, label: 'Assinatura' },
         ...(profile?.is_ambassador ? [{ icon: Share2, label: 'Embaixadores' }] : []),
         { icon: Mail, label: 'Convites' },
@@ -301,6 +305,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             fetchHeatmapData();
             fetchRecentVisitors();
         }
+        if (activeTab === 'Amigos') {
+            fetchFriends();
+            fetchPendingRequests();
+        }
         if (activeTab === 'Mensagens' || true) {
             fetchUnreadCount();
         }
@@ -320,8 +328,75 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 .eq('is_read', false);
 
             if (!error) setUnreadMessages(count || 0);
+
+            // Aproveita para buscar contagem de convites pendentes
+            const { count: friendReqCount } = await supabase
+                .from('friend_requests')
+                .select('*', { count: 'exact', head: true })
+                .eq('receiver_id', user.id)
+                .eq('status', 'pending');
+
+            setPendingRequests(new Array(friendReqCount || 0)); // Apenas para o badge inicial
         } catch (error) {
             console.error('Error fetching unread count:', error);
+        }
+    };
+
+    const fetchFriends = async () => {
+        if (!user) return;
+        try {
+            const { data, error } = await supabase
+                .from('friend_requests')
+                .select(`
+                    id,
+                    sender_id,
+                    receiver_id,
+                    sender:profiles!friend_requests_sender_id_fkey (id, name, avatar_url, city),
+                    receiver:profiles!friend_requests_receiver_id_fkey (id, name, avatar_url, city)
+                `)
+                .eq('status', 'accepted')
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`);
+
+            if (error) throw error;
+            const friendsList = data.map((rel: any) => rel.sender_id === user.id ? rel.receiver : rel.sender);
+            setFriends(friendsList);
+        } catch (error) {
+            console.error('Error fetching friends:', error);
+        }
+    };
+
+    const fetchPendingRequests = async () => {
+        if (!user) return;
+        try {
+            const { data, error } = await supabase
+                .from('friend_requests')
+                .select(`
+                    id,
+                    sender_id,
+                    sender:profiles!friend_requests_sender_id_fkey (id, name, avatar_url, city)
+                `)
+                .eq('receiver_id', user.id)
+                .eq('status', 'pending');
+
+            if (error) throw error;
+            setPendingRequests(data || []);
+        } catch (error) {
+            console.error('Error fetching pending requests:', error);
+        }
+    };
+
+    const handleFriendRequestAction = async (requestId: string, action: 'accepted' | 'rejected') => {
+        try {
+            const { error } = await supabase
+                .from('friend_requests')
+                .update({ status: action })
+                .eq('id', requestId);
+
+            if (error) throw error;
+            fetchPendingRequests();
+            if (action === 'accepted') fetchFriends();
+        } catch (error: any) {
+            alert('Erro ao processar solicitação: ' + error.message);
         }
     };
 
@@ -823,17 +898,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 accept="image/*"
             />
 
+            {/* Mobile Menu Toggle */}
+            <div className="lg:hidden fixed top-4 left-4 z-50">
+                <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="p-3 bg-primary text-navy rounded-sm shadow-xl"
+                >
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+            </div>
+
             {/* Sidebar */}
-            <aside className="w-64 bg-navy-dark border-r border-white/5 p-6 flex flex-col fixed h-full z-20">
-                <div className="text-xl font-light tracking-[0.4em] mb-12">
+            <aside className={`w-64 bg-navy-dark border-r border-white/5 p-6 flex flex-col fixed h-full z-40 transition-transform duration-300 lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}>
+                <div className="text-xl font-light tracking-[0.4em] mb-12 hidden lg:block">
                     THE<span className="font-black text-primary">SECRETCLUB</span>
                 </div>
 
-                <nav className="flex-1 space-y-2">
+                <div className="lg:hidden h-16" /> {/* Spacer for mobile toggle */}
+
+                <nav className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
                     {menuItems.map((item) => (
                         <button
                             key={item.label}
-                            onClick={() => setActiveTab(item.label)}
+                            onClick={() => {
+                                setActiveTab(item.label);
+                                setIsMobileMenuOpen(false);
+                            }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === item.label ? 'bg-primary text-navy' : 'text-gray-500 hover:bg-white/5 hover:text-white'
                                 }`}
                         >
@@ -857,9 +948,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 </button>
             </aside>
 
+            {/* Overlay for mobile menu */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Main Content */}
-            <main className="flex-1 ml-64 p-12">
-                <header className="flex justify-between items-center mb-12">
+            <main className="flex-1 lg:ml-64 p-4 md:p-12 transition-all">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 mt-16 lg:mt-0">
                     <div>
                         <h1 className="text-3xl font-black italic uppercase tracking-tighter">
                             {activeTab} <span className="text-primary not-italic">{activeTab === 'Resumo' ? 'Painel' : ''}</span>
@@ -2096,6 +2195,92 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 {activeTab === 'Convites' && (
                     <div className="animate-fade-in pb-20">
                         <InviteManager userId={user.id} />
+                    </div>
+                )}
+
+                {activeTab === 'Amigos' && (
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        {/* Pending Requests */}
+                        {pendingRequests.length > 0 && (
+                            <div className="bg-primary/5 border border-primary/20 p-8 rounded-sm">
+                                <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+                                    <UserPlus size={16} />
+                                    Solicitações Pendentes ({pendingRequests.length})
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {pendingRequests.map((req: any) => (
+                                        <div key={req.id} className="bg-navy border border-white/5 p-4 rounded-sm flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <img
+                                                    src={req.sender.avatar_url || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=300"}
+                                                    className="w-10 h-10 rounded-full object-cover border border-white/10"
+                                                />
+                                                <div>
+                                                    <div className="text-[11px] font-bold text-white">{req.sender.name}</div>
+                                                    <div className="text-[9px] text-gray-500 uppercase">{req.sender.city}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleFriendRequestAction(req.id, 'accepted')}
+                                                    className="bg-green-500 text-white p-2 rounded-sm hover:bg-green-600 transition-colors"
+                                                    title="Aceitar"
+                                                >
+                                                    <CheckCircle2 size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleFriendRequestAction(req.id, 'rejected')}
+                                                    className="bg-red-500 text-white p-2 rounded-sm hover:bg-red-600 transition-colors"
+                                                    title="Recusar"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Friends List */}
+                        <div className="bg-navy-light border border-white/5 p-8 rounded-sm">
+                            <h3 className="text-sm font-black uppercase tracking-widest mb-6">Meus Amigos ({friends.length})</h3>
+                            {friends.length === 0 ? (
+                                <div className="py-12 flex flex-col items-center justify-center text-gray-600 gap-4">
+                                    <User size={48} className="opacity-10" />
+                                    <p className="text-xs uppercase tracking-widest font-bold">Você ainda não possui amigos.</p>
+                                    <button
+                                        onClick={() => window.location.hash = ''}
+                                        className="text-[10px] text-primary hover:underline uppercase font-black"
+                                    >
+                                        Explorar perfis para adicionar
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                                    {friends.map((friend: any) => (
+                                        <div key={friend.id} className="group relative">
+                                            <div className="aspect-square rounded-sm overflow-hidden border border-white/5 bg-navy mb-2">
+                                                <img
+                                                    src={friend.avatar_url || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=300"}
+                                                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                                />
+                                                <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                                                    <button
+                                                        onClick={() => setActiveTab('Mensagens')}
+                                                        className="bg-primary text-navy px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest"
+                                                    >
+                                                        Conversar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="text-[10px] font-bold text-white truncate">{friend.name}</div>
+                                            <div className="text-[8px] text-gray-500 uppercase truncate">{friend.city}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 

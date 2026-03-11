@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info, MessageSquare } from 'lucide-react';
+import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info, MessageSquare, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { Feed } from './Feed';
@@ -38,6 +38,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const [endorsementsCount, setEndorsementsCount] = useState(0);
     const [hasEndorsed, setHasEndorsed] = useState(false);
     const [loadingEndorsement, setLoadingEndorsement] = useState(false);
+    const [friendStatus, setFriendStatus] = useState<'none' | 'pending' | 'accepted' | 'rejected'>('none');
+    const [loadingFriendAction, setLoadingFriendAction] = useState(false);
 
     // Combine photos and videos with safety checks
     const mediaItems = [
@@ -49,6 +51,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         if (isOpen && profile) {
             console.log('Opening ProfileModal for:', profile.name);
             fetchEndorsements();
+            fetchFriendStatus();
             if (user) fetchReviews();
 
             // Log view event
@@ -70,6 +73,50 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             };
         }
     }, [isOpen, profile, user]);
+
+    const fetchFriendStatus = async () => {
+        if (!user || !profile) return;
+        try {
+            const { data, error } = await supabase.rpc('get_friend_status', {
+                user_a: user.id,
+                user_b: profile.id
+            });
+            if (error) throw error;
+            setFriendStatus(data || 'none');
+        } catch (error) {
+            console.error('Error fetching friend status:', error);
+        }
+    };
+
+    const handleFriendAction = async () => {
+        if (!user) {
+            if (onLoginClick) onLoginClick();
+            return;
+        }
+        if (loadingFriendAction || friendStatus === 'accepted') return;
+
+        setLoadingFriendAction(true);
+        try {
+            if (friendStatus === 'none' || friendStatus === 'rejected') {
+                const { error } = await supabase
+                    .from('friend_requests')
+                    .upsert({
+                        sender_id: user.id,
+                        receiver_id: profile.id,
+                        status: 'pending'
+                    }, { onConflict: 'sender_id,receiver_id' });
+
+                if (error) throw error;
+                setFriendStatus('pending');
+                alert('Solicitação de amizade enviada!');
+            }
+        } catch (error: any) {
+            console.error('Friend action error:', error);
+            alert('Erro ao processar solicitação: ' + error.message);
+        } finally {
+            setLoadingFriendAction(false);
+        }
+    };
 
     const fetchReviews = async () => {
         try {
@@ -246,6 +293,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     >
                         <MessageCircle size={24} />
                         <span className="hidden md:inline">WhatsApp</span>
+                    </button>
+
+                    {/* Friend Request Button */}
+                    <button
+                        onClick={handleFriendAction}
+                        className={`absolute bottom-6 right-80 z-[9999] px-6 py-4 font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-2xl border transition-all rounded-full ${friendStatus === 'accepted'
+                            ? 'bg-green-600 text-white border-green-500'
+                            : friendStatus === 'pending'
+                                ? 'bg-orange-500 text-white border-orange-400'
+                                : 'bg-navy-dark hover:bg-navy-light text-white border-white/10 hover:scale-105'
+                            }`}
+                    >
+                        <UserPlus size={24} className={friendStatus === 'accepted' ? 'text-white' : 'text-primary'} />
+                        <span className="hidden md:inline">
+                            {friendStatus === 'accepted' ? 'Amigos' : friendStatus === 'pending' ? 'Pendente' : 'Adicionar'}
+                        </span>
                     </button>
 
                     {/* Private Message Button */}
