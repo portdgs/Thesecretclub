@@ -14,6 +14,8 @@ interface ProfileCardProps {
     hasVideo?: boolean;
     planTier?: 'free' | 'bronze' | 'silver' | 'gold' | 'platinum';
     whatsapp?: string;
+    isBoosted?: boolean;
+    distance?: number;
     onWhatsAppClick?: () => void;
     onClick?: () => void;
 }
@@ -27,6 +29,8 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
     isVerified,
     imageUrl,
     hasVideo,
+    isBoosted,
+    distance,
     onClick
 }) => {
     return (
@@ -57,11 +61,18 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                 </div>
 
                 {/* Verificação */}
-                {isVerified && (
-                    <div className="bg-[#e2b0a2]/90 backdrop-blur-sm text-navy flex items-center justify-center w-6 h-6 rounded-full shadow-[0_0_15px_rgba(226,176,162,0.6)]">
-                        <ShieldCheck size={14} />
-                    </div>
-                )}
+                <div className="flex flex-col items-end gap-2">
+                    {isVerified && (
+                        <div className="bg-[#e2b0a2]/90 backdrop-blur-sm text-navy flex items-center justify-center w-6 h-6 rounded-full shadow-[0_0_15px_rgba(226,176,162,0.6)]">
+                            <ShieldCheck size={14} />
+                        </div>
+                    )}
+                    {isBoosted && (
+                        <div className="bg-primary/90 backdrop-blur-sm text-navy flex items-center justify-center px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(226,176,162,0.8)] gap-1">
+                            <span className="text-[7px] font-black uppercase tracking-tighter">BOOST</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Informações do Perfil (Bottom) */}
@@ -73,7 +84,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                         </h3>
                         <div className="flex items-center gap-1.5 text-gray-300 text-[10px] sm:text-xs font-medium tracking-wide uppercase mt-2">
                             <MapPin size={12} className="text-primary" />
-                            <span>{neighborhood}</span>
+                            <span>{distance !== undefined ? `a ${distance.toFixed(1)}km de você` : neighborhood}</span>
                         </div>
                     </div>
 

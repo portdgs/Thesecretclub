@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import {
     LayoutDashboard, User, CreditCard, TrendingUp, LogOut, CheckCircle2,
     Clock, Plus, MessageCircle, Share2, Star, Loader2, Trash2,
-    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Mail
+    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Mail, Navigation, MessageSquare
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -37,13 +37,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         price_1h: '',
         bio: '',
         avatar_url: '',
-        cover_url: ''
+        cover_url: '',
+        latitude: null,
+        longitude: null,
+        is_location_public: false
     });
     const [activePlan, setActivePlan] = useState<any>(null);
     const [affiliateStats, setAffiliateStats] = useState({ indications: 0, conversions: 0 });
     const [commissions, setCommissions] = useState<any[]>([]);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<any>(null);
+    const [isBoostSelection, setIsBoostSelection] = useState(false);
     const [paymentData, setPaymentData] = useState<any>(null);
     const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'CREDIT_CARD' | null>(null);
 
@@ -55,14 +59,71 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [isCropping, setIsCropping] = useState(false);
     const [heatmapData, setHeatmapData] = useState<number[]>(new Array(24).fill(0));
+    const [unreadMessages, setUnreadMessages] = useState(0);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const videoInputRef = useRef<HTMLInputElement>(null);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
 
+    const handleLocationToggle = async () => {
+        const newState = !profile.is_location_public;
+
+        if (newState) {
+            if (!navigator.geolocation) {
+                alert('Seu navegador não suporta geolocalização.');
+                return;
+            }
+
+            setUploading(true);
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({
+                            latitude,
+                            longitude,
+                            is_location_public: true
+                        })
+                        .eq('id', user.id);
+
+                    if (error) {
+                        alert('Erro ao atualizar localização: ' + error.message);
+                    } else {
+                        setProfile({ ...profile, latitude, longitude, is_location_public: true });
+                        alert('Localização ativada! Seu perfil agora aparece no radar.');
+                    }
+                    setUploading(false);
+                },
+                (error) => {
+                    console.error('Erro de GPS:', error);
+                    alert('Erro ao obter sua localização. Verifique as permissões do navegador.');
+                    setUploading(false);
+                }
+            );
+        } else {
+            setUploading(true);
+            const { error } = await supabase
+                .from('profiles')
+                .update({ is_location_public: false })
+                .eq('id', user.id);
+
+            if (error) {
+                alert('Erro ao desativar radar: ' + error.message);
+            } else {
+                setProfile({ ...profile, is_location_public: false });
+                alert('Radar desativado.');
+            }
+            setUploading(false);
+        }
+    };
+
+    const BOOST_PLAN = { id: 'boost-24h', name: 'Impulsionar Perfil (24h)', price: 19.90 };
+
     const handleSelectPlan = async (plan: any) => {
         setSelectedPlan(plan);
+        setIsBoostSelection(false);
         setPaymentData(null);
         setPaymentMethod(null);
 
@@ -145,8 +206,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const status = await checkSuitPaymentStatus(paymentData.id);
 
             if (status === 'CONFIRMED') {
-                // Busca o ID do plano de forma insensível a maiúsculas/minúsculas
-                // Usamos limit(1) para evitar erro caso existam nomes duplicados no banco
+                if (isBoostSelection) {
+                    // Ativação do Boost por 24h
+                    const boostUntil = new Date();
+                    boostUntil.setHours(boostUntil.getHours() + 24);
+
+                    const { error: updateError } = await supabase
+                        .from('profiles')
+                        .update({
+                            boost_until: boostUntil.toISOString()
+                        })
+                        .eq('id', user.id);
+
+                    if (updateError) throw updateError;
+
+                    alert('Perfil impulsionado com sucesso! Você está no topo do feed por 24 horas.');
+                    await fetchProfile();
+                    setShowPaymentModal(false);
+                    return;
+                }
+
+                // Fluxo normal de Plano
                 const { data: planData, error: planError } = await supabase
                     .from('plans')
                     .select('id, name')
@@ -190,6 +270,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         { icon: Mail, label: 'Convites' },
         { icon: ShieldCheck, label: 'Verificação' },
         { icon: TrendingUp, label: 'Estatísticas' },
+        { icon: MessageSquare, label: 'Mensagens', badge: unreadMessages > 0 ? unreadMessages : undefined },
     ];
 
     useEffect(() => {
@@ -212,9 +293,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         if (activeTab === 'Estatísticas') {
             fetchHeatmapData();
         }
+        if (activeTab === 'Mensagens' || true) {
+            fetchUnreadCount();
+        }
 
         return () => { document.title = originalTitle; };
     }, [activeTab]);
+
+    const fetchUnreadCount = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { count, error } = await supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('receiver_id', user.id)
+                .eq('is_read', false);
+
+            if (!error) setUnreadMessages(count || 0);
+        } catch (error) {
+            console.error('Error fetching unread count:', error);
+        }
+    };
 
     const fetchAffiliateData = async () => {
         try {
@@ -702,7 +803,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 }`}
                         >
                             <item.icon size={16} />
-                            <span>{item.label}</span>
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {item.badge !== undefined && (
+                                <span className="bg-primary text-navy text-[8px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                    {item.badge}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </nav>
@@ -807,10 +913,69 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                 <div className={`w-2 h-2 rounded-full ${profile.is_online !== false ? 'bg-green-500' : 'bg-red-500'}`} />
                                                 {profile.is_online !== false ? 'Ficar Offline' : 'Ficar Online'}
                                             </button>
+
+                                            <button
+                                                onClick={handleLocationToggle}
+                                                disabled={uploading}
+                                                className={`px-6 py-3 rounded-sm border text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${profile.is_location_public
+                                                    ? 'bg-primary/20 border-primary/30 text-primary'
+                                                    : 'bg-white/5 border-white/10 text-gray-500 hover:text-white'
+                                                    }`}
+                                            >
+                                                <Navigation size={14} className={profile.is_location_public ? 'animate-pulse' : ''} />
+                                                {profile.is_location_public ? 'Radar Ativo' : 'Ativar Radar'}
+                                            </button>
                                         </div>
                                         <button className="btn-primary px-8 flex items-center justify-center font-black tracking-widest text-[10px]">Renovar Plano</button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Boost Section */}
+                        <div className="bg-gradient-to-r from-primary/10 to-navy-light border border-primary/20 p-8 rounded-sm mb-12 relative overflow-hidden group">
+                            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                                <div className="max-w-md">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <TrendingUp className="text-primary" size={20} />
+                                        <h3 className="text-xl font-black uppercase tracking-tighter text-white italic">Impulsionar Perfil</h3>
+                                    </div>
+                                    <p className="text-gray-400 text-[11px] leading-relaxed mb-1">
+                                        Fique no <span className="text-primary font-bold">topo do feed e dos destaques</span> por 24 horas.
+                                    </p>
+                                    <p className="text-[9px] text-gray-500 uppercase tracking-widest">
+                                        Perfeito para aumentar sua visibilidade e cliques no WhatsApp agora mesmo!
+                                    </p>
+                                    {profile.boost_until && new Date(profile.boost_until) > new Date() && (
+                                        <div className="mt-4 flex items-center gap-2 bg-primary/20 border border-primary/30 px-3 py-1.5 rounded-full w-fit">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-primary">Impulso Ativo até {new Date(profile.boost_until).toLocaleString()}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-center md:text-right shrink-0">
+                                    <div className="text-2xl font-black text-white mb-2">R$ 19,90</div>
+                                    <button
+                                        onClick={async () => {
+                                            if (!profile.cpf) {
+                                                alert('Preencha seu CPF na aba "Meu Perfil" antes de impulsionar seu perfil.');
+                                                return;
+                                            }
+                                            setSelectedPlan(BOOST_PLAN);
+                                            setIsBoostSelection(true);
+                                            setPaymentData(null);
+                                            setPaymentMethod(null);
+                                            setShowPaymentModal(true);
+                                        }}
+                                        className="btn-primary px-10 py-4 font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(226,176,162,0.3)] hover:shadow-[0_0_30px_rgba(226,176,162,0.5)] transition-all"
+                                    >
+                                        Impulsionar Agora
+                                    </button>
+                                </div>
+                            </div>
+                            {/* Background decoration */}
+                            <div className="absolute top-1/2 right-0 -translate-y-1/2 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                                <TrendingUp size={200} className="text-primary" />
                             </div>
                         </div>
                     </>
@@ -1685,6 +1850,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         </div>
                     )
                 }
+
+                {activeTab === 'Mensagens' && (
+                    <div className="bg-navy-light border border-white/5 p-8 rounded-sm min-h-[600px] flex flex-col">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-xl font-black uppercase tracking-tight">Suas Mensagens</h2>
+                            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
+                                <MessageSquare size={12} className="text-primary" />
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{unreadMessages} não lidas</span>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 bg-navy/50 rounded-sm border border-white/5 overflow-hidden flex flex-col items-center justify-center p-12 text-center">
+                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                                <MessageSquare size={40} className="text-primary opacity-20" />
+                            </div>
+                            <h3 className="text-lg font-black uppercase tracking-widest mb-4">Central de Conversas</h3>
+                            <p className="text-gray-500 text-sm max-w-sm mb-8">
+                                Acesse seu chat privado para conversar com outros membros, ver suas mensagens recebidas e gerenciar seus contatos.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    window.dispatchEvent(new CustomEvent('open-chat'));
+                                }}
+                                className="btn-primary px-10 py-5 font-black uppercase tracking-widest text-xs shadow-xl animate-pulse"
+                            >
+                                Abrir Chat e Ver Mensagens
+                            </button>
+                        </div>
+                    </div>
+                )}
                 {
                     activeTab === 'Estatísticas' && (
                         <div className="space-y-8 animate-in fade-in duration-500">

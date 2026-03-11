@@ -9,6 +9,7 @@ import { AmbassadorProgram } from './components/AffiliateProgram';
 import { LandingPage } from './components/LandingPage';
 import { FeedPage } from './components/FeedPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { ChatModal } from './components/ChatModal';
 
 export default function App() {
   const [searchCity, setSearchCity] = useState('');
@@ -40,6 +41,10 @@ export default function App() {
   });
   const [isTermsOpen, setIsTermsOpen] = useState(false);
 
+  // Chat State
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatTargetUserId, setChatTargetUserId] = useState<string | undefined>(undefined);
+
   // Capture referral from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -48,6 +53,15 @@ export default function App() {
       console.log("[App] Referral ID capturado:", ref);
       localStorage.setItem('referralId', ref);
     }
+  }, []);
+
+  // Open Chat Event Listener
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setIsChatOpen(true);
+    };
+    window.addEventListener('open-chat', handleOpenChat);
+    return () => window.removeEventListener('open-chat', handleOpenChat);
   }, []);
 
   // Define fetchUserRole outside to be reused
@@ -228,6 +242,7 @@ export default function App() {
       }
 
       query = query
+        .order('boost_until', { ascending: false, nullsFirst: false })
         .order('plan_tier_weight', { ascending: false })
         .order('created_at', { ascending: false });
 
@@ -262,7 +277,37 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [activeGender, activeCategory]);
+  }, [activeCategory, activeGender, supabase.storage]);
+
+  const fetchNearbyProfiles = useCallback(async (lat: number, lng: number, radius: number = 50) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.rpc('get_nearby_profiles', {
+        user_lat: lat,
+        user_lng: lng,
+        radius_km: radius
+      });
+
+      if (error) throw error;
+
+      const profilesWithMedia = await Promise.all((data || []).map(async (profile: any) => {
+        const { data: photoFiles } = await supabase.storage.from('public-photos').list(profile.id, { limit: 1 });
+        const { data: videoFiles } = await supabase.storage.from('public-videos').list(profile.id, { limit: 1 });
+
+        return {
+          ...profile,
+          imageUrl: photoFiles?.length ? supabase.storage.from('public-photos').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          videoUrl: videoFiles?.length ? supabase.storage.from('public-videos').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
+        };
+      }));
+
+      setProfiles(profilesWithMedia);
+    } catch (error) {
+      console.error('Error fetching nearby profiles:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase.storage]);
 
   const fetchFeaturedProfiles = useCallback(async () => {
     try {
@@ -286,6 +331,7 @@ export default function App() {
       }
 
       const { data, error } = await query
+        .order('boost_until', { ascending: false, nullsFirst: false })
         .order('plan_tier_weight', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(15);
@@ -447,37 +493,58 @@ export default function App() {
 
   // AUTHENTICATED: Show the Feed
   return (
-    <FeedPage
-      user={user}
-      profiles={profiles}
-      featuredProfiles={featuredProfiles}
-      loading={loading}
-      searchCity={searchCity}
-      setSearchCity={setSearchCity}
-      activeFilter={activeFilter}
-      setActiveFilter={setActiveFilter}
-      activeCategory={activeCategory}
-      setActiveCategory={setActiveCategory}
-      activeGender={activeGender}
-      setActiveGender={setActiveGender}
-      availableCities={availableCities}
-      availableNeighborhoods={availableNeighborhoods}
-      fetchProfiles={fetchProfiles}
-      handleWhatsAppClick={handleWhatsAppClick}
-      openProfile={openProfile}
-      isAdmin={isAdmin}
-      isProfileModalOpen={isProfileModalOpen}
-      setIsProfileModalOpen={setIsProfileModalOpen}
-      selectedProfile={selectedProfile}
-      selectedPhotos={selectedPhotos}
-      selectedVideos={selectedVideos}
-      handleProfileUpdate={handleProfileUpdate}
-      isAuthOpen={isAuthOpen}
-      setIsAuthOpen={setIsAuthOpen}
-      isTermsOpen={isTermsOpen}
-      setIsTermsOpen={setIsTermsOpen}
-      isAgeVerified={isAgeVerified}
-      setIsAgeVerified={setIsAgeVerified}
-    />
+    <AnimatePresence mode="wait">
+      <div className="min-h-screen bg-navy text-white">
+        <FeedPage
+          user={user}
+          profiles={profiles}
+          featuredProfiles={featuredProfiles}
+          loading={loading}
+          searchCity={searchCity}
+          setSearchCity={setSearchCity}
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          activeGender={activeGender}
+          setActiveGender={setActiveGender}
+          availableCities={availableCities}
+          availableNeighborhoods={availableNeighborhoods}
+          fetchProfiles={fetchProfiles}
+          fetchNearbyProfiles={fetchNearbyProfiles}
+          handleWhatsAppClick={handleWhatsAppClick}
+          onMessageClick={(id: string) => {
+            setChatTargetUserId(id);
+            setIsChatOpen(true);
+          }}
+          openProfile={openProfile}
+          isAdmin={isAdmin}
+          isProfileModalOpen={isProfileModalOpen}
+          setIsProfileModalOpen={setIsProfileModalOpen}
+          selectedProfile={selectedProfile}
+          selectedPhotos={selectedPhotos}
+          selectedVideos={selectedVideos}
+          handleProfileUpdate={handleProfileUpdate}
+          isAuthOpen={isAuthOpen}
+          setIsAuthOpen={setIsAuthOpen}
+          isTermsOpen={isTermsOpen}
+          setIsTermsOpen={setIsTermsOpen}
+          isAgeVerified={isAgeVerified}
+          setIsAgeVerified={setIsAgeVerified}
+        />
+
+        {isChatOpen && user && (
+          <ChatModal
+            isOpen={isChatOpen}
+            onClose={() => {
+              setIsChatOpen(false);
+              setChatTargetUserId(undefined);
+            }}
+            currentUserId={user.id}
+            targetUserId={chatTargetUserId}
+          />
+        )}
+      </div>
+    </AnimatePresence>
   );
 }

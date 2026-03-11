@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Search, Check, HelpCircle, ShieldCheck, User, Plus, Menu } from 'lucide-react';
+import { MapPin, Search, Check, HelpCircle, ShieldCheck, User, Plus, Menu, Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProfileCard } from './ProfileCard';
 import { ProfileModal } from './ProfileModal';
@@ -18,6 +18,7 @@ interface FeedPageProps {
     setActiveFilter: (filter: string) => void;
     activeCategory: 'singles' | 'casal';
     setActiveCategory: (cat: 'singles' | 'casal') => void;
+    fetchNearbyProfiles: (lat: number, lng: number) => void;
     activeGender: string;
     setActiveGender: (gender: string) => void;
     availableCities: string[];
@@ -41,6 +42,7 @@ interface FeedPageProps {
     setIsTermsOpen: (open: boolean) => void;
     isAgeVerified: boolean;
     setIsAgeVerified: (v: boolean) => void;
+    onMessageClick: (profileId: string) => void;
 }
 
 export const FeedPage: React.FC<FeedPageProps> = ({
@@ -59,6 +61,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     availableCities,
     availableNeighborhoods,
     fetchProfiles,
+    fetchNearbyProfiles,
     handleWhatsAppClick,
     openProfile,
     isAdmin,
@@ -74,8 +77,9 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     setIsTermsOpen,
     isAgeVerified,
     setIsAgeVerified,
+    onMessageClick,
 }) => {
-    const [viewMode, setViewMode] = React.useState<'grid' | 'feed'>('grid');
+    const [viewMode, setViewMode] = React.useState<'grid' | 'feed' | 'radar'>('grid');
 
     return (
         <div className="min-h-screen bg-navy text-white font-sans selection:bg-primary selection:text-navy">
@@ -89,6 +93,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 onLoginClick={() => setIsAuthOpen(true)}
                 onProfileUpdate={handleProfileUpdate}
                 onWhatsAppClick={handleWhatsAppClick}
+                onMessageClick={onMessageClick}
             />
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
@@ -269,26 +274,29 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 {featuredProfiles.length > 0 && (
                     <section className="relative z-30 mt-20 lg:-mt-12 pb-8 scrollbar-hide overflow-x-auto">
                         <div className="container mx-auto px-4 flex gap-4 min-w-max">
-                            {featuredProfiles.map((p) => (
-                                <div
-                                    key={p.id}
-                                    onClick={() => openProfile(p)}
-                                    className="flex flex-col items-center gap-1.5 cursor-pointer group"
-                                >
-                                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 border-2 border-primary ring-2 ring-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:ring-primary/40 group-hover:shadow-lg group-hover:shadow-primary/20 active:scale-95">
-                                        <div className="w-full h-full rounded-full overflow-hidden border-2 border-navy">
-                                            <img
-                                                src={p.imageUrl || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=200"}
-                                                alt={p.name}
-                                                className="w-full h-full object-cover"
-                                            />
+                            {featuredProfiles.map((p) => {
+                                const isBoosted = p.boost_until && new Date(p.boost_until) > new Date();
+                                return (
+                                    <div
+                                        key={p.id}
+                                        onClick={() => openProfile(p)}
+                                        className="flex flex-col items-center gap-1.5 cursor-pointer group"
+                                    >
+                                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 border-2 ${isBoosted ? 'border-primary ring-4 ring-primary/40' : 'border-primary ring-2 ring-primary/20'} transition-all duration-300 group-hover:scale-110 group-hover:ring-primary/40 group-hover:shadow-lg group-hover:shadow-primary/20 active:scale-95`}>
+                                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-navy">
+                                                <img
+                                                    src={p.imageUrl || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=200"}
+                                                    alt={p.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
                                         </div>
+                                        <span className={`text-[10px] font-bold ${isBoosted ? 'text-primary' : 'text-gray-400'} tracking-tight uppercase truncate max-w-[64px] sm:max-w-[80px]`}>
+                                            {p.name.split(' ')[0]}
+                                        </span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-gray-400 tracking-tight uppercase truncate max-w-[64px] sm:max-w-[80px]">
-                                        {p.name.split(' ')[0]}
-                                    </span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </section>
                 )}
@@ -349,10 +357,72 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                 >
                                     Feed Social
                                 </button>
+                                <button
+                                    onClick={() => {
+                                        if (viewMode !== 'radar') {
+                                            if (!navigator.geolocation) {
+                                                alert('Seu navegador não suporta geolocalização.');
+                                                return;
+                                            }
+                                            navigator.geolocation.getCurrentPosition(
+                                                (pos) => {
+                                                    fetchNearbyProfiles(pos.coords.latitude, pos.coords.longitude);
+                                                    setViewMode('radar');
+                                                },
+                                                (err) => {
+                                                    console.error('GPS Error:', err);
+                                                    alert('Permita o acesso à sua localização para usar o Radar.');
+                                                }
+                                            );
+                                        }
+                                    }}
+                                    className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'radar'
+                                        ? 'bg-primary text-navy shadow-[0_0_15px_rgba(226,176,162,0.4)]'
+                                        : 'text-gray-400 hover:text-white'
+                                        }`}
+                                >
+                                    <Navigation size={12} />
+                                    Radar
+                                </button>
                             </div>
                         </div>
 
-                        {viewMode === 'feed' ? (
+                        {viewMode === 'radar' ? (
+                            <div className="mt-8 animate-fade-in">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+                                    {profiles.length > 0 ? (
+                                        profiles.map((p: any) => (
+                                            <ProfileCard
+                                                key={p.id}
+                                                name={p.name || 'Membro'}
+                                                age={p.age || 18}
+                                                city={p.city || 'São Paulo'}
+                                                neighborhood={p.neighborhood || 'Centro'}
+                                                price={p.price_min || 0}
+                                                rating={p.rating || 5.0}
+                                                isVerified={p.verified}
+                                                isBoosted={p.boost_until && new Date(p.boost_until) > new Date()}
+                                                imageUrl={p.imageUrl}
+                                                hasVideo={!!p.videoUrl}
+                                                distance={p.distance_km}
+                                                planTier={
+                                                    p.plans?.tier_weight === 4 ? 'platinum' :
+                                                        p.plans?.tier_weight === 3 ? 'gold' :
+                                                            p.plans?.tier_weight === 2 ? 'silver' :
+                                                                p.plans?.tier_weight === 1 ? 'bronze' : 'free'
+                                                }
+                                                onClick={() => openProfile(p)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-20 text-center border border-dashed border-white/10">
+                                            <Navigation size={40} className="text-gray-600 mx-auto mb-4 opacity-20" />
+                                            <p className="text-gray-500 uppercase tracking-widest text-xs font-black">Nenhum membro ativo no radar próximo a você</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : viewMode === 'feed' ? (
                             <div className="py-8 animate-fade-in">
                                 <Feed
                                     currentUserId={user?.id}
@@ -384,6 +454,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                                 price={p.price_min || 0}
                                                 rating={p.rating || 5.0}
                                                 isVerified={p.verified}
+                                                isBoosted={p.boost_until && new Date(p.boost_until) > new Date()}
                                                 imageUrl={p.imageUrl}
                                                 hasVideo={!!p.videoUrl}
                                                 planTier={

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info } from 'lucide-react';
+import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { Feed } from './Feed';
@@ -14,6 +14,7 @@ interface ProfileModalProps {
     onLoginClick?: () => void;
     onProfileUpdate?: (profileId: string, updates: { rating: number; review_count: number }) => void;
     onWhatsAppClick?: (profileId: string) => void;
+    onMessageClick?: (profileId: string) => void;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -25,7 +26,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     user,
     onLoginClick,
     onProfileUpdate,
-    onWhatsAppClick
+    onWhatsAppClick,
+    onMessageClick
 }) => {
     const [activeTab, setActiveTab] = useState('Galeria');
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -239,6 +241,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     >
                         <MessageCircle size={24} />
                         <span className="hidden md:inline">WhatsApp</span>
+                    </button>
+
+                    {/* Private Message Button */}
+                    <button
+                        onClick={() => {
+                            if (onMessageClick) onMessageClick(profile.id);
+                        }}
+                        className="absolute bottom-6 right-40 z-[9999] bg-navy-dark hover:bg-navy-light text-white px-6 py-4 font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-2xl border border-white/10 hover:scale-105 transition-transform rounded-full"
+                    >
+                        <MessageSquare size={24} className="text-primary" />
+                        <span className="hidden md:inline">Mensagem</span>
                     </button>
 
                     {/* Main Scrollable Container */}
