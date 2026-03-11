@@ -46,3 +46,17 @@ body {
   background-color: #f4dcd6;
   @apply tracking-[0.4em];
 }
+
+/* Landing Page Text Glow */
+.landing-text-glow {
+  text-shadow: 0 0 20px rgba(226, 176, 162, 0.4), 0 0 40px rgba(226, 176, 162, 0.1);
+}
+
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 4s ease-in-out infinite;
+}
