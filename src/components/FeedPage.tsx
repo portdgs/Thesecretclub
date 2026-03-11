@@ -464,12 +464,21 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                             <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em]">Anuncie seus serviços e receba mais contatos</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div className="max-w-md mx-auto">
                             {([] as Array<{ name: string, price: string, tier: string, features: Array<{ text: string, hint?: string }>, popular?: boolean, platinum?: boolean }>).concat([
-                                { name: 'Bronze', price: '37,90', tier: 'Básico', features: [{ text: 'Até 10 Fotos' }, { text: 'Destaque Padrão' }] },
-                                { name: 'Prata', price: '87,00', tier: 'Intermediário', features: [{ text: 'Até 15 Fotos' }, { text: '1 Vídeo' }, { text: 'Destaque Médio' }] },
-                                { name: 'Ouro', price: '174,00', tier: 'Recomendado', popular: true, features: [{ text: 'Fotos Ilimitadas' }, { text: '3 Vídeos' }, { text: 'Selo "Mais Popular"' }, { text: 'Destaque Alto', hint: 'Maior relevância nas buscas e vitrine' }] },
-                                { name: 'Platina', price: '397,00', tier: 'Elite', platinum: true, features: [{ text: 'Fotos Ilimitadas' }, { text: 'Vídeos Ilimitados' }, { text: 'Selo "Elite"' }, { text: 'Topo Rotativo do Site', hint: 'O cupido fixará seu perfil nas 3 primeiras posições' }] },
+                                {
+                                    name: 'Plano Único Full',
+                                    price: '39,99',
+                                    tier: 'Completo',
+                                    platinum: true,
+                                    features: [
+                                        { text: 'Fotos Ilimitadas' },
+                                        { text: 'Vídeos Ilimitados' },
+                                        { text: 'Selo "Elite" VIP' },
+                                        { text: 'Destaque Máximo', hint: 'Maior relevância nas buscas e vitrine' },
+                                        { text: 'Topo Rotativo do Site', hint: 'O cupido fixará seu perfil nas 3 primeiras posições' }
+                                    ]
+                                },
                             ]).map((plan) => (
                                 <div key={plan.name} className={`relative p-8 rounded-xl transition-all duration-300 group ${plan.platinum
                                     ? 'bg-white/5 backdrop-blur-md border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]'
