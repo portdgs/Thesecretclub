@@ -727,6 +727,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => window.location.hash = ''}
+                            className="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors bg-white/5 border border-white/10 px-4 py-2 rounded-sm"
+                        >
+                            Voltar para Home
+                        </button>
                         <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-sm flex items-center gap-2">
                             <CheckCircle2 size={14} className="text-primary" />
                             <span className="text-[9px] font-black uppercase tracking-widest text-primary">
@@ -1268,12 +1274,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
                             <h2 className="text-xl font-black uppercase tracking-tight mb-6">Planos Disponíveis</h2>
 
-                            <div id="plans-grid" className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div id="plans-grid" className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {[
-                                    { id: 'bronze-plan', name: 'Bronze', price: 37.90, features: ['Até 10 Fotos', 'Destaque Padrão', 'Alerta de Visita'], recommended: false },
-                                    { id: 'prata-plan', name: 'Prata', price: 87.00, features: ['Até 15 Fotos', 'Destaque Padrão', '1 Vídeo'], recommended: false },
-                                    { id: 'ouro-plan', name: 'Ouro', price: 174.00, features: ['Fotos Ilimitadas', '3 Vídeos', 'Selo Popular', 'Mapa de Calor'], recommended: true },
-                                    { id: 'platina-plan', name: 'Platina', price: 397.00, features: ['Tudo Ilimitado', 'Vídeo de Capa', 'Topo do Site (BI)'], recommended: false },
+                                    { id: 'full-plan', name: 'Full', price: 39.99, features: ['Acesso Ilimitado', 'Até 20 Fotos', 'Até 3 Vídeos', 'Destaque no Feed', 'Programa de Embaixadores'], recommended: true },
                                 ].map((plan) => (
                                     <div key={plan.id} className={`relative bg-navy border ${plan.recommended ? 'border-primary shadow-lg shadow-primary/10 scale-105 z-10' : 'border-white/5'} p-8 flex flex-col`}>
                                         {plan.recommended && (
