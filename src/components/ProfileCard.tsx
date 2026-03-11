@@ -7,16 +7,10 @@ interface ProfileCardProps {
     age: number;
     city: string;
     neighborhood: string;
-    price: number;
-    rating: number;
     isVerified: boolean;
     imageUrl: string;
-    hasVideo?: boolean;
-    planTier?: 'free' | 'bronze' | 'silver' | 'gold' | 'platinum';
-    whatsapp?: string;
     isBoosted?: boolean;
     distance?: number;
-    onWhatsAppClick?: () => void;
     onClick?: () => void;
 }
 

@@ -522,7 +522,6 @@ export default function App() {
             setIsChatOpen(true);
           }}
           openProfile={openProfile}
-          isAdmin={isAdmin}
           isProfileModalOpen={isProfileModalOpen}
           setIsProfileModalOpen={setIsProfileModalOpen}
           selectedProfile={selectedProfile}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Search, Check, HelpCircle, ShieldCheck, User, Plus, Menu, Navigation, MessageSquare, Bell } from 'lucide-react';
+import { MapPin, Search, Check, HelpCircle, User, Plus, Menu, Navigation, MessageSquare, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProfileCard } from './ProfileCard';
 import { ProfileModal } from './ProfileModal';
@@ -26,7 +26,6 @@ interface FeedPageProps {
     fetchProfiles: (city?: string, filter?: string) => void;
     handleWhatsAppClick: (profileId: string) => void;
     openProfile: (profile: any) => void;
-    isAdmin: boolean;
     // Profile Modal
     isProfileModalOpen: boolean;
     setIsProfileModalOpen: (open: boolean) => void;
@@ -64,7 +63,6 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     fetchNearbyProfiles,
     handleWhatsAppClick,
     openProfile,
-    isAdmin,
     isProfileModalOpen,
     setIsProfileModalOpen,
     selectedProfile,
@@ -447,19 +445,10 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                                 age={p.age || 18}
                                                 city={p.city || 'São Paulo'}
                                                 neighborhood={p.neighborhood || 'Centro'}
-                                                price={p.price_min || 0}
-                                                rating={p.rating || 5.0}
                                                 isVerified={p.verified}
                                                 isBoosted={p.boost_until && new Date(p.boost_until) > new Date()}
                                                 imageUrl={p.imageUrl}
-                                                hasVideo={!!p.videoUrl}
                                                 distance={p.distance_km}
-                                                planTier={
-                                                    p.plans?.tier_weight === 4 ? 'platinum' :
-                                                        p.plans?.tier_weight === 3 ? 'gold' :
-                                                            p.plans?.tier_weight === 2 ? 'silver' :
-                                                                p.plans?.tier_weight === 1 ? 'bronze' : 'free'
-                                                }
                                                 onClick={() => openProfile(p)}
                                             />
                                         ))
@@ -500,20 +489,9 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                                 age={p.age || 18}
                                                 city={p.city || 'São Paulo'}
                                                 neighborhood={p.neighborhood || 'Centro'}
-                                                price={p.price_min || 0}
-                                                rating={p.rating || 5.0}
                                                 isVerified={p.verified}
                                                 isBoosted={p.boost_until && new Date(p.boost_until) > new Date()}
                                                 imageUrl={p.imageUrl}
-                                                hasVideo={!!p.videoUrl}
-                                                planTier={
-                                                    p.plans?.tier_weight === 4 ? 'platinum' :
-                                                        p.plans?.tier_weight === 3 ? 'gold' :
-                                                            p.plans?.tier_weight === 2 ? 'silver' :
-                                                                p.plans?.tier_weight === 1 ? 'bronze' : 'free'
-                                                }
-                                                whatsapp={p.whatsapp}
-                                                onWhatsAppClick={() => handleWhatsAppClick(p.id)}
                                                 onClick={() => openProfile(p)}
                                             />
                                         ))
