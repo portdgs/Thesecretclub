@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Copy, Users, CheckCircle, AlertCircle, Share2, Crown } from 'lucide-react';
+import { Users, CheckCircle, AlertCircle, Share2, Crown } from 'lucide-react';
 
 interface InviteManagerProps {
     userId: string;

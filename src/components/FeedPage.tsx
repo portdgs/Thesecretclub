@@ -71,6 +71,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     isAuthOpen,
     setIsAuthOpen,
     isTermsOpen,
+    setIsTermsOpen,
     isAgeVerified,
     setIsAgeVerified,
 }) => {

@@ -11,7 +11,7 @@ interface FeedProps {
 
 const POSTS_PER_PAGE = 10;
 
-export const Feed: React.FC<FeedProps> = ({ currentUserId, profileType }) => {
+export const Feed: React.FC<FeedProps> = ({ currentUserId }) => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
