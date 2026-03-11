@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Search, Check, HelpCircle, ShieldCheck, User, Plus, Menu, Navigation } from 'lucide-react';
+import { MapPin, Search, Check, HelpCircle, ShieldCheck, User, Plus, Menu, Navigation, MessageSquare, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProfileCard } from './ProfileCard';
 import { ProfileModal } from './ProfileModal';
@@ -98,73 +98,99 @@ export const FeedPage: React.FC<FeedPageProps> = ({
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
             {/* Header */}
-            <header className="fixed top-0 z-50 w-full bg-navy/70 backdrop-blur-xl border-b border-white/5 shadow-2xl transition-all duration-300">
-                <div className="border-b border-white/5">
-                    <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-                        <div
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => {
-                                setSearchCity('');
-                                window.location.hash = '';
-                            }}
+            <header className="fixed top-0 z-50 w-full bg-bordeaux shadow-2xl transition-all duration-300 border-b border-white/10">
+                <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+                    {/* Logo */}
+                    <div
+                        className="flex items-center gap-2 cursor-pointer shrink-0"
+                        onClick={() => {
+                            setSearchCity('');
+                            window.location.hash = '';
+                        }}
+                    >
+                        <div className="text-xl font-bold tracking-tight text-white flex items-center">
+                            <Plus className="text-pink mr-1" size={24} />
+                            <span className="font-serif italic font-light">Sex</span>
+                            <span className="font-black uppercase ml-0.5">log</span>
+                            <span className="text-[8px] ml-1 bg-pink px-1 rounded-sm">CLUBE</span>
+                        </div>
+                    </div>
+
+                    {/* Central Search Bar (Sexlog Style) */}
+                    <div className="flex-1 max-w-xl hidden md:flex relative group">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <Search size={16} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Encontrar pessoas..."
+                            className="w-full bg-white/10 border border-white/5 rounded-md pl-10 pr-4 py-2 text-sm outline-none focus:bg-white/20 focus:border-white/20 transition-all placeholder:text-gray-400"
+                            value={searchCity}
+                            onChange={(e) => setSearchCity(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Header Icons & Actions */}
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <button
+                            onClick={() => window.location.hash = '#dashboard'}
+                            className="p-2 text-gray-300 hover:text-white transition-colors relative"
+                            title="Painel"
                         >
-                            <div className="w-8 h-8 bg-primary/20 backdrop-blur-sm rounded-lg flex items-center justify-center rotate-3 border border-primary/30">
-                                <Plus className="text-primary transform -rotate-3" size={20} />
-                            </div>
-                            <div className="text-xl font-bold tracking-tight text-white">
-                                THE<span className="text-primary tracking-widest font-black uppercase ml-0.5 drop-shadow-sm">SECRET</span>CLUB
-                            </div>
-                        </div>
+                            <User size={22} />
+                        </button>
 
-                        <div className="flex-1 flex justify-center hidden lg:flex overflow-hidden">
-                            <h1 className="text-lg sm:text-xl font-serif font-light tracking-tight text-white/95 whitespace-nowrap">
-                                A arte do <span className="text-primary italic">encontro</span> em sua <span className="text-primary italic"> melhor</span> forma
-                            </h1>
-                        </div>
+                        <button
+                            onClick={() => onMessageClick('')}
+                            className="p-2 text-gray-300 hover:text-white transition-colors relative"
+                            title="Mensagens"
+                        >
+                            <MessageSquare size={22} />
+                            <span className="absolute top-1 right-1 w-2 h-2 bg-pink rounded-full border border-bordeaux"></span>
+                        </button>
 
-                        <div className="flex-1" />
+                        <button className="p-2 text-gray-300 hover:text-white transition-colors" title="Notificações">
+                            <Bell size={22} />
+                        </button>
 
-                        <div className="flex items-center gap-2 sm:gap-6">
-                            <button
-                                onClick={() => window.location.hash = '#dashboard'}
-                                className="flex items-center gap-2 text-[11px] font-black text-white/80 hover:text-primary transition-colors tracking-tight uppercase"
-                            >
-                                <User size={16} />
-                                <span>PAINEL</span>
-                            </button>
+                        <div className="h-8 w-[1px] bg-white/10 mx-1 hidden sm:block" />
 
-                            {isAdmin && (
-                                <button
-                                    onClick={() => window.location.hash = '#admin'}
-                                    className="hidden sm:flex items-center gap-2 text-[11px] font-black text-primary border border-primary/30 px-3 py-1.5 rounded-sm hover:bg-primary/10 transition-all tracking-tight uppercase"
-                                >
-                                    <ShieldCheck size={14} />
-                                    <span>ADMIN</span>
-                                </button>
-                            )}
+                        <button
+                            onClick={async () => {
+                                const { supabase } = await import('../lib/supabase');
+                                await supabase.auth.signOut();
+                                window.location.hash = '';
+                                window.location.reload();
+                            }}
+                            className="text-[10px] text-gray-400 hover:text-white uppercase tracking-widest font-bold transition-colors hidden sm:block"
+                        >
+                            Sair
+                        </button>
 
-                            <button
-                                onClick={async () => {
-                                    const { supabase } = await import('../lib/supabase');
-                                    await supabase.auth.signOut();
-                                    window.location.hash = '';
-                                    window.location.reload();
-                                }}
-                                className="text-[10px] text-gray-500 hover:text-red-400 uppercase tracking-widest font-bold transition-colors"
-                            >
-                                Sair
-                            </button>
-
-                            <div className="flex lg:hidden items-center gap-3 ml-2 border-l pl-4 border-white/10">
-                                <Menu className="text-gray-500 hover:text-primary transition-colors cursor-pointer" size={20} />
-                            </div>
-                        </div>
+                        <button className="lg:hidden p-2 text-gray-300">
+                            <Menu size={24} />
+                        </button>
                     </div>
                 </div>
 
                 {/* Category & Gender Tabs */}
-                <div className="bg-white/5 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
-                    <div className="container mx-auto flex items-center justify-start lg:justify-center gap-0 h-12">
+                <div className="bg-bordeaux-light/50 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
+                    <div className="container mx-auto flex items-center justify-start lg:justify-center gap-0 h-10">
+                        {[
+                            { label: 'Feed Social', action: () => setViewMode('feed') },
+                            { label: 'Novidades', action: () => { setSearchCity(''); setViewMode('grid'); } },
+                            { label: 'Vídeos', action: () => { setActiveFilter('Com Vídeo'); setViewMode('grid'); } },
+                            { label: 'Livecam', action: () => { } },
+                        ].map((link) => (
+                            <button
+                                key={link.label}
+                                onClick={link.action}
+                                className="px-6 h-full flex items-center text-[10px] font-bold text-white/70 hover:text-white uppercase tracking-widest transition-colors"
+                            >
+                                {link.label}
+                            </button>
+                        ))}
+                        <div className="h-4 w-[1px] bg-white/10 mx-4" />
                         {[
                             { label: 'MULHERES', cat: 'singles', gender: 'Mulheres' },
                             { label: 'HOMENS', cat: 'singles', gender: 'Homens' },
@@ -270,36 +296,60 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                     </div>
                 </section>
 
-                {/* Featured Profiles (Stories) */}
-                {featuredProfiles.length > 0 && (
-                    <section className="relative z-30 mt-20 lg:-mt-12 pb-8 scrollbar-hide overflow-x-auto">
-                        <div className="container mx-auto px-4 flex gap-4 min-w-max">
-                            {featuredProfiles.map((p) => {
-                                const isBoosted = p.boost_until && new Date(p.boost_until) > new Date();
-                                return (
-                                    <div
-                                        key={p.id}
-                                        onClick={() => openProfile(p)}
-                                        className="flex flex-col items-center gap-1.5 cursor-pointer group"
-                                    >
-                                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 border-2 ${isBoosted ? 'border-primary ring-4 ring-primary/40' : 'border-primary ring-2 ring-primary/20'} transition-all duration-300 group-hover:scale-110 group-hover:ring-primary/40 group-hover:shadow-lg group-hover:shadow-primary/20 active:scale-95`}>
-                                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-navy">
-                                                <img
-                                                    src={p.imageUrl || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=200"}
-                                                    alt={p.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
+                {/* Featured Profiles (Stories - Sexlog Style) */}
+                <section className="relative z-30 mt-8 pb-4 scrollbar-hide overflow-x-auto bg-navy/50 border-b border-white/5">
+                    <div className="container mx-auto px-4 py-6 flex items-start gap-5 min-w-max">
+                        {/* Boost your profile button (Sexlog style) */}
+                        <div
+                            onClick={() => window.location.hash = '#dashboard'}
+                            className="flex flex-col items-center gap-2 cursor-pointer group shrink-0"
+                        >
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-bordeaux flex items-center justify-center border-2 border-white/10 group-hover:border-pink transition-all">
+                                <Plus className="text-white group-hover:scale-125 transition-transform" size={32} />
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-none">Destaque</span>
+                                <span className="text-[10px] font-medium text-gray-500 uppercase tracking-tighter">seu perfil</span>
+                            </div>
+                        </div>
+
+                        {featuredProfiles.map((p) => {
+                            const isBoosted = p.boost_until && new Date(p.boost_until) > new Date();
+                            const isOnline = true; // Placeholder for online status
+                            return (
+                                <div
+                                    key={p.id}
+                                    onClick={() => openProfile(p)}
+                                    className="flex flex-col items-center gap-2 cursor-pointer group shrink-0"
+                                >
+                                    <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[3px] ${isBoosted ? 'bg-gradient-to-tr from-pink via-purple-500 to-pink' : 'bg-gray-700'} group-hover:scale-105 transition-all duration-300 shadow-xl`}>
+                                        <div className="w-full h-full rounded-full overflow-hidden border-2 border-navy">
+                                            <img
+                                                src={p.imageUrl || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=200"}
+                                                alt={p.name}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
-                                        <span className={`text-[10px] font-bold ${isBoosted ? 'text-primary' : 'text-gray-400'} tracking-tight uppercase truncate max-w-[64px] sm:max-w-[80px]`}>
+                                        {/* Live/Online Indicator */}
+                                        {isOnline && (
+                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-green-500 text-[8px] font-black text-white px-2 py-0.5 rounded-full border-2 border-navy uppercase tracking-widest shadow-lg">
+                                                LIVE
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col items-center max-w-[80px]">
+                                        <span className={`text-[10px] font-bold ${isBoosted ? 'text-pink' : 'text-gray-300'} tracking-tight truncate w-full text-center`}>
                                             {p.name.split(' ')[0]}
                                         </span>
+                                        <span className="text-[8px] text-gray-500 font-medium uppercase tracking-tighter truncate w-full text-center leading-none mt-0.5">
+                                            {p.profile_type === 'casal' ? 'Casal' : p.gender || 'Membro'}
+                                        </span>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-                )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
 
 
 
@@ -336,13 +386,12 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                             ))}
                         </div>
 
-                        {/* View Mode Toggle */}
                         <div className="flex justify-center mb-8 border-b border-white/5 pb-4">
                             <div className="bg-white/5 p-1 rounded-full flex gap-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${viewMode === 'grid'
-                                        ? 'bg-primary text-navy shadow-[0_0_15px_rgba(226,176,162,0.4)]'
+                                        ? 'bg-pink text-white shadow-[0_0_15px_rgba(255,0,102,0.4)]'
                                         : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
@@ -351,7 +400,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                 <button
                                     onClick={() => setViewMode('feed')}
                                     className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${viewMode === 'feed'
-                                        ? 'bg-primary text-navy shadow-[0_0_15px_rgba(226,176,162,0.4)]'
+                                        ? 'bg-pink text-white shadow-[0_0_15px_rgba(255,0,102,0.4)]'
                                         : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
@@ -377,7 +426,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                         }
                                     }}
                                     className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'radar'
-                                        ? 'bg-primary text-navy shadow-[0_0_15px_rgba(226,176,162,0.4)]'
+                                        ? 'bg-pink text-white shadow-[0_0_15px_rgba(255,0,102,0.4)]'
                                         : 'text-gray-400 hover:text-white'
                                         }`}
                                 >

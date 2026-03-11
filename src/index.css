@@ -7,6 +7,12 @@
   --color-navy-light: #131a26;
   --color-navy-dark: #05070a;
 
+  /* Sexlog Inspired Colors */
+  --color-bordeaux: #4a0e2e;
+  --color-bordeaux-light: #701545;
+  --color-pink: #ff0066;
+  --color-pink-light: #ff4d94;
+
   --font-sans: 'Outfit', sans-serif;
   --font-serif: 'Playfair Display', serif;
 }
@@ -53,8 +59,15 @@ body {
 }
 
 @keyframes subtle-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .animate-subtle-pulse {
