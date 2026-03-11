@@ -9,11 +9,11 @@ import {
     Plus
 } from 'lucide-react';
 
-interface AffiliateProgramProps {
+interface AmbassadorProgramProps {
     onLoginClick: () => void;
 }
 
-export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick }) => {
+export const AmbassadorProgram: React.FC<AmbassadorProgramProps> = ({ onLoginClick }) => {
     return (
         <div className="min-h-screen bg-[#0a0a0b] text-white font-sans selection:bg-[#e2b0a2] selection:text-navy">
             {/* Header / Logo Area */}
@@ -46,17 +46,17 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-8 uppercase tracking-widest">
                         <TrendingUp size={16} />
-                        PROGRAMA DE AFILIADOS OFICIAL
+                        PROGRAMA DE EMBAIXADORES OFICIAL
                     </div>
                     <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight uppercase tracking-tighter">
-                        Indique e Ganhe <span className="text-primary italic underline underline-offset-8">Renda Extra</span>
+                        Indique e Ganhe <span className="text-primary italic underline underline-offset-8">como Embaixador</span>
                     </h2>
                     <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
                         Ganhe <strong className="text-white">20% de comissão VITÁLICIA</strong> sobre todos os planos e destaques comprados pelos membros que você indicar para o TheSecretclub.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <button onClick={onLoginClick} className="px-10 py-5 bg-primary text-navy font-black text-sm uppercase tracking-widest rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(226,176,162,0.4)] hover:bg-white flex items-center justify-center gap-2">
-                            Quero Ser Afiliado <LinkIcon size={18} />
+                            Quero Ser Embaixador <LinkIcon size={18} />
                         </button>
                     </div>
                 </div>
@@ -81,7 +81,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                             </div>
                             <h4 className="text-xl font-bold mb-3 uppercase tracking-widest">Cadastre-se</h4>
                             <p className="text-gray-400 text-sm leading-relaxed">
-                                Crie sua conta gratuitamente no TheSecretclub. No seu painel (Dashboard), acesse a aba "Afiliados" para pegar seu Link Exclusivo.
+                                Crie sua conta gratuitamente no TheSecretclub. No seu painel (Dashboard), acesse a aba "Embaixadores" para pegar seu Link Exclusivo.
                             </p>
                         </div>
 
@@ -179,9 +179,9 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
             <section className="py-24 px-6 text-center border-t border-white/5 bg-gradient-to-t from-primary/5 to-transparent">
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl md:text-5xl font-black mb-6 uppercase tracking-tighter">Pronta para começar?</h2>
-                    <p className="text-gray-400 mb-10 text-lg font-light">Junte-se ao nosso programa de afiliados e comece a monetizar seus contatos hoje mesmo.</p>
+                    <p className="text-gray-400 mb-10 text-lg font-light">Junte-se ao nosso programa de embaixador e comece a monetizar seus contatos hoje mesmo.</p>
                     <button onClick={onLoginClick} className="px-12 py-5 bg-white text-navy font-black text-sm uppercase tracking-widest rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                        Pegar Meu Link de Afiliado
+                        Pegar Meu Link de Embaixador
                     </button>
                 </div>
             </section>
@@ -197,7 +197,7 @@ export const AffiliateProgram: React.FC<AffiliateProgramProps> = ({ onLoginClick
                     </div>
                     <p className="text-[10px] text-gray-600 max-w-sm uppercase tracking-widest leading-loose">
                         © 2026 TheSecretclub.
-                        Termos aplicáveis ao programa de afiliados na plataforma.
+                        Termos aplicáveis ao programa de embaixadores na plataforma.
                     </p>
                 </div>
             </footer>

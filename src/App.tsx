@@ -5,7 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { ClientDashboard } from './components/ClientDashboard';
 import { AdminPanel } from './components/AdminPanel';
 import { ModelLandingPage } from './components/ModelLandingPage';
-import { AffiliateProgram } from './components/AffiliateProgram';
+import { AmbassadorProgram } from './components/AffiliateProgram';
 import { LandingPage } from './components/LandingPage';
 import { FeedPage } from './components/FeedPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
@@ -321,7 +321,7 @@ export default function App() {
   const isDashboardView = currentHash === '#dashboard';
   const isAdminView = currentHash === '#admin';
   const isModelLandingView = currentHash === '#sejaummembro' || currentPath === '/sejaummembro';
-  const isAffiliateView = currentPath.toLowerCase() === '/programadeafiliadosadulto';
+  const isAmbassadorView = currentPath.toLowerCase() === '/programadeafiliadosadulto';
 
   const handleProfileUpdate = useCallback((profileId: string, updates: any) => {
     setProfiles(prev => prev.map(p =>
@@ -379,7 +379,7 @@ export default function App() {
       fetchAvailableCities();
     }
 
-  }, [currentHash, currentPath, isModelLandingView, isAffiliateView, searchCity, activeFilter, activeGender, user, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
+  }, [currentHash, currentPath, isModelLandingView, isAmbassadorView, searchCity, activeFilter, activeGender, user, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
 
   // Invite validation callback
   const handleInviteValidated = useCallback((_code: string) => {
@@ -400,10 +400,10 @@ export default function App() {
 
 
   // Final Routing Logic
-  if (isAffiliateView) {
+  if (isAmbassadorView) {
     return (
       <>
-        <AffiliateProgram onLoginClick={() => setIsAuthOpen(true)} />
+        <AmbassadorProgram onLoginClick={() => setIsAuthOpen(true)} />
         <AnimatePresence>
           {isAuthOpen && (
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />

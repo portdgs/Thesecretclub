@@ -206,7 +206,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             fetchPhotos();
             fetchVideos();
         }
-        if (activeTab === 'Afiliados') {
+        if (activeTab === 'Embaixadores') {
             fetchAffiliateData();
         }
         if (activeTab === 'Estatísticas') {
