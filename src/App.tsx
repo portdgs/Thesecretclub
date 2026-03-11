@@ -381,6 +381,11 @@ export default function App() {
 
   }, [currentHash, currentPath, isModelLandingView, isAffiliateView, searchCity, activeFilter, activeGender, user, fetchProfiles, fetchFeaturedProfiles, fetchAvailableCities]);
 
+  // Invite validation callback
+  const handleInviteValidated = useCallback((_code: string) => {
+    setIsAuthOpen(true);
+  }, []);
+
   // Guard: Global Loading
   if (!roleLoaded && (user || isDashboardView || isAdminView)) {
     return (
@@ -393,10 +398,6 @@ export default function App() {
     );
   }
 
-  // Invite validation callback
-  const handleInviteValidated = useCallback((_code: string) => {
-    setIsAuthOpen(true);
-  }, []);
 
   // Final Routing Logic
   if (isAffiliateView) {
