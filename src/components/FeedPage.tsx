@@ -95,26 +95,28 @@ export const FeedPage: React.FC<FeedPageProps> = ({
             />
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
-            {/* Header */}
-            <header className="fixed top-0 z-50 w-full bg-bordeaux shadow-2xl transition-all duration-300 border-b border-white/10">
+            {/* Navigation Header */}
+            <header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl border-b border-white/5">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
                     {/* Logo */}
                     <div
-                        className="flex items-center gap-2 cursor-pointer shrink-0"
+                        className="flex flex-col items-start cursor-pointer shrink-0"
                         onClick={() => {
                             setSearchCity('');
                             window.location.hash = '';
                         }}
                     >
-                        <div className="text-xl font-bold tracking-tight text-white flex items-center">
-                            <Plus className="text-pink mr-1" size={24} />
-                            <span className="font-serif italic font-light">Sex</span>
-                            <span className="font-black uppercase ml-0.5">log</span>
-                            <span className="text-[8px] ml-1 bg-pink px-1 rounded-sm">CLUBE</span>
+                        <div className="text-xl font-black tracking-tighter text-white flex items-center">
+                            <span>THE</span>
+                            <span className="text-primary italic">SECRET</span>
+                            <span>CLUB</span>
                         </div>
+                        <span className="text-[8px] text-primary/60 font-medium tracking-[0.2em] uppercase -mt-1 ml-0.5">
+                            A arte do encontro...
+                        </span>
                     </div>
 
-                    {/* Central Search Bar (Sexlog Style) */}
+                    {/* Central Search Bar */}
                     <div className="flex-1 max-w-xl hidden md:flex relative group">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                             <Search size={16} />
@@ -144,7 +146,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                             title="Mensagens"
                         >
                             <MessageSquare size={22} />
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-pink rounded-full border border-bordeaux"></span>
+                            <span className="absolute top-1 right-1 w-2 h-2 bg-pink rounded-full border border-navy"></span>
                         </button>
 
                         <button className="p-2 text-gray-300 hover:text-white transition-colors" title="Notificações">
@@ -172,7 +174,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 </div>
 
                 {/* Category & Gender Tabs */}
-                <div className="bg-bordeaux-light/50 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
+                <div className="bg-navy/50 backdrop-blur-sm scrollbar-hide overflow-x-auto border-t border-white/5">
                     <div className="container mx-auto flex items-center justify-start lg:justify-center gap-0 h-10">
                         {[
                             { label: 'Feed Social', action: () => setViewMode('feed') },
@@ -192,8 +194,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                         {[
                             { label: 'MULHERES', cat: 'singles', gender: 'Mulheres' },
                             { label: 'HOMENS', cat: 'singles', gender: 'Homens' },
-                            { label: 'CASAIS', cat: 'casal', gender: 'Todos' },
-                            { label: 'TRANS', cat: 'singles', gender: 'Trans' }
+                            { label: 'CASAIS', cat: 'casal', gender: 'Todos' }
                         ].map((filter) => {
                             const isActive = (filter.cat === 'casal')
                                 ? activeCategory === 'casal'
@@ -223,7 +224,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 </div>
             </header>
 
-            <main className="pt-[121px]">
+            <main className="pt-0">
                 {/* Hero / Search */}
                 <section className="relative min-h-[400px] md:min-h-[35vh] flex flex-col items-center justify-start md:justify-center pt-12 md:pt-12 pb-32 md:pb-12 overflow-hidden">
                     <div className="absolute inset-0 z-0">
@@ -680,6 +681,6 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 type="terms_of_use"
                 onClose={() => setIsTermsOpen(false)}
             />
-        </div>
+        </div >
     );
 };
