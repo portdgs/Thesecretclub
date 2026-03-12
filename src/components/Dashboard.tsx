@@ -559,14 +559,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user) return;
 
             const { data, error } = await supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .list(user.id);
 
             if (error) throw error;
 
             if (data) {
                 const urls = data.map((file: any) =>
-                    supabase.storage.from('Thesecretclub').getPublicUrl(`${user.id}/${file.name}`).data.publicUrl
+                    supabase.storage.from('TheSecretclub').getPublicUrl(`${user.id}/${file.name}`).data.publicUrl
                 );
                 setPhotos(urls);
             }
@@ -652,7 +652,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .upload(filePath, compressedFile, {
                     cacheControl: '3600',
                     upsert: true
@@ -732,7 +732,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .upload(filePath, compressedFile, {
                     cacheControl: '3600',
                     upsert: true
@@ -741,7 +741,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .getPublicUrl(filePath);
 
             setProfile((prev: any) => ({ ...prev, avatar_url: publicUrl }));
@@ -807,7 +807,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .upload(filePath, croppedImageBlob, {
                     contentType: 'image/jpeg',
                     cacheControl: '3600',
@@ -817,7 +817,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .getPublicUrl(filePath);
 
             setProfile((prev: any) => ({ ...prev, cover_url: publicUrl }));
@@ -840,7 +840,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user || !fileName) return;
 
             const { error } = await supabase.storage
-                .from('Thesecretclub')
+                .from('TheSecretclub')
                 .remove([`${user.id}/${fileName}`]);
 
             if (error) throw error;

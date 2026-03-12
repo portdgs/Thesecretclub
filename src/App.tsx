@@ -262,12 +262,12 @@ export default function App() {
       console.log("[App] Perfis retornados:", profilesData?.length || 0);
 
       const profilesWithMedia = await Promise.all((profilesData || []).map(async (profile: any) => {
-        const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
+        const { data: photoFiles } = await supabase.storage.from('TheSecretclub').list(profile.id, { limit: 1 });
         const { data: videoFiles } = await supabase.storage.from('Thesecretclub-video').list(profile.id, { limit: 1 });
 
         return {
           ...profile,
-          imageUrl: photoFiles?.length ? supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          imageUrl: photoFiles?.length ? supabase.storage.from('TheSecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
           videoUrl: videoFiles?.length ? supabase.storage.from('Thesecretclub-video').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
         };
       }));
@@ -299,12 +299,12 @@ export default function App() {
       const filteredData = (data || []).filter((p: any) => p.id !== user?.id);
 
       const profilesWithMedia = await Promise.all(filteredData.map(async (profile: any) => {
-        const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
+        const { data: photoFiles } = await supabase.storage.from('TheSecretclub').list(profile.id, { limit: 1 });
         const { data: videoFiles } = await supabase.storage.from('Thesecretclub-video').list(profile.id, { limit: 1 });
 
         return {
           ...profile,
-          imageUrl: photoFiles?.length ? supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          imageUrl: photoFiles?.length ? supabase.storage.from('TheSecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
           videoUrl: videoFiles?.length ? supabase.storage.from('Thesecretclub-video').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
         };
       }));
@@ -351,10 +351,10 @@ export default function App() {
       if (error) throw error;
 
       const featured = await Promise.all((data || []).map(async (profile: any) => {
-        const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
+        const { data: photoFiles } = await supabase.storage.from('TheSecretclub').list(profile.id, { limit: 1 });
         return {
           ...profile,
-          imageUrl: photoFiles?.length ? supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          imageUrl: photoFiles?.length ? supabase.storage.from('TheSecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
         };
       }));
 
@@ -399,9 +399,9 @@ export default function App() {
       const photosLimit = profile.plans?.photos_limit ?? 3;
       const videosLimit = profile.plans?.videos_limit ?? 0;
 
-      const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id);
+      const { data: photoFiles } = await supabase.storage.from('TheSecretclub').list(profile.id);
       const photoUrls = (photoFiles || []).map((file: any) =>
-        supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
+        supabase.storage.from('TheSecretclub').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
       );
 
       const { data: videoFiles } = await supabase.storage.from('Thesecretclub-video').list(profile.id);

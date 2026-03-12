@@ -5,7 +5,7 @@
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 CREATE POLICY "Public Access"
 ON storage.objects FOR SELECT
-USING ( bucket_id IN ('Thesecretclub', 'Thesecretclub-video', 'user-content') );
+USING ( bucket_id IN ('TheSecretclub', 'Thesecretclub-video', 'user-content') );
 
 -- 2. Permite uploads de usuários autenticados (INSERT) 
 DROP POLICY IF EXISTS "Allow authenticated uploads" ON storage.objects;
