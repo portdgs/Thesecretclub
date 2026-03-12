@@ -78,10 +78,11 @@ export const InviteManager: React.FC<InviteManagerProps> = ({ userId }) => {
     };
 
     const copyToClipboard = (token: string, guestEmail: string) => {
-        // Generate a pre-filled link if needed, or just copy the token + email instructions
-        const message = `Você foi convidado para o TheSecretclub!\n\nEmail autorizado: ${guestEmail}\nToken de Acesso: ${token}\n\nAcesse: https://thesecretclub.io/ e clique em "Tenho um convite".`;
+        const baseUrl = window.location.origin;
+        const inviteUrl = `${baseUrl}?ref=${userId}&token=${token}`;
+        const message = `Você foi convidado para o TheSecretclub!\n\nEmail autorizado: ${guestEmail}\nLink de Acesso: ${inviteUrl}\n\nClique no link acima para entrar diretamente.`;
         navigator.clipboard.writeText(message);
-        alert('Instruções copiadas para a área de transferência!');
+        alert('Link de convite copiado!');
     };
 
     if (isLoadingData) {

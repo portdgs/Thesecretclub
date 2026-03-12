@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, KeyRound, ArrowRight, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -14,6 +14,61 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [autoValidating, setAutoValidating] = useState(false);
+
+    // Auto-detect token from URL params (from ambassador link)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tokenFromUrl = params.get('token');
+        const refFromUrl = params.get('ref');
+
+        // Store referral ID if present
+        if (refFromUrl) {
+            localStorage.setItem('referralId', refFromUrl);
+        }
+
+        if (tokenFromUrl) {
+            setInviteCode(tokenFromUrl);
+            setShowInvite(true);
+            setAutoValidating(true);
+            // Auto-validate the token
+            (async () => {
+                try {
+                    const trimmedCode = tokenFromUrl.trim().toLowerCase();
+                    const { data, error: queryError } = await supabase
+                        .from('generated_invites')
+                        .select('id, is_used, invited_email')
+                        .eq('final_token', trimmedCode)
+                        .single();
+
+                    if (queryError || !data) {
+                        setError('Código de convite inválido ou não encontrado.');
+                        setAutoValidating(false);
+                        return;
+                    }
+
+                    if (data.is_used) {
+                        setError('Este código já foi utilizado.');
+                        setAutoValidating(false);
+                        return;
+                    }
+
+                    setSuccess(true);
+                    localStorage.setItem('pendingInviteCode', trimmedCode);
+
+                    // Clean the URL params
+                    window.history.replaceState({}, '', window.location.pathname);
+
+                    setTimeout(() => {
+                        onInviteValidated(trimmedCode);
+                    }, 1500);
+                } catch {
+                    setError('Erro ao validar convite.');
+                    setAutoValidating(false);
+                }
+            })();
+        }
+    }, []);
 
     const handleInviteSubmit = async () => {
         if (!inviteCode.trim()) {
@@ -200,8 +255,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
                                                 setError(null);
                                             }}
                                             onKeyDown={(e) => e.key === 'Enter' && handleInviteSubmit()}
-                                            placeholder="Cole seu token de acesso aqui"
-                                            disabled={success}
+                                            placeholder={autoValidating ? "Validando convite automático..." : "Cole seu token de acesso aqui"}
+                                            disabled={success || autoValidating}
                                             className="w-full bg-white/5 border border-white/10 rounded-sm py-3 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 tracking-widest font-mono transition-all disabled:opacity-50"
                                         />
                                     </div>
@@ -239,17 +294,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
 
                                     <button
                                         onClick={handleInviteSubmit}
-                                        disabled={loading || success}
+                                        disabled={loading || success || autoValidating}
                                         className="w-full bg-primary text-navy py-3 rounded-sm font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
-                                        {loading ? (
+                                        {loading || autoValidating ? (
                                             <Loader2 className="animate-spin" size={14} />
                                         ) : success ? (
                                             <Sparkles size={14} />
                                         ) : (
                                             <ArrowRight size={14} />
                                         )}
-                                        {loading ? 'Validando...' : success ? 'Validado!' : 'Validar Convite'}
+                                        {loading || autoValidating ? 'Validando...' : success ? 'Validado!' : 'Validar Convite'}
                                     </button>
                                 </div>
 
