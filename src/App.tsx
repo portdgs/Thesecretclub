@@ -110,10 +110,10 @@ export default function App() {
     supabase.auth.getSession().then(({ data }: { data: any }) => {
       if (isInitialFetchDone) return;
       const currentUser = data?.session?.user ?? null;
-      console.log("[App] Sessão inicial capturada:", currentUser?.id || "Ninguém");
+      console.log("[App] Sessão inicial capturada:", user?.id || "Ninguém");
       setUser(currentUser);
       if (currentUser) {
-        fetchUserRole(currentUser.id);
+        fetchUserRole(user.id);
       } else {
         setRoleLoaded(true);
       }
@@ -130,7 +130,7 @@ export default function App() {
         if (pendingRole) {
           console.log("[App] Aplicando pendingRole (como profile_type):", pendingRole);
           localStorage.removeItem('pendingRole');
-          const { data: existingProfile } = await supabase.from('profiles').select('profile_type').eq('id', currentUser.id);
+          const { data: existingProfile } = await supabase.from('profiles').select('profile_type').eq('id', user.id);
 
           if (existingProfile && existingProfile.length > 0 && existingProfile[0].profile_type !== pendingRole) {
             setUserRole(existingProfile[0].profile_type);
@@ -138,7 +138,7 @@ export default function App() {
           } else {
             const referredBy = localStorage.getItem('referralId');
             await supabase.from('profiles').upsert({
-              id: currentUser.id,
+              id: user.id,
               profile_type: pendingRole,
               name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Usuário',
               referred_by: referredBy || null,
@@ -149,7 +149,7 @@ export default function App() {
         } else {
           // Avoid duplicate calls if initial fetch is already handling it
           if (isInitialFetchDone) {
-            fetchUserRole(currentUser.id);
+            fetchUserRole(user.id);
           }
         }
       } else {
@@ -215,8 +215,8 @@ export default function App() {
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('profile_type', 'cliente');
 
-      if (currentUser?.id) {
-        query = query.neq('id', currentUser.id);
+      if (user?.id) {
+        query = query.neq('id', user.id);
       }
 
       if (city && city.trim()) {
@@ -296,7 +296,7 @@ export default function App() {
       if (error) throw error;
 
       // Filter out the current user from the nearby results
-      const filteredData = (data || []).filter((p: any) => p.id !== currentUser?.id);
+      const filteredData = (data || []).filter((p: any) => p.id !== user?.id);
 
       const profilesWithMedia = await Promise.all(filteredData.map(async (profile: any) => {
         const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
@@ -324,8 +324,8 @@ export default function App() {
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('profile_type', 'cliente');
 
-      if (currentUser?.id) {
-        query = query.neq('id', currentUser.id);
+      if (user?.id) {
+        query = query.neq('id', user.id);
       }
 
       if (activeCategory === 'singles') {
