@@ -559,14 +559,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user) return;
 
             const { data, error } = await supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .list(user.id);
 
             if (error) throw error;
 
             if (data) {
                 const urls = data.map((file: any) =>
-                    supabase.storage.from('public-photos').getPublicUrl(`${user.id}/${file.name}`).data.publicUrl
+                    supabase.storage.from('Thesecretclub').getPublicUrl(`${user.id}/${file.name}`).data.publicUrl
                 );
                 setPhotos(urls);
             }
@@ -581,14 +581,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user) return;
 
             const { data, error } = await supabase.storage
-                .from('public-videos')
+                .from('Thesecretclub-video')
                 .list(user.id);
 
             if (error) throw error;
 
             if (data) {
                 const urls = data.map((file: any) =>
-                    supabase.storage.from('public-videos').getPublicUrl(`${user.id}/${file.name}`).data.publicUrl
+                    supabase.storage.from('Thesecretclub-video').getPublicUrl(`${user.id}/${file.name}`).data.publicUrl
                 );
                 setVideos(urls);
             }
@@ -652,7 +652,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .upload(filePath, compressedFile, {
                     cacheControl: '3600',
                     upsert: true
@@ -692,7 +692,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('public-videos')
+                .from('Thesecretclub-video')
                 .upload(filePath, file, {
                     cacheControl: '3600',
                     upsert: true
@@ -732,7 +732,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .upload(filePath, compressedFile, {
                     cacheControl: '3600',
                     upsert: true
@@ -741,7 +741,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .getPublicUrl(filePath);
 
             setProfile((prev: any) => ({ ...prev, avatar_url: publicUrl }));
@@ -807,7 +807,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             const filePath = `${user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .upload(filePath, croppedImageBlob, {
                     contentType: 'image/jpeg',
                     cacheControl: '3600',
@@ -817,7 +817,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .getPublicUrl(filePath);
 
             setProfile((prev: any) => ({ ...prev, cover_url: publicUrl }));
@@ -840,7 +840,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user || !fileName) return;
 
             const { error } = await supabase.storage
-                .from('public-photos')
+                .from('Thesecretclub')
                 .remove([`${user.id}/${fileName}`]);
 
             if (error) throw error;
@@ -857,7 +857,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             if (!user || !fileName) return;
 
             const { error } = await supabase.storage
-                .from('public-videos')
+                .from('Thesecretclub-video')
                 .remove([`${user.id}/${fileName}`]);
 
             if (error) throw error;
@@ -1941,13 +1941,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                                             const fileExt = file.name.split('.').pop();
                                                             const fileName = `validation_${user.id}_${Date.now()}.${fileExt}`;
                                                             const { error: uploadError } = await supabase.storage
-                                                                .from('public-videos')
+                                                                .from('Thesecretclub-video')
                                                                 .upload(`${user.id}/${fileName}`, file);
 
                                                             if (uploadError) throw uploadError;
 
                                                             const { data: { publicUrl } } = supabase.storage
-                                                                .from('public-videos')
+                                                                .from('Thesecretclub-video')
                                                                 .getPublicUrl(`${user.id}/${fileName}`);
 
                                                             const { error: updateError } = await supabase

@@ -1,4 +1,4 @@
-ï»¿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AuthModal } from './components/AuthModal';
 import { Dashboard } from './components/Dashboard';
@@ -82,7 +82,7 @@ export default function App() {
         setUserRole(data[0].profile_type || 'singles');
         setIsAdmin(!!data[0].is_admin);
       } else {
-        console.warn("[App] Perfil nÃ£o encontrado para o usuÃ¡rio logado.");
+        console.warn("[App] Perfil não encontrado para o usuário logado.");
         setUserRole('singles');
         setIsAdmin(false);
       }
@@ -97,10 +97,10 @@ export default function App() {
 
   // Auth listener
   useEffect(() => {
-    console.log("[App] Iniciando monitoramento de sessÃ£o...");
+    console.log("[App] Iniciando monitoramento de sessão...");
 
     if (!isSupabaseConfigured) {
-      console.warn("[App] Supabase nÃ£o configurado.");
+      console.warn("[App] Supabase não configurado.");
       setRoleLoaded(true);
       return;
     }
@@ -110,7 +110,7 @@ export default function App() {
     supabase.auth.getSession().then(({ data }: { data: any }) => {
       if (isInitialFetchDone) return;
       const currentUser = data?.session?.user ?? null;
-      console.log("[App] SessÃ£o inicial capturada:", currentUser?.id || "NinguÃ©m");
+      console.log("[App] Sessão inicial capturada:", currentUser?.id || "Ninguém");
       setUser(currentUser);
       if (currentUser) {
         fetchUserRole(currentUser.id);
@@ -140,7 +140,7 @@ export default function App() {
             await supabase.from('profiles').upsert({
               id: currentUser.id,
               profile_type: pendingRole,
-              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'UsuÃ¡rio',
+              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Usuário',
               referred_by: referredBy || null,
             }, { onConflict: 'id' });
             setUserRole(pendingRole);
@@ -168,7 +168,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!roleLoaded) {
-        console.warn("[App] Timeout de carregamento de role atingido. ForÃ§ando desbloqueio.");
+        console.warn("[App] Timeout de carregamento de role atingido. Forçando desbloqueio.");
         setRoleLoaded(true);
       }
     }, 5000);
@@ -214,6 +214,11 @@ export default function App() {
         .from('profiles')
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('profile_type', 'cliente');
+
+      if (currentUser?.id) {
+        query = query.neq('id', currentUser.id);
+      }
+
       if (city && city.trim()) {
         const searchTerm = `%${city.trim()}%`;
         query = query.or(`city.ilike.${searchTerm},neighborhood.ilike.${searchTerm}`);
@@ -249,7 +254,7 @@ export default function App() {
       const { data: profilesData, error: profilesError } = await query;
 
       if (profilesError) {
-        console.error('[App] Erro crÃ­tico ao buscar perfis:', profilesError.message || profilesError);
+        console.error('[App] Erro crítico ao buscar perfis:', profilesError.message || profilesError);
         setProfiles([]);
         return;
       }
@@ -257,17 +262,17 @@ export default function App() {
       console.log("[App] Perfis retornados:", profilesData?.length || 0);
 
       const profilesWithMedia = await Promise.all((profilesData || []).map(async (profile: any) => {
-        const { data: photoFiles } = await supabase.storage.from('public-photos').list(profile.id, { limit: 1 });
-        const { data: videoFiles } = await supabase.storage.from('public-videos').list(profile.id, { limit: 1 });
+        const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
+        const { data: videoFiles } = await supabase.storage.from('Thesecretclub-video').list(profile.id, { limit: 1 });
 
         return {
           ...profile,
-          imageUrl: photoFiles?.length ? supabase.storage.from('public-photos').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
-          videoUrl: videoFiles?.length ? supabase.storage.from('public-videos').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
+          imageUrl: photoFiles?.length ? supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          videoUrl: videoFiles?.length ? supabase.storage.from('Thesecretclub-video').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
         };
       }));
 
-      if (filter === 'Com VÃ­deo') {
+      if (filter === 'Com Vídeo') {
         setProfiles(profilesWithMedia.filter(p => p.videoUrl));
       } else {
         setProfiles(profilesWithMedia);
@@ -290,14 +295,17 @@ export default function App() {
 
       if (error) throw error;
 
-      const profilesWithMedia = await Promise.all((data || []).map(async (profile: any) => {
-        const { data: photoFiles } = await supabase.storage.from('public-photos').list(profile.id, { limit: 1 });
-        const { data: videoFiles } = await supabase.storage.from('public-videos').list(profile.id, { limit: 1 });
+      // Filter out the current user from the nearby results
+      const filteredData = (data || []).filter((p: any) => p.id !== currentUser?.id);
+
+      const profilesWithMedia = await Promise.all(filteredData.map(async (profile: any) => {
+        const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
+        const { data: videoFiles } = await supabase.storage.from('Thesecretclub-video').list(profile.id, { limit: 1 });
 
         return {
           ...profile,
-          imageUrl: photoFiles?.length ? supabase.storage.from('public-photos').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
-          videoUrl: videoFiles?.length ? supabase.storage.from('public-videos').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
+          imageUrl: photoFiles?.length ? supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          videoUrl: videoFiles?.length ? supabase.storage.from('Thesecretclub-video').getPublicUrl(`${profile.id}/${videoFiles[0].name}`).data.publicUrl : null
         };
       }));
 
@@ -315,6 +323,10 @@ export default function App() {
         .from('profiles')
         .select('*, plans(tier_weight, photos_limit, videos_limit)')
         .neq('profile_type', 'cliente');
+
+      if (currentUser?.id) {
+        query = query.neq('id', currentUser.id);
+      }
 
       if (activeCategory === 'singles') {
         query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
@@ -339,10 +351,10 @@ export default function App() {
       if (error) throw error;
 
       const featured = await Promise.all((data || []).map(async (profile: any) => {
-        const { data: photoFiles } = await supabase.storage.from('public-photos').list(profile.id, { limit: 1 });
+        const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id, { limit: 1 });
         return {
           ...profile,
-          imageUrl: photoFiles?.length ? supabase.storage.from('public-photos').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
+          imageUrl: photoFiles?.length ? supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${photoFiles[0].name}`).data.publicUrl : null,
         };
       }));
 
@@ -387,14 +399,14 @@ export default function App() {
       const photosLimit = profile.plans?.photos_limit ?? 3;
       const videosLimit = profile.plans?.videos_limit ?? 0;
 
-      const { data: photoFiles } = await supabase.storage.from('public-photos').list(profile.id);
+      const { data: photoFiles } = await supabase.storage.from('Thesecretclub').list(profile.id);
       const photoUrls = (photoFiles || []).map((file: any) =>
-        supabase.storage.from('public-photos').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
+        supabase.storage.from('Thesecretclub').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
       );
 
-      const { data: videoFiles } = await supabase.storage.from('public-videos').list(profile.id);
+      const { data: videoFiles } = await supabase.storage.from('Thesecretclub-video').list(profile.id);
       const videoUrls = (videoFiles || []).map((file: any) =>
-        supabase.storage.from('public-videos').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
+        supabase.storage.from('Thesecretclub-video').getPublicUrl(`${profile.id}/${file.name}`).data.publicUrl
       );
 
       setSelectedPhotos(photoUrls.slice(0, photosLimit));
