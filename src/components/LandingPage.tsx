@@ -25,11 +25,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
         setError(null);
 
         try {
-            // Check if invite code exists and is valid (without consuming it yet)
+            // Check if invite token exists in generated_invites table
+            const trimmedCode = inviteCode.trim().toLowerCase();
             const { data, error: queryError } = await supabase
-                .from('invite_codes')
-                .select('id, used_by, expires_at')
-                .eq('code', inviteCode.trim().toUpperCase())
+                .from('generated_invites')
+                .select('id, is_used, invited_email')
+                .eq('final_token', trimmedCode)
                 .single();
 
             if (queryError || !data) {
@@ -37,22 +38,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
                 return;
             }
 
-            if (data.used_by) {
+            if (data.is_used) {
                 setError('Este código já foi utilizado.');
-                return;
-            }
-
-            if (data.expires_at && new Date(data.expires_at) < new Date()) {
-                setError('Este código expirou.');
                 return;
             }
 
             // Store valid invite code for use during registration
             setSuccess(true);
-            localStorage.setItem('pendingInviteCode', inviteCode.trim().toUpperCase());
+            localStorage.setItem('pendingInviteCode', trimmedCode);
 
             setTimeout(() => {
-                onInviteValidated(inviteCode.trim().toUpperCase());
+                onInviteValidated(trimmedCode);
             }, 1200);
 
         } catch {
@@ -200,13 +196,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
                                             type="text"
                                             value={inviteCode}
                                             onChange={(e) => {
-                                                setInviteCode(e.target.value.toUpperCase());
+                                                setInviteCode(e.target.value);
                                                 setError(null);
                                             }}
                                             onKeyDown={(e) => e.key === 'Enter' && handleInviteSubmit()}
-                                            placeholder="EX: SECRET-ALPHA-001"
+                                            placeholder="Cole seu token de acesso aqui"
                                             disabled={success}
-                                            className="w-full bg-white/5 border border-white/10 rounded-sm py-3 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 uppercase tracking-widest font-mono transition-all disabled:opacity-50"
+                                            className="w-full bg-white/5 border border-white/10 rounded-sm py-3 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 tracking-widest font-mono transition-all disabled:opacity-50"
                                         />
                                     </div>
 
