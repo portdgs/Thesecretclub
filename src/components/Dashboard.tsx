@@ -1667,11 +1667,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         </div>
                     )
                 }
-                {
-                    activeTab === 'Indique e Ganhe' && (
-                        <InviteManager userId={user.id} />
-                    )
-                }
 
                 {/* Hidden Inputs */}
                 {

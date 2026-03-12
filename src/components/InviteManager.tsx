@@ -179,15 +179,20 @@ export const InviteManager: React.FC<InviteManagerProps> = ({ userId }) => {
                                 </code>
                                 <button
                                     onClick={() => {
-                                        navigator.clipboard.writeText(`${window.location.origin}/?ref=${userId}`);
-                                        alert('Link copiado!');
+                                        const inviteUrl = `${window.location.origin}/?ref=${userId}`;
+                                        const message = `Olá! Estou te convidando para o TheSecretclub. Acesse pelo meu link: ${inviteUrl}\n\nApós acessar, use o código de convite que vou te enviar para completar seu cadastro. Te vejo lá!`;
+                                        navigator.clipboard.writeText(message);
+                                        alert('Mensagem de convite copiada!');
                                     }}
                                     className="p-3 bg-primary text-navy rounded-lg hover:bg-white transition-colors"
+                                    title="Copiar mensagem de convite"
                                 >
                                     <Share2 size={18} />
                                 </button>
                             </div>
-                            <p className="text-[10px] text-gray-500 mt-2">Use este link para divulgar em suas redes sociais. Qualquer um que entrar por aqui contará como sua indicação.</p>
+                            <p className="text-[10px] text-gray-500 mt-2">
+                                Envie este link para a pessoa convidada. Ela deverá preencher o código de convite que você gerará abaixo.
+                            </p>
                         </div>
 
                         {/* Configuração de PIX */}
@@ -282,7 +287,7 @@ export const InviteManager: React.FC<InviteManagerProps> = ({ userId }) => {
                                 className="w-full bg-navy border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
                                 disabled={loading}
                             />
-                            <p className="text-[10px] text-gray-500 mt-2">O convite só funcionará se o convidado utilizar exatamente este e-mail.</p>
+                            <p className="text-[10px] text-gray-500 mt-2 italic font-medium">O convite só funcionará se o convidado utilizar exatamente este e-mail. Após gerar, você deve enviar o código para ele.</p>
                         </div>
 
                         {error && <div className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</div>}
