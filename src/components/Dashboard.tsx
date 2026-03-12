@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import {
     LayoutDashboard, User, CreditCard, TrendingUp, LogOut, CheckCircle2,
     Clock, Plus, MessageCircle, Share2, Star, Loader2, Trash2,
-    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Mail, Navigation, MessageSquare, UserPlus, Menu
+    ShieldCheck, Image as ImageIcon, Camera, X, HelpCircle, Navigation, MessageSquare, UserPlus, Menu
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -49,8 +49,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         pix_key_type: ''
     });
     const [activePlan, setActivePlan] = useState<any>(null);
-    const [affiliateStats, setAffiliateStats] = useState({ indications: 0, conversions: 0 });
-    const [commissions, setCommissions] = useState<any[]>([]);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [isBoostSelection, setIsBoostSelection] = useState(false);
@@ -277,8 +275,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         { icon: ImageIcon, label: 'Aparência' },
         { icon: UserPlus, label: 'Amigos', badge: pendingRequests.length > 0 ? pendingRequests.length : undefined },
         { icon: CreditCard, label: 'Assinatura' },
-        ...(profile?.is_ambassador ? [{ icon: Share2, label: 'Embaixadores' }] : []),
-        { icon: Mail, label: 'Convites' },
+        { icon: Share2, label: 'Indique e Ganhe' },
         { icon: ShieldCheck, label: 'Verificação' },
         { icon: TrendingUp, label: 'Estatísticas' },
         { icon: MessageSquare, label: 'Mensagens', badge: unreadMessages > 0 ? unreadMessages : undefined },
@@ -297,9 +294,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         if (activeTab === 'Mídia e Fotos') {
             fetchPhotos();
             fetchVideos();
-        }
-        if (activeTab === 'Embaixadores') {
-            fetchAffiliateData();
         }
         if (activeTab === 'Estatísticas') {
             fetchHeatmapData();
@@ -400,34 +394,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
     };
 
-    const fetchAffiliateData = async () => {
-        try {
-            if (!user) return;
-            // Indicações Totais (quem usou o link)
-            const { count, error: indErr } = await supabase
-                .from('profiles')
-                .select('id', { count: 'exact', head: true })
-                .eq('referred_by', user.id);
-
-            // Comissões (Conversões reais)
-            const { data: commData, error: commErr } = await supabase
-                .from('affiliate_commissions')
-                .select('*')
-                .eq('referrer_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (indErr) console.error('Erro ao buscar indicações:', indErr);
-            if (commErr) console.error('Erro ao buscar comissões:', commErr);
-
-            setAffiliateStats({
-                indications: count || 0,
-                conversions: commData?.length || 0
-            });
-            setCommissions(commData || []);
-        } catch (error) {
-            console.error('Erro em fetchAffiliateData:', error);
-        }
-    };
 
     const fetchHeatmapData = async () => {
         try {
@@ -1702,189 +1668,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     )
                 }
                 {
-                    activeTab === 'Embaixadores' && (
-                        <div className="space-y-8">
-                            <div className="bg-navy-light border border-white/5 p-8 rounded-sm">
-                                <h2 className="text-xl font-black uppercase tracking-tight mb-4">Programa de Embaixadores</h2>
-                                <p className="text-gray-400 text-sm mb-8">
-                                    Divulgue o TheSecretclub e ganhe <span className="text-primary font-bold">20% de comissão</span> sobre cada indicação ativa feita como embaixador.
-                                </p>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                                    {/* Link de Indicação */}
-                                    <div className="bg-navy border border-white/10 p-6 rounded-sm">
-                                        <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest block mb-2">Seu Link de Indicação</label>
-                                        <div className="flex items-center gap-4">
-                                            <code className="flex-1 bg-black/20 p-4 rounded-sm text-xs font-mono text-primary truncate">
-                                                {`${window.location.origin}/?ref=${profile.id || '...'}`}
-                                            </code>
-                                            <button
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(`${window.location.origin}/?ref=${profile.id}`);
-                                                    alert('Link copiado!');
-                                                }}
-                                                className="btn-primary px-4 py-4 font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shrink-0"
-                                            >
-                                                <span>Copiar Link de Embaixador</span>
-                                                <Share2 size={16} /> Copiar
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Configuração de PIX */}
-                                    <div className="bg-navy border border-white/10 p-6 rounded-sm">
-                                        <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest block mb-2">Sua Chave PIX para Recebimento</label>
-                                        <div className="flex gap-2">
-                                            <select
-                                                value={profile.pix_key_type || ''}
-                                                onChange={(e) => setProfile({ ...profile, pix_key_type: e.target.value })}
-                                                className="bg-black/20 border border-white/10 rounded-sm text-xs text-white p-2 focus:outline-none focus:border-primary/50"
-                                            >
-                                                <option value="">Tipo</option>
-                                                <option value="CPF">CPF</option>
-                                                <option value="CNPJ">CNPJ</option>
-                                                <option value="EMAIL">Email</option>
-                                                <option value="PHONE">Telefone</option>
-                                                <option value="EVP">Chave Aleatória</option>
-                                            </select>
-                                            <input
-                                                type="text"
-                                                placeholder="Sua chave PIX"
-                                                value={profile.pix_key || ''}
-                                                onChange={(e) => setProfile({ ...profile, pix_key: e.target.value })}
-                                                className="flex-1 bg-black/20 border border-white/10 rounded-sm text-xs text-white px-4 py-2 focus:outline-none focus:border-primary/50"
-                                            />
-                                            <button
-                                                onClick={async () => {
-                                                    setUploading(true);
-                                                    const { error } = await supabase.from('profiles').update({
-                                                        pix_key: profile.pix_key,
-                                                        pix_key_type: profile.pix_key_type
-                                                    }).eq('id', user.id);
-                                                    setUploading(false);
-                                                    if (error) alert('Erro ao salvar PIX');
-                                                    else alert('Dados de PIX salvos com sucesso!');
-                                                }}
-                                                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-sm text-[10px] font-black uppercase transition-colors"
-                                            >
-                                                Salvar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6">Seu Saldo e Ganhos</h3>
-
-                                {(() => {
-                                    const pendingComms = commissions.filter(c => c.status === 'pending' || c.status === 'processing');
-                                    const availableBal = pendingComms.filter(c => c.status === 'pending' && (!c.available_at || new Date(c.available_at) <= new Date())).reduce((acc, c) => acc + parseFloat(c.amount_net_commission || c.amount || 0), 0);
-                                    const lockedBal = pendingComms.filter(c => c.status === 'pending' && c.available_at && new Date(c.available_at) > new Date()).reduce((acc, c) => acc + parseFloat(c.amount_net_commission || c.amount || 0), 0);
-
-                                    return (
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                            <div className="bg-navy p-6 rounded-sm border border-white/5 relative overflow-hidden">
-                                                <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Saldo Disponível</div>
-                                                <div className="text-3xl font-black text-green-500">R$ {availableBal.toFixed(2)}</div>
-                                                {lockedBal > 0 && (
-                                                    <div className="text-[9px] text-yellow-500 mt-1 uppercase font-bold tracking-widest">
-                                                        + R$ {lockedBal.toFixed(2)} em carência (7 dias)
-                                                    </div>
-                                                )}
-                                                {availableBal >= 100 ? (
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (!profile.pix_key) {
-                                                                alert('Cadastre sua chave PIX primeiro.');
-                                                                return;
-                                                            }
-                                                            if (confirm(`Deseja solicitar o saque do seu saldo disponível de R$ ${availableBal.toFixed(2)}?`)) {
-                                                                setUploading(true);
-                                                                const { data, error: invokeError } = await supabase.functions.invoke('asaas-proxy', {
-                                                                    body: { action: 'withdraw', payload: { userId: user.id } }
-                                                                });
-                                                                setUploading(false);
-
-                                                                const serverError = data?.error;
-                                                                if (invokeError || serverError) {
-                                                                    alert('Erro no saque: ' + (serverError || invokeError?.message || 'Erro desconhecido'));
-                                                                } else {
-                                                                    alert('Saque solicitado com sucesso! O processo de transferência foi iniciado.');
-                                                                    fetchProfile();
-                                                                    fetchAffiliateData();
-                                                                }
-                                                            }
-                                                        }}
-                                                        className="mt-4 w-full btn-primary py-2 text-[10px] font-black uppercase tracking-widest"
-                                                    >
-                                                        {uploading ? 'Processando...' : 'Solicitar Saque (PIX)'}
-                                                    </button>
-                                                ) : (
-                                                    <p className="text-[8px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Mínimo para saque: R$ 100,00</p>
-                                                )}
-                                            </div>
-                                            <div className="bg-navy p-6 rounded-sm border border-white/5">
-                                                <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Indicações Totais</div>
-                                                <div className="text-3xl font-black">{affiliateStats.indications}</div>
-                                            </div>
-                                            <div className="bg-navy p-6 rounded-sm border border-white/5">
-                                                <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Conversões</div>
-                                                <div className="text-3xl font-black">{affiliateStats.conversions}</div>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-
-                                <div className="bg-navy rounded-sm border border-white/5 overflow-hidden">
-                                    <table className="w-full text-left">
-                                        <thead className="bg-black/20 text-[9px] uppercase font-black tracking-widest text-gray-500">
-                                            <tr>
-                                                <th className="p-4">Data</th>
-                                                <th className="p-4">Descrição</th>
-                                                <th className="p-4">Valor</th>
-                                                <th className="p-4">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="text-[11px] text-gray-400">
-                                            {commissions.length > 0 ? (
-                                                commissions.map((comm) => (
-                                                    <tr key={comm.id} className="border-t border-white/5">
-                                                        <td className="p-4">{new Date(comm.created_at).toLocaleDateString()}</td>
-                                                        <td className="p-4">Comissão - Indicação Ativa</td>
-                                                        <td className="p-4 text-green-500">R$ {parseFloat(comm.amount_net_commission || comm.amount || 0).toFixed(2)}</td>
-                                                        <td className="p-4">
-                                                            <div className="flex flex-col gap-1 items-start">
-                                                                <span className={`px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${comm.status === 'paid' ? 'bg-green-500/10 text-green-500' :
-                                                                    comm.status === 'suspicious' ? 'bg-red-500/10 text-red-500' :
-                                                                        comm.status === 'canceled' ? 'bg-gray-500/10 text-gray-500 line-through' : 'bg-yellow-500/10 text-yellow-500'
-                                                                    }`}>
-                                                                    {comm.status === 'paid' ? 'Pago' : comm.status === 'suspicious' ? 'Suspeito' : comm.status === 'canceled' ? 'Cancelado' : 'Pendente'}
-                                                                </span>
-                                                                {comm.status === 'pending' && comm.available_at && new Date(comm.available_at) > new Date() && (
-                                                                    <span className="text-[8px] text-gray-500 flex items-center gap-1">
-                                                                        <Clock size={10} /> Libera em {new Date(comm.available_at).toLocaleDateString()}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td className="p-4" colSpan={4}>
-                                                        <div className="flex flex-col items-center justify-center py-8 text-gray-600 gap-2">
-                                                            <Share2 size={24} className="opacity-20" />
-                                                            <span>Compartilhe seu link para começar a ganhar!</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                    activeTab === 'Indique e Ganhe' && (
+                        <InviteManager userId={user.id} />
                     )
                 }
+
                 {/* Hidden Inputs */}
                 {
                     activeTab === 'Verificação' && (
@@ -1985,35 +1773,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     )
                 }
 
-                {activeTab === 'Mensagens' && (
-                    <div className="bg-navy-light border border-white/5 p-8 rounded-sm min-h-[600px] flex flex-col">
-                        <div className="flex justify-between items-center mb-8">
-                            <h2 className="text-xl font-black uppercase tracking-tight">Suas Mensagens</h2>
-                            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
-                                <MessageSquare size={12} className="text-primary" />
-                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{unreadMessages} não lidas</span>
+                {
+                    activeTab === 'Mensagens' && (
+                        <div className="bg-navy-light border border-white/5 p-8 rounded-sm min-h-[600px] flex flex-col">
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-xl font-black uppercase tracking-tight">Suas Mensagens</h2>
+                                <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
+                                    <MessageSquare size={12} className="text-primary" />
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{unreadMessages} não lidas</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="flex-1 bg-navy/50 rounded-sm border border-white/5 overflow-hidden flex flex-col items-center justify-center p-12 text-center">
-                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                                <MessageSquare size={40} className="text-primary opacity-20" />
+                            <div className="flex-1 bg-navy/50 rounded-sm border border-white/5 overflow-hidden flex flex-col items-center justify-center p-12 text-center">
+                                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                                    <MessageSquare size={40} className="text-primary opacity-20" />
+                                </div>
+                                <h3 className="text-lg font-black uppercase tracking-widest mb-4">Central de Conversas</h3>
+                                <p className="text-gray-500 text-sm max-w-sm mb-8">
+                                    Acesse seu chat privado para conversar com outros membros, ver suas mensagens recebidas e gerenciar seus contatos.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        window.dispatchEvent(new CustomEvent('open-chat'));
+                                    }}
+                                    className="btn-primary px-10 py-5 font-black uppercase tracking-widest text-xs shadow-xl animate-pulse"
+                                >
+                                    Abrir Chat e Ver Mensagens
+                                </button>
                             </div>
-                            <h3 className="text-lg font-black uppercase tracking-widest mb-4">Central de Conversas</h3>
-                            <p className="text-gray-500 text-sm max-w-sm mb-8">
-                                Acesse seu chat privado para conversar com outros membros, ver suas mensagens recebidas e gerenciar seus contatos.
-                            </p>
-                            <button
-                                onClick={() => {
-                                    window.dispatchEvent(new CustomEvent('open-chat'));
-                                }}
-                                className="btn-primary px-10 py-5 font-black uppercase tracking-widest text-xs shadow-xl animate-pulse"
-                            >
-                                Abrir Chat e Ver Mensagens
-                            </button>
                         </div>
-                    </div>
-                )}
+                    )
+                }
                 {
                     activeTab === 'Estatísticas' && (
                         <div className="space-y-8 animate-in fade-in duration-500">
@@ -2192,97 +1982,101 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     )
                 }
 
-                {activeTab === 'Convites' && (
-                    <div className="animate-fade-in pb-20">
-                        <InviteManager userId={user.id} />
-                    </div>
-                )}
+                {
+                    activeTab === 'Indique e Ganhe' && (
+                        <div className="animate-fade-in pb-20">
+                            <InviteManager userId={user.id} />
+                        </div>
+                    )
+                }
 
-                {activeTab === 'Amigos' && (
-                    <div className="space-y-8 animate-in fade-in duration-500">
-                        {/* Pending Requests */}
-                        {pendingRequests.length > 0 && (
-                            <div className="bg-primary/5 border border-primary/20 p-8 rounded-sm">
-                                <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
-                                    <UserPlus size={16} />
-                                    Solicitações Pendentes ({pendingRequests.length})
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {pendingRequests.map((req: any) => (
-                                        <div key={req.id} className="bg-navy border border-white/5 p-4 rounded-sm flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <img
-                                                    src={req.sender.avatar_url || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=300"}
-                                                    className="w-10 h-10 rounded-full object-cover border border-white/10"
-                                                />
-                                                <div>
-                                                    <div className="text-[11px] font-bold text-white">{req.sender.name}</div>
-                                                    <div className="text-[9px] text-gray-500 uppercase">{req.sender.city}</div>
+                {
+                    activeTab === 'Amigos' && (
+                        <div className="space-y-8 animate-in fade-in duration-500">
+                            {/* Pending Requests */}
+                            {pendingRequests.length > 0 && (
+                                <div className="bg-primary/5 border border-primary/20 p-8 rounded-sm">
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+                                        <UserPlus size={16} />
+                                        Solicitações Pendentes ({pendingRequests.length})
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {pendingRequests.map((req: any) => (
+                                            <div key={req.id} className="bg-navy border border-white/5 p-4 rounded-sm flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <img
+                                                        src={req.sender.avatar_url || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=300"}
+                                                        className="w-10 h-10 rounded-full object-cover border border-white/10"
+                                                    />
+                                                    <div>
+                                                        <div className="text-[11px] font-bold text-white">{req.sender.name}</div>
+                                                        <div className="text-[9px] text-gray-500 uppercase">{req.sender.city}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleFriendRequestAction(req.id, 'accepted')}
-                                                    className="bg-green-500 text-white p-2 rounded-sm hover:bg-green-600 transition-colors"
-                                                    title="Aceitar"
-                                                >
-                                                    <CheckCircle2 size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleFriendRequestAction(req.id, 'rejected')}
-                                                    className="bg-red-500 text-white p-2 rounded-sm hover:bg-red-600 transition-colors"
-                                                    title="Recusar"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Friends List */}
-                        <div className="bg-navy-light border border-white/5 p-8 rounded-sm">
-                            <h3 className="text-sm font-black uppercase tracking-widest mb-6">Meus Amigos ({friends.length})</h3>
-                            {friends.length === 0 ? (
-                                <div className="py-12 flex flex-col items-center justify-center text-gray-600 gap-4">
-                                    <User size={48} className="opacity-10" />
-                                    <p className="text-xs uppercase tracking-widest font-bold">Você ainda não possui amigos.</p>
-                                    <button
-                                        onClick={() => window.location.hash = ''}
-                                        className="text-[10px] text-primary hover:underline uppercase font-black"
-                                    >
-                                        Explorar perfis para adicionar
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                                    {friends.map((friend: any) => (
-                                        <div key={friend.id} className="group relative">
-                                            <div className="aspect-square rounded-sm overflow-hidden border border-white/5 bg-navy mb-2">
-                                                <img
-                                                    src={friend.avatar_url || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=300"}
-                                                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                                />
-                                                <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                                                <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => setActiveTab('Mensagens')}
-                                                        className="bg-primary text-navy px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest"
+                                                        onClick={() => handleFriendRequestAction(req.id, 'accepted')}
+                                                        className="bg-green-500 text-white p-2 rounded-sm hover:bg-green-600 transition-colors"
+                                                        title="Aceitar"
                                                     >
-                                                        Conversar
+                                                        <CheckCircle2 size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleFriendRequestAction(req.id, 'rejected')}
+                                                        className="bg-red-500 text-white p-2 rounded-sm hover:bg-red-600 transition-colors"
+                                                        title="Recusar"
+                                                    >
+                                                        <X size={14} />
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="text-[10px] font-bold text-white truncate">{friend.name}</div>
-                                            <div className="text-[8px] text-gray-500 uppercase truncate">{friend.city}</div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             )}
+
+                            {/* Friends List */}
+                            <div className="bg-navy-light border border-white/5 p-8 rounded-sm">
+                                <h3 className="text-sm font-black uppercase tracking-widest mb-6">Meus Amigos ({friends.length})</h3>
+                                {friends.length === 0 ? (
+                                    <div className="py-12 flex flex-col items-center justify-center text-gray-600 gap-4">
+                                        <User size={48} className="opacity-10" />
+                                        <p className="text-xs uppercase tracking-widest font-bold">Você ainda não possui amigos.</p>
+                                        <button
+                                            onClick={() => window.location.hash = ''}
+                                            className="text-[10px] text-primary hover:underline uppercase font-black"
+                                        >
+                                            Explorar perfis para adicionar
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                                        {friends.map((friend: any) => (
+                                            <div key={friend.id} className="group relative">
+                                                <div className="aspect-square rounded-sm overflow-hidden border border-white/5 bg-navy mb-2">
+                                                    <img
+                                                        src={friend.avatar_url || "https://images.unsplash.com/photo-1524504388940-b1c116d197e9?auto=format&fit=crop&q=80&w=300"}
+                                                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                                    />
+                                                    <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                                                        <button
+                                                            onClick={() => setActiveTab('Mensagens')}
+                                                            className="bg-primary text-navy px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest"
+                                                        >
+                                                            Conversar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="text-[10px] font-bold text-white truncate">{friend.name}</div>
+                                                <div className="text-[8px] text-gray-500 uppercase truncate">{friend.city}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* Hidden Inputs */}
                 <input
@@ -2313,7 +2107,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     className="hidden"
                     accept="image/*"
                 />
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
