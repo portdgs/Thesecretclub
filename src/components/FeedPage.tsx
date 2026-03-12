@@ -78,6 +78,8 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     onMessageClick,
 }) => {
     const [viewMode, setViewMode] = React.useState<'grid' | 'feed' | 'radar'>('grid');
+    const [isLocationSelectorOpen, setIsLocationSelectorOpen] = React.useState(false);
+    const [localSearchCity, setLocalSearchCity] = React.useState(searchCity);
 
     return (
         <div className="min-h-screen bg-navy text-white font-sans selection:bg-primary selection:text-navy">
@@ -360,9 +362,90 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                                 Encontre membros em <br className="sm:hidden" />
                                 <span className="text-primary italic"> {searchCity || 'todo o Brasil'} </span>
                             </h2>
-                            <div className="mt-1 flex items-center gap-2 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                <MapPin size={12} className="text-primary" />
-                                Deseja mudar a sua localização? <button className="text-white hover:text-primary underline" onClick={() => setSearchCity('')}>Clique aqui</button>
+                            <div className="mt-1">
+                                {!isLocationSelectorOpen ? (
+                                    <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                        <MapPin size={12} className="text-primary" />
+                                        Deseja mudar a sua localização? <button className="text-white hover:text-primary underline" onClick={() => setIsLocationSelectorOpen(true)}>Clique aqui</button>
+                                    </div>
+                                ) : (
+                                    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
+                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Localizados em</p>
+                                        <div className="flex items-center gap-2 max-w-md bg-white/5 border border-white/10 rounded-sm p-1">
+                                            <div className="flex-1 flex items-center gap-3 px-3">
+                                                <MapPin size={14} className="text-primary/50" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Digite sua localização"
+                                                    className="w-full bg-transparent border-none outline-none text-xs font-bold text-white placeholder:text-gray-600 h-8"
+                                                    value={localSearchCity}
+                                                    onChange={(e) => setLocalSearchCity(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            setSearchCity(localSearchCity);
+                                                            fetchProfiles(localSearchCity);
+                                                            setIsLocationSelectorOpen(false);
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    if (!navigator.geolocation) {
+                                                        alert('Seu navegador não suporta geolocalização.');
+                                                        return;
+                                                    }
+                                                    navigator.geolocation.getCurrentPosition(
+                                                        (pos) => {
+                                                            fetchNearbyProfiles(pos.coords.latitude, pos.coords.longitude);
+                                                            setViewMode('radar');
+                                                            setSearchCity('Perto de você');
+                                                            setIsLocationSelectorOpen(false);
+                                                        },
+                                                        (err) => {
+                                                            console.error('GPS Error:', err);
+                                                            alert('Permita o acesso à sua localização para usar o Radar.');
+                                                        }
+                                                    );
+                                                }}
+                                                title="Usar minha localização (Radar)"
+                                                className="p-2 aspect-square flex items-center justify-center bg-transparent text-pink hover:bg-pink/10 rounded-sm transition-all"
+                                            >
+                                                <Navigation size={18} />
+                                            </button>
+                                        </div>
+                                        <div className="mt-2 flex gap-4">
+                                            <button
+                                                onClick={() => {
+                                                    setSearchCity(localSearchCity);
+                                                    fetchProfiles(localSearchCity);
+                                                    setIsLocationSelectorOpen(false);
+                                                }}
+                                                className="text-[9px] font-black uppercase text-primary hover:text-white transition-colors"
+                                            >
+                                                Aplicar
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setSearchCity('');
+                                                    setLocalSearchCity('');
+                                                    fetchProfiles('');
+                                                    setIsLocationSelectorOpen(false);
+                                                    setViewMode('grid');
+                                                }}
+                                                className="text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors"
+                                            >
+                                                Ver todo Brasil
+                                            </button>
+                                            <button
+                                                onClick={() => setIsLocationSelectorOpen(false)}
+                                                className="text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
