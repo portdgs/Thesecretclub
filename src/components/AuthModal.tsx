@@ -97,13 +97,21 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
                     let referredBy = localStorage.getItem('referralId');
 
                     if (codeToUse) {
+                        // 1. Try referral system (secure tokens)
                         const { data: inviterId } = await supabase.rpc('validate_and_use_secure_invite', {
                             guest_email: email.trim().toLowerCase(),
-                            token: codeToUse,
+                            token: codeToUse.toLowerCase(),
                             new_user_uuid: data.user.id
                         });
+
                         if (inviterId) {
                             referredBy = inviterId;
+                        } else {
+                            // 2. Fallback to legacy invite_codes system
+                            await supabase.rpc('validate_and_use_invite', {
+                                invite_code: codeToUse.toUpperCase(),
+                                user_uuid: data.user.id
+                            });
                         }
                     }
                     localStorage.removeItem('pendingInviteCode');

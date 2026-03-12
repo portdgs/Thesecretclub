@@ -31,37 +31,42 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
             setInviteCode(tokenFromUrl);
             setShowInvite(true);
             setAutoValidating(true);
-            // Auto-validate the token
             (async () => {
                 try {
-                    const trimmedCode = tokenFromUrl.trim().toLowerCase();
-                    const { data, error: queryError } = await supabase
+                    const trimmedCode = tokenFromUrl.trim();
+
+                    // 1. Try generated_invites (referral)
+                    const { data: genData } = await supabase
                         .from('generated_invites')
-                        .select('id, is_used, invited_email')
-                        .eq('final_token', trimmedCode)
+                        .select('id, is_used')
+                        .eq('final_token', trimmedCode.toLowerCase())
                         .single();
 
-                    if (queryError || !data) {
-                        setError('Código de convite inválido ou não encontrado.');
-                        setAutoValidating(false);
+                    if (genData && !genData.is_used) {
+                        setSuccess(true);
+                        localStorage.setItem('pendingInviteCode', trimmedCode.toLowerCase());
+                        window.history.replaceState({}, '', window.location.pathname);
+                        setTimeout(() => onInviteValidated(trimmedCode.toLowerCase()), 1500);
                         return;
                     }
 
-                    if (data.is_used) {
-                        setError('Este código já foi utilizado.');
-                        setAutoValidating(false);
+                    // 2. Try invite_codes (legacy)
+                    const { data: legacyData } = await supabase
+                        .from('invite_codes')
+                        .select('id, used_by, expires_at')
+                        .eq('code', trimmedCode.toUpperCase())
+                        .single();
+
+                    if (legacyData && !legacyData.used_by && (!legacyData.expires_at || new Date(legacyData.expires_at) > new Date())) {
+                        setSuccess(true);
+                        localStorage.setItem('pendingInviteCode', trimmedCode.toUpperCase());
+                        window.history.replaceState({}, '', window.location.pathname);
+                        setTimeout(() => onInviteValidated(trimmedCode.toUpperCase()), 1500);
                         return;
                     }
 
-                    setSuccess(true);
-                    localStorage.setItem('pendingInviteCode', trimmedCode);
-
-                    // Clean the URL params
-                    window.history.replaceState({}, '', window.location.pathname);
-
-                    setTimeout(() => {
-                        onInviteValidated(trimmedCode);
-                    }, 1500);
+                    setError('Código de convite inválido ou expirado.');
+                    setAutoValidating(false);
                 } catch {
                     setError('Erro ao validar convite.');
                     setAutoValidating(false);
@@ -80,31 +85,49 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onInvite
         setError(null);
 
         try {
-            // Check if invite token exists in generated_invites table
-            const trimmedCode = inviteCode.trim().toLowerCase();
-            const { data, error: queryError } = await supabase
+            const trimmedCode = inviteCode.trim();
+
+            // 1. Check generated_invites
+            const { data: genData } = await supabase
                 .from('generated_invites')
-                .select('id, is_used, invited_email')
-                .eq('final_token', trimmedCode)
+                .select('id, is_used')
+                .eq('final_token', trimmedCode.toLowerCase())
                 .single();
 
-            if (queryError || !data) {
-                setError('Código de convite inválido ou não encontrado.');
+            if (genData) {
+                if (genData.is_used) {
+                    setError('Este código já foi utilizado.');
+                    return;
+                }
+                setSuccess(true);
+                localStorage.setItem('pendingInviteCode', trimmedCode.toLowerCase());
+                setTimeout(() => onInviteValidated(trimmedCode.toLowerCase()), 1200);
                 return;
             }
 
-            if (data.is_used) {
-                setError('Este código já foi utilizado.');
+            // 2. Check invite_codes (legacy)
+            const { data: legacyData } = await supabase
+                .from('invite_codes')
+                .select('id, used_by, expires_at')
+                .eq('code', trimmedCode.toUpperCase())
+                .single();
+
+            if (legacyData) {
+                if (legacyData.used_by) {
+                    setError('Este código já foi utilizado.');
+                    return;
+                }
+                if (legacyData.expires_at && new Date(legacyData.expires_at) < new Date()) {
+                    setError('Este código expirou.');
+                    return;
+                }
+                setSuccess(true);
+                localStorage.setItem('pendingInviteCode', trimmedCode.toUpperCase());
+                setTimeout(() => onInviteValidated(trimmedCode.toUpperCase()), 1200);
                 return;
             }
 
-            // Store valid invite code for use during registration
-            setSuccess(true);
-            localStorage.setItem('pendingInviteCode', trimmedCode);
-
-            setTimeout(() => {
-                onInviteValidated(trimmedCode);
-            }, 1200);
+            setError('Código de convite inválido ou não encontrado.');
 
         } catch {
             setError('Erro ao validar convite. Tente novamente.');
