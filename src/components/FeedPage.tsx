@@ -1,6 +1,6 @@
 import React from 'react';
-import { MapPin, Search, Check, HelpCircle, User, Plus, Menu, Navigation, MessageSquare, Bell } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { MapPin, Search, Check, HelpCircle, User, Plus, Menu, Navigation, MessageSquare, Bell, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ProfileCard } from './ProfileCard';
 import { ProfileModal } from './ProfileModal';
 import { AuthModal } from './AuthModal';
@@ -357,96 +357,113 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                 {/* Profile Grid */}
                 <section id="showcase" className="bg-navy py-8">
                     <div className="container mx-auto px-4">
-                        <div className="mb-8 border-l-4 border-primary pl-6">
+                        <div className="mb-8 border-l-4 border-primary pl-6 relative">
                             <h2 className="text-xl sm:text-2xl font-black text-white uppercase leading-tight tracking-tighter">
                                 Encontre membros em <br className="sm:hidden" />
                                 <span className="text-primary italic"> {searchCity || 'todo o Brasil'} </span>
                             </h2>
                             <div className="mt-1">
-                                {!isLocationSelectorOpen ? (
-                                    <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                        <MapPin size={12} className="text-primary" />
-                                        Deseja mudar a sua localização? <button className="text-white hover:text-primary underline" onClick={() => setIsLocationSelectorOpen(true)}>Clique aqui</button>
-                                    </div>
-                                ) : (
-                                    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
-                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Localizados em</p>
-                                        <div className="flex items-center gap-2 max-w-md bg-white/5 border border-white/10 rounded-sm p-1">
-                                            <div className="flex-1 flex items-center gap-3 px-3">
-                                                <MapPin size={14} className="text-primary/50" />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Digite sua localização"
-                                                    className="w-full bg-transparent border-none outline-none text-xs font-bold text-white placeholder:text-gray-600 h-8"
-                                                    value={localSearchCity}
-                                                    onChange={(e) => setLocalSearchCity(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            setSearchCity(localSearchCity);
-                                                            fetchProfiles(localSearchCity);
-                                                            setIsLocationSelectorOpen(false);
-                                                        }
-                                                    }}
-                                                />
+                                <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                    <MapPin size={12} className="text-primary" />
+                                    Deseja mudar a sua localização? <button className="text-white hover:text-primary underline" onClick={() => setIsLocationSelectorOpen(true)}>Clique aqui</button>
+                                </div>
+                            </div>
+
+                            {/* Premium Location Selector Overlay */}
+                            <AnimatePresence>
+                                {isLocationSelectorOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        className="absolute top-0 left-0 w-full z-50 bg-navy/95 backdrop-blur-2xl border border-white/10 rounded-xl p-6 shadow-2xl mt-12"
+                                    >
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="flex flex-col">
+                                                <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">LOCALIZADOS EM</p>
+                                                <h3 className="text-xl font-black text-white uppercase tracking-tighter">Mudar Localização</h3>
                                             </div>
                                             <button
-                                                onClick={() => {
-                                                    if (!navigator.geolocation) {
-                                                        alert('Seu navegador não suporta geolocalização.');
-                                                        return;
-                                                    }
-                                                    navigator.geolocation.getCurrentPosition(
-                                                        (pos) => {
-                                                            fetchNearbyProfiles(pos.coords.latitude, pos.coords.longitude);
-                                                            setViewMode('radar');
-                                                            setSearchCity('Perto de você');
-                                                            setIsLocationSelectorOpen(false);
-                                                        },
-                                                        (err) => {
-                                                            console.error('GPS Error:', err);
-                                                            alert('Permita o acesso à sua localização para usar o Radar.');
-                                                        }
-                                                    );
-                                                }}
-                                                title="Usar minha localização (Radar)"
-                                                className="p-2 aspect-square flex items-center justify-center bg-transparent text-pink hover:bg-pink/10 rounded-sm transition-all"
+                                                onClick={() => setIsLocationSelectorOpen(false)}
+                                                className="p-2 text-gray-500 hover:text-white transition-colors"
                                             >
-                                                <Navigation size={18} />
+                                                <X size={20} />
                                             </button>
                                         </div>
-                                        <div className="mt-2 flex gap-4">
+
+                                        <div className="relative group mb-6">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/50 group-focus-within:text-primary transition-colors">
+                                                <MapPin size={18} />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Qual cidade ou bairro você busca?"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-sm font-bold text-white outline-none focus:bg-white/10 focus:border-primary/50 transition-all placeholder:text-gray-600"
+                                                value={localSearchCity}
+                                                onChange={(e) => setLocalSearchCity(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        setSearchCity(localSearchCity);
+                                                        fetchProfiles(localSearchCity);
+                                                        setIsLocationSelectorOpen(false);
+                                                    }
+                                                }}
+                                                autoFocus
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                                            {[
+                                                { label: 'TODO BRASIL', icon: <MapPin size={14} />, action: () => { setSearchCity(''); setLocalSearchCity(''); fetchProfiles(''); setIsLocationSelectorOpen(false); setViewMode('grid'); } },
+                                                {
+                                                    label: 'RADAR (GPS)', icon: <Navigation size={14} />, action: () => {
+                                                        if (!navigator.geolocation) { alert('Seu navegador não suporta geolocalização.'); return; }
+                                                        navigator.geolocation.getCurrentPosition(
+                                                            (pos) => {
+                                                                fetchNearbyProfiles(pos.coords.latitude, pos.coords.longitude);
+                                                                setViewMode('radar');
+                                                                setSearchCity('Perto de você');
+                                                                setIsLocationSelectorOpen(false);
+                                                            },
+                                                            (err) => { console.error('GPS Error:', err); alert('Permita o acesso à sua localização para usar o Radar.'); }
+                                                        );
+                                                    }
+                                                },
+                                                { label: 'SÃO PAULO', action: () => { setSearchCity('São Paulo'); setLocalSearchCity('São Paulo'); fetchProfiles('São Paulo'); setIsLocationSelectorOpen(false); } },
+                                                { label: 'RIO DE JANEIRO', action: () => { setSearchCity('Rio de Janeiro'); setLocalSearchCity('Rio de Janeiro'); fetchProfiles('Rio de Janeiro'); setIsLocationSelectorOpen(false); } },
+                                            ].map((btn, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={btn.action}
+                                                    className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-white transition-all"
+                                                >
+                                                    {btn.icon}
+                                                    {btn.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex gap-4 border-t border-white/5 pt-6">
                                             <button
                                                 onClick={() => {
                                                     setSearchCity(localSearchCity);
                                                     fetchProfiles(localSearchCity);
                                                     setIsLocationSelectorOpen(false);
                                                 }}
-                                                className="text-[9px] font-black uppercase text-primary hover:text-white transition-colors"
+                                                className="flex-1 bg-primary text-navy py-3 rounded-lg font-black uppercase tracking-widest text-[11px] hover:bg-white transition-all shadow-[0_0_20px_rgba(226,176,162,0.3)]"
                                             >
-                                                Aplicar
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setSearchCity('');
-                                                    setLocalSearchCity('');
-                                                    fetchProfiles('');
-                                                    setIsLocationSelectorOpen(false);
-                                                    setViewMode('grid');
-                                                }}
-                                                className="text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors"
-                                            >
-                                                Ver todo Brasil
+                                                Aplicar Filtro
                                             </button>
                                             <button
                                                 onClick={() => setIsLocationSelectorOpen(false)}
-                                                className="text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors"
+                                                className="px-6 py-3 rounded-lg font-black uppercase tracking-widest text-[11px] text-gray-500 hover:text-white transition-all underline"
                                             >
-                                                Cancelar
+                                                Fechar
                                             </button>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )}
-                            </div>
+                            </AnimatePresence>
                         </div>
 
                         {/* Filter bar inline */}

@@ -1107,7 +1107,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     <label className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Tipo de Perfil</label>
                                     <select
                                         className="w-full bg-navy border border-white/5 p-4 outline-none focus:border-primary/50 text-sm"
-                                        value={profile.profile_type || 'acompanhante'}
+                                        value={profile.profile_type || 'membro'}
                                         onChange={(e) => setProfile({ ...profile, profile_type: e.target.value })}
                                     >
                                         <option value="casal">Casal</option>

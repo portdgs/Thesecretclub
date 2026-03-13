@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+ï»¿import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AuthModal } from './components/AuthModal';
 import { Dashboard } from './components/Dashboard';
@@ -82,7 +82,7 @@ export default function App() {
         setUserRole(data[0].profile_type || 'singles');
         setIsAdmin(!!data[0].is_admin);
       } else {
-        console.warn("[App] Perfil não encontrado para o usuário logado.");
+        console.warn("[App] Perfil nÃ£o encontrado para o usuÃ¡rio logado.");
         setUserRole('singles');
         setIsAdmin(false);
       }
@@ -97,10 +97,10 @@ export default function App() {
 
   // Auth listener
   useEffect(() => {
-    console.log("[App] Iniciando monitoramento de sessão...");
+    console.log("[App] Iniciando monitoramento de sessÃ£o...");
 
     if (!isSupabaseConfigured) {
-      console.warn("[App] Supabase não configurado.");
+      console.warn("[App] Supabase nÃ£o configurado.");
       setRoleLoaded(true);
       return;
     }
@@ -110,7 +110,7 @@ export default function App() {
     supabase.auth.getSession().then(({ data }: { data: any }) => {
       if (isInitialFetchDone) return;
       const currentUser = data?.session?.user ?? null;
-      console.log("[App] Sessão inicial capturada:", user?.id || "Ninguém");
+      console.log("[App] SessÃ£o inicial capturada:", user?.id || "NinguÃ©m");
       setUser(currentUser);
       if (currentUser) {
         fetchUserRole(user.id);
@@ -140,7 +140,7 @@ export default function App() {
             await supabase.from('profiles').upsert({
               id: user.id,
               profile_type: pendingRole,
-              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Usuário',
+              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'UsuÃ¡rio',
               referred_by: referredBy || null,
             }, { onConflict: 'id' });
             setUserRole(pendingRole);
@@ -168,7 +168,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!roleLoaded) {
-        console.warn("[App] Timeout de carregamento de role atingido. Forçando desbloqueio.");
+        console.warn("[App] Timeout de carregamento de role atingido. ForÃ§ando desbloqueio.");
         setRoleLoaded(true);
       }
     }, 5000);
@@ -226,7 +226,7 @@ export default function App() {
 
       // Filter by profile_type (category)
       if (activeCategory === 'singles') {
-        query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
+        query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.is.null');
       } else {
         query = query.eq('profile_type', 'casal');
       }
@@ -254,7 +254,7 @@ export default function App() {
       const { data: profilesData, error: profilesError } = await query;
 
       if (profilesError) {
-        console.error('[App] Erro crítico ao buscar perfis:', profilesError.message || profilesError);
+        console.error('[App] Erro crÃ­tico ao buscar perfis:', profilesError.message || profilesError);
         setProfiles([]);
         return;
       }
@@ -272,7 +272,7 @@ export default function App() {
         };
       }));
 
-      if (filter === 'Com Vídeo') {
+      if (filter === 'Com VÃ­deo') {
         setProfiles(profilesWithMedia.filter(p => p.videoUrl));
       } else {
         setProfiles(profilesWithMedia);
@@ -329,7 +329,7 @@ export default function App() {
       }
 
       if (activeCategory === 'singles') {
-        query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.eq.acompanhante,profile_type.is.null');
+        query = query.or('profile_type.eq.homem_single,profile_type.eq.mulher_single,profile_type.eq.membro,profile_type.is.null');
       } else {
         query = query.eq('profile_type', 'casal');
       }
@@ -429,7 +429,7 @@ export default function App() {
     } else if (!user) {
       document.title = 'TheSecretclub | Acesso Exclusivo por Convite';
     } else if (searchCity) {
-      document.title = `Acompanhantes em ${searchCity} | TheSecretclub`;
+      document.title = `Membros em ${searchCity} | TheSecretclub`;
     } else {
       document.title = 'TheSecretclub | Feed';
     }
@@ -563,3 +563,4 @@ export default function App() {
     </AnimatePresence>
   );
 }
+

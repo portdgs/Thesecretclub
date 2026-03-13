@@ -88,7 +88,9 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUserId, onLikeT
                             {post.author.name}
                         </div>
                         <div className="text-[10px] text-gray-500 flex items-center gap-2">
-                            <span className="uppercase tracking-widest text-primary">{post.author.profile_type || 'Membro'}</span>
+                            <span className="uppercase tracking-widest text-primary">
+                                {(post.author.profile_type?.toLowerCase() === 'acompanhante' || !post.author.profile_type) ? 'Membro' : post.author.profile_type}
+                            </span>
                             <span>•</span>
                             <span>{timeAgo(post.created_at)}</span>
                         </div>

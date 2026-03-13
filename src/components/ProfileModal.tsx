@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info, MessageSquare, UserPlus } from 'lucide-react';
+import { X, MessageCircle, MapPin, Star, ShieldCheck, ChevronLeft, ChevronRight, Play, Camera, Info, MessageSquare, UserPlus, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { Feed } from './Feed';
@@ -621,62 +621,133 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                 {/* AVALIAÇÕES TAB */}
                                 {activeTab === 'Avaliações' && (
                                     <div className="p-6 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
+
+                                        {/* Summary Header */}
+                                        <div className="flex flex-col md:flex-row items-center gap-8 mb-12 bg-navy/5 p-8 rounded-2xl border border-navy/5">
+                                            <div className="text-center md:border-r md:border-navy/10 md:pr-12">
+                                                <div className="text-5xl font-black text-navy-dark leading-none mb-2">{displayRating.toFixed(1)}</div>
+                                                <div className="flex justify-center gap-1 text-yellow-500 mb-2">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} size={16} fill={i < Math.round(displayRating) ? "currentColor" : "none"} />
+                                                    ))}
+                                                </div>
+                                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{displayReviewCount} Avaliações</div>
+                                            </div>
+                                            <div className="flex-1 w-full space-y-2">
+                                                {[5, 4, 3, 2, 1].map((rating) => {
+                                                    const count = reviews.filter(r => r.rating === rating).length;
+                                                    const percentage = displayReviewCount > 0 ? (count / displayReviewCount) * 100 : 0;
+                                                    return (
+                                                        <div key={rating} className="flex items-center gap-3">
+                                                            <span className="text-[10px] font-bold text-gray-500 w-2">{rating}</span>
+                                                            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                                <motion.div
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${percentage}%` }}
+                                                                    className="h-full bg-primary rounded-full"
+                                                                />
+                                                            </div>
+                                                            <span className="text-[9px] font-bold text-gray-400 w-6">{percentage.toFixed(0)}%</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
                                         {!user ? (
                                             <div
                                                 onClick={onLoginClick}
-                                                className="bg-white/60 backdrop-blur-sm border-2 border-dashed border-gray-300 p-8 text-center rounded-xl mb-10 cursor-pointer hover:bg-white/80 transition-colors"
+                                                className="bg-navy/5 border-2 border-dashed border-navy/10 p-8 text-center rounded-2xl mb-12 cursor-pointer hover:bg-navy/10 transition-colors group"
                                             >
-                                                <p className="text-gray-500 text-xs mb-3">Faça login para avaliar</p>
-                                                <span className="btn-primary px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-full">Entrar Agora</span>
+                                                <Star size={32} className="mx-auto mb-4 text-gray-300 group-hover:text-primary group-hover:scale-110 transition-all" />
+                                                <p className="text-navy-dark font-black uppercase tracking-widest text-[10px] mb-2">Sua opinião é valiosa</p>
+                                                <p className="text-gray-500 text-xs mb-6">Faça login para avaliar este perfil</p>
+                                                <span className="bg-navy-dark text-white px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-primary hover:text-navy-dark transition-all">Entrar Agora</span>
                                             </div>
                                         ) : (
-                                            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-lg mb-10">
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-navy-dark mb-4">Sua Avaliação</h4>
-                                                <div className="flex gap-2 mb-4">
-                                                    {[1, 2, 3, 4, 5].map((star) => (
-                                                        <button
-                                                            key={star}
-                                                            onClick={() => setNewReview({ ...newReview, rating: star })}
-                                                            className={`transition-colors p-1 ${star <= newReview.rating ? 'text-yellow-500' : 'text-gray-300'}`}
-                                                        >
-                                                            <Star size={24} fill={star <= newReview.rating ? "currentColor" : "none"} />
-                                                        </button>
-                                                    ))}
+                                            <div className="bg-white p-8 rounded-2xl border border-navy/5 shadow-2xl mb-12 relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-navy-dark mb-6 flex items-center gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                                    Sua Avaliação
+                                                </h4>
+
+                                                <div className="flex items-center gap-4 mb-8">
+                                                    <div className="flex gap-1">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button
+                                                                key={star}
+                                                                onClick={() => setNewReview({ ...newReview, rating: star })}
+                                                                className={`transition-all ${star <= newReview.rating ? 'text-yellow-500 scale-110' : 'text-gray-300 hover:text-yellow-200'} p-1`}
+                                                            >
+                                                                <Star size={32} fill={star <= newReview.rating ? "currentColor" : "none"} strokeWidth={1.5} />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-xs font-black text-gray-400 uppercase tracking-widest ml-auto">
+                                                        {newReview.rating === 5 ? 'Excelente' :
+                                                            newReview.rating === 4 ? 'Muito Bom' :
+                                                                newReview.rating === 3 ? 'Bom' :
+                                                                    newReview.rating === 2 ? 'Regular' : 'Ruim'}
+                                                    </span>
                                                 </div>
-                                                <textarea
-                                                    value={newReview.comment}
-                                                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                                                    placeholder="Escreva seu comentário..."
-                                                    className="w-full bg-gray-50 border border-gray-200 p-4 rounded-md text-sm text-navy-dark mb-4 min-h-[100px] focus:outline-none focus:border-primary/50 placeholder-gray-400"
-                                                />
+
+                                                <div className="relative">
+                                                    <textarea
+                                                        value={newReview.comment}
+                                                        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value.slice(0, 500) })}
+                                                        placeholder="Compartilhe como foi sua experiência..."
+                                                        className="w-full bg-gray-50 border border-gray-100 p-5 rounded-xl text-sm text-navy-dark mb-2 min-h-[120px] focus:outline-none focus:border-primary/50 placeholder-gray-400 transition-all"
+                                                    />
+                                                    <div className="text-[9px] font-bold text-gray-400 text-right mb-6 uppercase tracking-widest">
+                                                        {newReview.comment.length} / 500 caracteres
+                                                    </div>
+                                                </div>
+
                                                 <button
                                                     onClick={submitReview}
-                                                    disabled={submittingReview}
-                                                    className="w-full btn-primary py-3 font-black uppercase tracking-widest text-[11px] rounded-md shadow-lg shadow-primary/10"
+                                                    disabled={submittingReview || !newReview.comment.trim()}
+                                                    className={`
+                                                        w-full py-4 font-black uppercase tracking-[0.2em] text-[11px] rounded-xl transition-all shadow-xl
+                                                        ${submittingReview || !newReview.comment.trim()
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-navy-dark text-white hover:bg-primary hover:text-navy-dark shadow-primary/20 hover:-translate-y-0.5'
+                                                        }
+                                                    `}
                                                 >
-                                                    {submittingReview ? 'Enviando...' : 'Publicar Avaliação'}
+                                                    {submittingReview ? 'Processando...' : 'Publicar Avaliação'}
                                                 </button>
                                             </div>
                                         )}
 
-                                        <div className="space-y-6">
+                                        <div className="space-y-4">
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 px-1">Comentários Recentes</h4>
                                             {reviews.map((review: any) => (
-                                                <div key={review.id} className="bg-white/80 p-6 rounded-xl border border-white/50 shadow-sm">
-                                                    <div className="flex justify-between items-start mb-3">
+                                                <div key={review.id} className="bg-white p-6 rounded-2xl border border-navy/5 shadow-sm hover:shadow-md transition-all group">
+                                                    <div className="flex justify-between items-start mb-4">
                                                         <div className="flex gap-1 text-yellow-500">
                                                             {[...Array(5)].map((_, i) => (
-                                                                <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "" : "text-gray-300"} />
+                                                                <Star key={i} size={10} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "" : "text-gray-200"} />
                                                             ))}
                                                         </div>
-                                                        <span className="text-[10px] text-gray-400 font-mono">
-                                                            {new Date(review.created_at).toLocaleDateString()}
+                                                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                                                            {new Date(review.created_at).toLocaleDateString('pt-BR')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-gray-600 text-sm italic leading-relaxed">"{review.comment}"</p>
+                                                    <p className="text-gray-600 text-[13px] leading-relaxed font-medium mb-3">"{review.comment}"</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center">
+                                                            <Check size={8} className="text-green-500" />
+                                                        </div>
+                                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Membro Verificado</span>
+                                                    </div>
                                                 </div>
                                             ))}
                                             {reviews.length === 0 && (
-                                                <p className="text-center text-gray-400 text-sm py-12">Seja o primeiro a avaliar!</p>
+                                                <div className="text-center py-20 bg-navy/5 rounded-2xl border border-dashed border-navy/10">
+                                                    <MessageSquare size={32} className="mx-auto mb-4 text-gray-200" />
+                                                    <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">Ainda não há avaliações disponíveis</p>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
